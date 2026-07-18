@@ -1,14 +1,26 @@
 {
   "ModID": "ship-finder-sirlocksley",
-  "Version": "1.0.0",
+  "Version": "0.2.0",
   "Anno": 8,
   "Difficulty": "cheat",
+  "RequiresNewGame": false,
+  "SafeToRemove": true,
   "ModName": {
     "English": "Ship Finder"
   },
   "Category": {
     "English": "Mod"
   },
+  "Description": {
+    "English": "Quality-of-life mod for finding and navigating to ships."
+  },
   "CreatorName": "SirLocksley",
-  "CreatorContact": ""
+  "CreatorContact": "",
+  "Scripts": {
+    "Modules": [
+      "shipfinder/ship-finder.lua"
+    ],
+    "Init": "ShipFinder = require(\"ship-finder\")",
+    "Load": "ShipFinder:Load()"
+  }
 }
