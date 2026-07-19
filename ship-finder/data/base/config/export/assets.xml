@@ -1,30 +1,22 @@
 <ModOps>
-  <!--
-    Happy Anno 117 modding!
-
-    Modloder Reference
-    https://jakobharder.github.io/anno-mod-loader/
-  -->
-
-  <!-- # Outline Section 1 -->
-  <!-- Named Group 1 -->
-  <Group>
-    <!--
-      Hit Ctrl+Alt+B > Outline to show the outline.
-      Or alternatively, Ctrl+Shift+O to just jump to a section.
-    -->
-
-    <!-- Nested Named Group -->
-    <Group>
-    </Group>
-  </Group>
-
-  <!-- Named Group 2 -->
-  <Group>
-  </Group>
-
-  <!-- # Outline Section 2 -->
-  <Group>
-
-  </Group>
+  <ModOp
+    Type="add"
+    GUID="2001271"
+    Path="/Values/ShortcutConfig/InputBindings"
+  >
+    <Item>
+      <Command>ShipFinder:FindTestShip()</Command>
+      <Active>Session</Active>
+      <Identifier>ShipFinderTestShortcut</Identifier>
+      <AvailableOnPlatforms>PC</AvailableOnPlatforms>
+      <InputTypes>
+        <Modern>
+          <KeyType>Control;F</KeyType>
+        </Modern>
+        <Legacy>
+          <KeyType>Control;F</KeyType>
+        </Legacy>
+      </InputTypes>
+    </Item>
+  </ModOp>
 </ModOps>
