@@ -1,32 +1,3 @@
 <ModOps>
-  <!--
-    Anno 117 Language Template
-
-    Modloder Reference
-    https://jakobharder.github.io/anno-mod-loader/
-
-    Note: Texts are now based on LineId and not GUID.
-  -->
-  <ModOp Add="/TextExport/Texts[1]">
-    <Text>
-      <Text>Ship Finder</Text>
-      <LineId>2001000001</LineId>
-    </Text>
-    <Text>
-      <Text>Navigate through your current ships in alphabetical order.</Text>
-      <LineId>2001000002</LineId>
-    </Text>
-    <Text>
-      <Text>Previous ship</Text>
-      <LineId>2001000003</LineId>
-    </Text>
-    <Text>
-      <Text>Next ship</Text>
-      <LineId>2001000004</LineId>
-    </Text>
-    <Text>
-      <Text>Close</Text>
-      <LineId>2001000005</LineId>
-    </Text>
-  </ModOp>
+  <!-- The core has no localized UI. Optional advisor add-ons own their text. -->
 </ModOps>

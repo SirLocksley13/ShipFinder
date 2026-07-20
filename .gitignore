@@ -2,5 +2,6 @@
 *.log
 *.tmp
 Thumbs.db
-.DS_Storeship-finder/.modcache/
+.DS_Store
 /ship-finder/.modcache/
+/personal/

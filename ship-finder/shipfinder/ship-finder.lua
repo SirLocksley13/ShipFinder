@@ -2,6 +2,16 @@ local ShipFinder = {}
 
 ShipFinder.lastAlphabeticalShipId = nil
 
+local alphabeticalCatalogueBySession = {
+    [3245] = 2003000,
+    [6627] = 2003002,
+}
+
+local sirLocksleyCatalogueBySession = {
+    [3245] = 2015000,
+    [6627] = 2015002,
+}
+
 function ShipFinder:Load()
     system.log("[Ship Finder] Lua loaded and shortcut function ready")
 end
@@ -88,9 +98,18 @@ function ShipFinder:GetShipsSortedByName()
         end
     end
 
+    local function naturalSortKey(name)
+        local normalized = string.lower(name)
+        local key = string.gsub(normalized, "%d+", function(number)
+            return string.format("%020d", tonumber(number))
+        end)
+
+        return key
+    end
+
     table.sort(ships, function(left, right)
-        local leftName = string.lower(left.name)
-        local rightName = string.lower(right.name)
+        local leftName = naturalSortKey(left.name)
+        local rightName = naturalSortKey(right.name)
 
         if leftName == rightName then
             return left.id < right.id
@@ -152,6 +171,36 @@ end
 
 function ShipFinder:FindPreviousAlphabeticalShip()
     return self:NavigateAlphabeticalShips(-1)
+end
+
+function ShipFinder:OpenCatalogueForCurrentSession(catalogues, catalogueName)
+    local session = GameSession.SessionGUID
+    local storyline = catalogues[session]
+
+    if storyline == nil then
+        system.log(
+            "[Ship Finder] No " .. catalogueName .. " catalogue for session"
+            .. " | Session: " .. tostring(session)
+        )
+        return false
+    end
+
+    GovernorDecision:CheatStartGovernorDecisionForCurrentPlayerNet(storyline)
+    return true
+end
+
+function ShipFinder:OpenAlphabeticalCatalogue()
+    return self:OpenCatalogueForCurrentSession(
+        alphabeticalCatalogueBySession,
+        "alphabetical"
+    )
+end
+
+function ShipFinder:OpenSirLocksleyCatalogue()
+    return self:OpenCatalogueForCurrentSession(
+        sirLocksleyCatalogueBySession,
+        "Sir Locksley"
+    )
 end
 
 return ShipFinder
