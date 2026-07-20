@@ -1,0 +1,25 @@
+{
+    "ModID":  "ship-finder-alphabetical-catalogue",
+    "Version":  "0.3.4",
+    "Anno":  8,
+    "Difficulty":  "cheat",
+    "RequiresNewGame":  false,
+    "SafeToRemove":  true,
+    "ModDependencies":  [
+                            "ship-finder-sirlocksley"
+                        ],
+    "LoadAfterIds":  [
+                         "ship-finder-sirlocksley"
+                     ],
+    "ModName":  {
+                    "English":  "Ship Finder - Alphabetical Catalogue"
+                },
+    "Category":  {
+                     "English":  "Mod"
+                 },
+    "Description":  {
+                        "English":  "Live alphabetical catalogue for the current player's ships in the current province."
+                    },
+    "CreatorName":  "SirLocksley",
+    "CreatorContact":  ""
+}

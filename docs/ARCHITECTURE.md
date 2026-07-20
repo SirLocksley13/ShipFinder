@@ -1,8 +1,9 @@
 # Ship Finder Architecture
 
-This document describes the committed Ship Finder core at version 0.4.0. It
-also defines the boundary between the stable core and optional advisor-menu
-add-ons.
+This document describes the committed Ship Finder core at version 0.4.0 and
+the separately versioned Alphabetical Catalogue add-on at version 0.3.4. It
+also defines the boundary between published components and personal advisor
+experiments.
 
 ## Design goals
 
@@ -10,8 +11,8 @@ add-ons.
 - Query current game state instead of persisting ship snapshots.
 - Keep Anno XML responsible for integration and Lua responsible for behavior.
 - Use deterministic natural sorting and stable object IDs.
-- Allow optional UI catalogues without coupling their experimental assets to
-  the core package.
+- Keep the published UI catalogue separate from the core package.
+- Exclude failing player-specific experiments from published components.
 
 ## Component boundaries
 
@@ -114,11 +115,52 @@ active session. Consequently, the core is dynamic within the current province
 but does not provide a global cross-province fleet query. World-map ships in
 transit are a separate future feature.
 
-## Optional catalogue integration
+## Alphabetical Catalogue add-on
 
-Advisor catalogues live under the ignored `personal/` directory and are not
-part of the committed core. This prevents experimental XML graphs and large
-generated catalogues from destabilizing the shortcut module.
+The proven live catalogue is tracked at:
+
+```text
+addons/ship-finder-alphabetical-catalogue
+```
+
+It has ModID `ship-finder-alphabetical-catalogue`, depends on
+`ship-finder-sirlocksley`, and registers `Ctrl+Alt+F` directly in its own XML.
+Keeping it separate prevents its advisor graph from destabilizing the core
+shortcut module.
+
+Its runtime data flow is:
+
+```text
+Ctrl+Alt+F
+    -> add-on XML shortcut
+    -> StoryLine and DecisionRoot
+    -> live letter-index decision
+    -> live ship-page decision
+    -> row Sequence sets group/page/slot variables
+    -> ActionExecuteScript
+    -> rebuild and natural-sort the same live ship list
+    -> select ship and jump camera
+```
+
+The add-on owns GUIDs `2003000–2003144`, its localization LineIds, and
+`data/script/shipfinder/select-dynamic-catalogue-ship.lua`. Dynamic option
+labels and the click handler intentionally use identical grouping and sorting
+rules so a displayed name resolves to the same ship when clicked.
+
+The committed generator is:
+
+```text
+tools/generate-dynamic-catalogue-test.ps1 -Target Public
+```
+
+It regenerates the add-on's XML, localization, and Lua data in the tracked
+`addons/` directory.
+
+## Personal catalogue integration
+
+Player-specific catalogues remain under the ignored `personal/` directory and
+are not published. This includes the working static Sir Locksley catalogue and
+its currently failing dynamic successor.
 
 The Lua module currently retains a small, working compatibility interface for
 the static Sir Locksley catalogue:
@@ -132,8 +174,7 @@ Those functions map a current session GUID to an add-on storyline GUID and ask
 Anno to open it. The add-on owns its decisions, text, selection adapter, and
 asset namespace.
 
-The proven live alphabetical advisor add-on registers its own direct
-`Ctrl+Alt+F` XML binding and therefore does not change the core shortcut XML.
+The core compatibility helpers do not change the core shortcut XML.
 
 ## Savegame-safety model
 
@@ -174,18 +215,20 @@ APIs. Validation therefore has two layers:
    - Parse `modinfo.json` as JSON.
    - Parse `assets.xml` as XML.
    - Parse the Lua module with a Lua parser.
-   - Confirm shortcut identifiers and key combinations are unique.
+   - Confirm shortcut identifiers and key combinations are unique across the
+     core and published add-on.
 2. In-game regression:
    - Restart Anno completely after deployment.
    - Verify forward, backward, and wraparound behavior.
    - Verify natural numeric ordering.
    - Verify create, destroy, rename, and province changes.
+   - Open Ctrl+Alt+F, navigate letters/pages, and select exact rows.
    - Inspect the log for selection and camera-jump entries.
 
 ## Extension rules
 
 - Do not reuse an Anno asset GUID for a different template type.
-- Keep generated or experimental advisor assets outside the core package.
+- Keep generated advisor assets outside the core package.
 - Keep UI labels and click handlers on the same filtering and sorting rules.
 - Re-query live objects rather than caching game-object references.
 - Preserve Ctrl+F and Ctrl+Shift+F regression behavior when adding UI features.
