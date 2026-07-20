@@ -5,9 +5,9 @@
     Path="/Values/ShortcutConfig/InputBindings"
   >
     <Item>
-      <Command>ShipFinder:FindTestShip()</Command>
+      <Command>ShipFinder:FindNextAlphabeticalShip()</Command>
       <Active>Session</Active>
-      <Identifier>ShipFinderTestShortcut</Identifier>
+      <Identifier>ShipFinderAlphabeticalShortcut</Identifier>
       <AvailableOnPlatforms>PC</AvailableOnPlatforms>
       <InputTypes>
         <Modern>
@@ -18,5 +18,243 @@
         </Legacy>
       </InputTypes>
     </Item>
+    <Item>
+      <Command>ShipFinder:FindPreviousAlphabeticalShip()</Command>
+      <Active>Session</Active>
+      <Identifier>ShipFinderReverseAlphabeticalShortcut</Identifier>
+      <AvailableOnPlatforms>PC</AvailableOnPlatforms>
+      <InputTypes>
+        <Modern>
+          <KeyType>Control;Shift;F</KeyType>
+        </Modern>
+        <Legacy>
+          <KeyType>Control;Shift;F</KeyType>
+        </Legacy>
+      </InputTypes>
+    </Item>
+    <Item>
+      <Command>GovernorDecision:CheatStartGovernorDecisionForCurrentPlayerNet(2001272)</Command>
+      <Active>Session</Active>
+      <Identifier>ShipFinderAdvisorShortcut</Identifier>
+      <AvailableOnPlatforms>PC</AvailableOnPlatforms>
+      <InputTypes>
+        <Modern>
+          <KeyType>Control;Alt;F</KeyType>
+        </Modern>
+        <Legacy>
+          <KeyType>Control;Alt;F</KeyType>
+        </Legacy>
+      </InputTypes>
+    </Item>
   </ModOp>
+
+  <!-- Engine-managed cursor shared by the advisor decision actions and Lua. -->
+  <ModOp
+    Type="add"
+    GUID="23779"
+    Path="/Values/ConditionVariableConfiguration/IntVariables"
+  >
+    <Item>
+      <Name>ShipFinderPosition</Name>
+      <StartValue>0</StartValue>
+      <Comment>Alphabetical ship cursor used by the Ship Finder advisor window</Comment>
+    </Item>
+  </ModOp>
+
+  <!-- Required by the Anno 117 release loader before adding new assets. -->
+  <ModOp Add="/AssetList/Groups[last()]"><Group><Assets /></Group></ModOp>
+
+  <Asset>
+    <Template>StoryLine</Template>
+    <Values>
+      <Standard>
+        <GUID>2001272</GUID>
+        <Name>Ship Finder Decision Storyline</Name>
+      </Standard>
+      <StoryLine>
+        <StartConnector>
+          <Item>
+            <Component>2001273</Component>
+          </Item>
+        </StartConnector>
+      </StoryLine>
+      <QuestComponent />
+      <QuestComponentConnector />
+    </Values>
+  </Asset>
+
+  <Asset>
+    <Template>DecisionRoot</Template>
+    <Values>
+      <Standard>
+        <GUID>2001273</GUID>
+        <Name>Ship Finder Decision Root</Name>
+      </Standard>
+      <DecisionRoot>
+        <DecisionRootOutput>
+          <Item />
+          <Item />
+          <Item />
+        </DecisionRootOutput>
+        <DecisionRootStartComponent>2001274</DecisionRootStartComponent>
+        <DecisionGovernorRequest>
+          <IsBaseAutoCreateAsset>1</IsBaseAutoCreateAsset>
+          <Values>
+            <GovernorRequest>
+              <RequestDescription>2001000001</RequestDescription>
+              <RequestPriority>100</RequestPriority>
+              <RequestTimeout>600000</RequestTimeout>
+              <RequestIcon>38172</RequestIcon>
+              <RequestParticipant>27075</RequestParticipant>
+              <IsRequestMandatory>0</IsRequestMandatory>
+            </GovernorRequest>
+          </Values>
+        </DecisionGovernorRequest>
+        <UIType>Popup</UIType>
+      </DecisionRoot>
+      <QuestComponent />
+    </Values>
+  </Asset>
+
+  <Asset>
+    <Template>Decision</Template>
+    <Values>
+      <Standard>
+        <GUID>2001274</GUID>
+        <Name>Ship Finder Navigation Decision</Name>
+      </Standard>
+      <Decision>
+        <DecisionScreenConfig>
+          <Headline>2001000001</Headline>
+          <Text>2001000002</Text>
+          <LeftParticipant>27075</LeftParticipant>
+        </DecisionScreenConfig>
+        <DecisionOptions>
+          <Item>
+            <OptionText>2001000003</OptionText>
+          </Item>
+          <Item>
+            <OptionText>2001000004</OptionText>
+          </Item>
+          <Item>
+            <OptionText>2001000005</OptionText>
+          </Item>
+        </DecisionOptions>
+      </Decision>
+      <QuestComponent />
+      <DecisionComponent>
+        <DecisionOutputs>
+          <Item>
+            <SuccessOutput>
+              <Item>
+                <Component>2001275</Component>
+              </Item>
+            </SuccessOutput>
+          </Item>
+          <Item>
+            <SuccessOutput>
+              <Item>
+                <Component>2001276</Component>
+              </Item>
+            </SuccessOutput>
+          </Item>
+          <Item />
+        </DecisionOutputs>
+      </DecisionComponent>
+    </Values>
+  </Asset>
+
+  <Asset>
+    <Template>Sequence</Template>
+    <Values>
+      <Standard>
+        <GUID>2001275</GUID>
+        <Name>Ship Finder Previous Ship Action</Name>
+      </Standard>
+      <Sequence>
+        <SequenceActions>
+          <Item>
+            <Action>
+              <Template>ActionModifyVariable</Template>
+              <Values>
+                <Action />
+                <ActionModifyVariable>
+                  <VariableName>ShipFinderPosition</VariableName>
+                  <Modifier>Subtract</Modifier>
+                  <ModifierVariable>
+                    <Template>IntVariableOrValue</Template>
+                    <Values>
+                      <IntVariableOrValue>
+                        <IntValue>1</IntValue>
+                      </IntVariableOrValue>
+                    </Values>
+                  </ModifierVariable>
+                </ActionModifyVariable>
+              </Values>
+            </Action>
+          </Item>
+          <Item>
+            <Action>
+              <Template>ActionExecuteScript</Template>
+              <Values>
+                <Action />
+                <ActionExecuteScript>
+                  <ScriptFileName>data/script/shipfinder/navigate-by-position.lua</ScriptFileName>
+                </ActionExecuteScript>
+              </Values>
+            </Action>
+          </Item>
+        </SequenceActions>
+      </Sequence>
+      <QuestComponentConnector />
+      <QuestComponent />
+    </Values>
+  </Asset>
+
+  <Asset>
+    <Template>Sequence</Template>
+    <Values>
+      <Standard>
+        <GUID>2001276</GUID>
+        <Name>Ship Finder Next Ship Action</Name>
+      </Standard>
+      <Sequence>
+        <SequenceActions>
+          <Item>
+            <Action>
+              <Template>ActionModifyVariable</Template>
+              <Values>
+                <Action />
+                <ActionModifyVariable>
+                  <VariableName>ShipFinderPosition</VariableName>
+                  <Modifier>Add</Modifier>
+                  <ModifierVariable>
+                    <Template>IntVariableOrValue</Template>
+                    <Values>
+                      <IntVariableOrValue>
+                        <IntValue>1</IntValue>
+                      </IntVariableOrValue>
+                    </Values>
+                  </ModifierVariable>
+                </ActionModifyVariable>
+              </Values>
+            </Action>
+          </Item>
+          <Item>
+            <Action>
+              <Template>ActionExecuteScript</Template>
+              <Values>
+                <Action />
+                <ActionExecuteScript>
+                  <ScriptFileName>data/script/shipfinder/navigate-by-position.lua</ScriptFileName>
+                </ActionExecuteScript>
+              </Values>
+            </Action>
+          </Item>
+        </SequenceActions>
+      </Sequence>
+      <QuestComponentConnector />
+      <QuestComponent />
+    </Values>
+  </Asset>
 </ModOps>

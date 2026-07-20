@@ -9,8 +9,24 @@
   -->
   <ModOp Add="/TextExport/Texts[1]">
     <Text>
-      <Text>Happy Modding</Text>
-      <LineId>2001000000</LineId>
+      <Text>Ship Finder</Text>
+      <LineId>2001000001</LineId>
+    </Text>
+    <Text>
+      <Text>Navigate through your current ships in alphabetical order.</Text>
+      <LineId>2001000002</LineId>
+    </Text>
+    <Text>
+      <Text>Previous ship</Text>
+      <LineId>2001000003</LineId>
+    </Text>
+    <Text>
+      <Text>Next ship</Text>
+      <LineId>2001000004</LineId>
+    </Text>
+    <Text>
+      <Text>Close</Text>
+      <LineId>2001000005</LineId>
     </Text>
   </ModOp>
 </ModOps>
