@@ -43,7 +43,7 @@ local index = (page * 4) + slot
 local ship = ships[index]
 if ship == nil then
     system.log(
-        "[Ship Finder Dynamic Catalogue] Empty row selected"
+        "[Ship Finder Internal Alphabetical] Empty row selected"
         .. " | Group: " .. tostring(group)
         .. " | Page: " .. tostring(page)
         .. " | Slot: " .. tostring(slot)
@@ -52,7 +52,7 @@ if ship == nil then
 end
 
 system.log(
-    "[Ship Finder Dynamic Catalogue] Selecting live catalogue ship"
+    "[Ship Finder Internal Alphabetical] Selecting live catalogue ship"
     .. " | Group: " .. tostring(group)
     .. " | Page: " .. tostring(page)
     .. " | Slot: " .. tostring(slot)

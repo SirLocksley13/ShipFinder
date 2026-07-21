@@ -1,0 +1,32 @@
+{
+  "ModID": "ship-finder-unified-menu",
+  "Version": "1.0.0",
+  "Anno": 8,
+  "Difficulty": "cheat",
+  "RequiresNewGame": false,
+  "SafeToRemove": true,
+  "ModDependencies": [
+    "ship-finder-sirlocksley"
+  ],
+  "LoadAfterIds": [
+    "ship-finder-sirlocksley"
+  ],
+  "ModName": {
+    "English": "Ship Finder - Unified Menu"
+  },
+  "Category": {
+    "English": "Mod"
+  },
+  "Description": {
+    "English": "Opens a live Ship Finder menu with Ctrl+Alt+F. Lists only ships in the current province and provides alphabetical, trade-route, attention, warship and other-ship categories. Users following the supported L_/A_ ship naming convention automatically receive the additional personal menu."
+  },
+  "CreatorName": "SirLocksley",
+  "CreatorContact": "https://github.com/SirLocksley13/ShipFinder",
+  "Scripts": {
+    "Modules": [
+      "shipfinder/combined-root.lua"
+    ],
+    "Init": "ShipFinderCombinedRoot = require(\"combined-root\")",
+    "Load": "ShipFinderCombinedRoot:Load()"
+  }
+}
