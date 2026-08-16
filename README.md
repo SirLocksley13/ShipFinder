@@ -1,76 +1,32 @@
-# Ship Finder for Anno 117
+# Ship Finder v1.1.0
 
-Ship Finder is a savegame-safe quality-of-life mod for **Anno 117: Pax Romana**.
-It finds ships from the current province, selects the chosen ship and moves the
-camera directly to it.
+**Ship Finder** helps you find and jump to ships quickly in Anno 117: Pax Romana.
 
-## Core shortcuts
+## Open Ship Finder
+Press **Ctrl+Alt+F**.
 
-- `Ctrl+F`: Next ship
-- `Ctrl+Shift+F`: Previous ship
-
-The core uses live current-province queries and natural sorting, so newly built,
-renamed and destroyed ships are reflected immediately, and names such as
-`Traveler 2` sort before `Traveler 11`.
-
-## Unified menu
-
-The published add-on is located at:
-
-`addons/ship-finder-unified-menu`
-
-Press `Ctrl+Alt+F` to open a live menu containing only ships in the current
-province.
-
-General users receive:
-
-- Alphabetical Ship List
+## Main features
 - Active Trade Routes
-- Trade Ships Needing Attention
+- Independent Ships
 - Warships
-- Other Ships
+- Ships Needing Attention
+- All Ships A-Z
+- Ships by Island
+- Direct ship navigation
+- Ctrl+Alt+1-9 shortcuts on supported reports
+- English and German localization
 
-## Optional personal naming system
+## Ships by Island
+Ships are grouped by the islands served by their assigned trade routes. The first use may perform a short scan of island connections. Ship assignments are refreshed automatically; use **Rescan Island Connections** after changing route stops or if the result appears incorrect.
 
-The naming format is **not an official Anno 117 convention**. It is a personal
-fleet-naming system created by Dr. Enrico Handrick.
+A ship travelling between provinces can temporarily remain listed but may not be jumpable until it is available again in the current province.
 
-Trade-route ships use:
+## Languages
+- English
+- German
 
-```text
-L_<first 3 letters of island 1>_<first 3 letters of island 2>_<number>
-A_<first 3 letters of island 1>_<first 3 letters of island 2>_<number>
-```
-
-Examples:
-
-```text
-L_ROM_OST_01
-A_WUL_BRE_02
-```
-
-`L` represents Latium, `A` represents Albion, the two island fields use only
-the first three letters of the islands, and the final number distinguishes
-multiple ships using the same route.
-
-Emergency transport ships that normally wait in an island harbor are named
-with the word `Runner` and the island identifier, for example:
-
-```text
-Runner ROM
-Runner OST
-```
-
-Players who do not use this system still receive the complete general Ship
-Finder menu. When an `L_...` or `A_...` trade-route name is detected, Ship
-Finder automatically enables the personal menu, including the separate Runners
-category.
-
-See [ship-finder/README.md](ship-finder/README.md) for the core behavior,
-[addons/ship-finder-unified-menu/README.md](addons/ship-finder-unified-menu/README.md)
-for the unified menu, and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the
-technical design.
+The mod name remains **Ship Finder** in both languages.
 
 ## Author
-
-Developed by **Dr. Enrico Handrick** under the GitHub username **SirLocksley13**.
+Dr. Enrico Handrick  
+GitHub: SirLocksley13

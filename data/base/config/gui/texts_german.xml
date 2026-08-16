@@ -1,0 +1,670 @@
+<ModOps>
+  <ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>Alle Schiffe A-Z</Text>
+      <LineId>2006000039</LineId>
+    </Text>
+    <Text>
+      <Text>Ship Finder</Text>
+      <LineId>2006000000</LineId>
+    </Text>
+    <Text>
+      <Text>Ship Finder</Text>
+      <LineId>2006000001</LineId>
+    </Text>
+    <Text>
+      <Text>Finde ein Schiff in der aktuellen Provinz. „Schiffe nach Insel“ kann bei der ersten Verwendung einen Scan durchführen.</Text>
+      <LineId>2006000002</LineId>
+    </Text>
+    <Text>
+      <Text>Handelsrouten</Text>
+      <LineId>2006000003</LineId>
+    </Text>
+    <Text>
+      <Text>Wähle den ersten Inselcode.</Text>
+      <LineId>2006000004</LineId>
+    </Text>
+    <Text>
+      <Text>Ziele der Handelsroute</Text>
+      <LineId>2006000005</LineId>
+    </Text>
+    <Text>
+      <Text>Wähle den zweiten Inselcode.</Text>
+      <LineId>2006000006</LineId>
+    </Text>
+    <Text>
+      <Text>Handelsroutenschiffe</Text>
+      <LineId>2006000007</LineId>
+    </Text>
+    <Text>
+      <Text>Ship Finder</Text>
+      <LineId>2006000008</LineId>
+    </Text>
+    <Text>
+      <Text>Wähle ein bestimmtes Schiff. Leere Zeilen bedeuten, dass diese Seite weniger Schiffe enthält.</Text>
+      <LineId>2006000009</LineId>
+    </Text>
+    <Text>
+      <Text>&lt;&lt;&lt; SCHLIESSEN &gt;&gt;&gt;</Text>
+      <LineId>2006000010</LineId>
+    </Text>
+    <Text>
+      <Text>◀ Zurück</Text>
+      <LineId>2006000011</LineId>
+    </Text>
+    <Text>
+      <Text>▲ Erste Inseln</Text>
+      <LineId>2006000012</LineId>
+    </Text>
+    <Text>
+      <Text>▲ Routen</Text>
+      <LineId>2006000013</LineId>
+    </Text>
+    <Text>
+      <Text>◀◀ Frühere Auswahl</Text>
+      <LineId>2006000014</LineId>
+    </Text>
+    <Text>
+      <Text>Weitere Auswahl ▶▶</Text>
+      <LineId>2006000015</LineId>
+    </Text>
+    <Text>
+      <Text>Aktive Handelsrouten</Text>
+      <LineId>2006000016</LineId>
+    </Text>
+    <Text>
+      <Text>Schiffe mit Handlungsbedarf</Text>
+      <LineId>2006000017</LineId>
+    </Text>
+    <Text>
+      <Text>Unabhängige Schiffe</Text>
+      <LineId>2006000018</LineId>
+    </Text>
+    <Text>
+      <Text>Kriegsschiffe</Text>
+      <LineId>2006000019</LineId>
+    </Text>
+    <Text>
+      <Text>Unabhängige Schiffe</Text>
+      <LineId>2006000020</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;local p=Variables:GetVariable("S3P")or 0;local R={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local q=o.Nameable;local n=q and q.Name;if n then local a,b,d=n:match("^[LlAa]_([^_]+)_([^_]+)_(%d+)$");if a then local t=o.TradeRouteVehicle;if((t and t.IsAssignedOnTradeRoute and not t.IsPaused)and 1 or 2)==c then local x,y=a:lower(),b:lower();R[#R+1]={x,y,a,b,n,x.."|"..y.."|"..("%020d"):format(tonumber(d)or 0).."|"..tostring(o.ID)}end end end end;table.sort(R,function(x,y)return x[6]&lt;y[6]end);local z=p*3+1;local i,n,l,v=0,0,"",nil;for _,r in ipairs(R)do if r[1]~=l then l=r[1];i=i+1;if i==z then v=r[3];n=0 elseif i&gt;z then break end end;if i==z then n=n+1 end end;return v and(v.."... ("..n..")")or"[N/A]"end)()}</Text>
+      <LineId>2006000021</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;local p=Variables:GetVariable("S3P")or 0;local R={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local q=o.Nameable;local n=q and q.Name;if n then local a,b,d=n:match("^[LlAa]_([^_]+)_([^_]+)_(%d+)$");if a then local t=o.TradeRouteVehicle;if((t and t.IsAssignedOnTradeRoute and not t.IsPaused)and 1 or 2)==c then local x,y=a:lower(),b:lower();R[#R+1]={x,y,a,b,n,x.."|"..y.."|"..("%020d"):format(tonumber(d)or 0).."|"..tostring(o.ID)}end end end end;table.sort(R,function(x,y)return x[6]&lt;y[6]end);local z=p*3+2;local i,n,l,v=0,0,"",nil;for _,r in ipairs(R)do if r[1]~=l then l=r[1];i=i+1;if i==z then v=r[3];n=0 elseif i&gt;z then break end end;if i==z then n=n+1 end end;return v and(v.."... ("..n..")")or"[N/A]"end)()}</Text>
+      <LineId>2006000022</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;local p=Variables:GetVariable("S3P")or 0;local R={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local q=o.Nameable;local n=q and q.Name;if n then local a,b,d=n:match("^[LlAa]_([^_]+)_([^_]+)_(%d+)$");if a then local t=o.TradeRouteVehicle;if((t and t.IsAssignedOnTradeRoute and not t.IsPaused)and 1 or 2)==c then local x,y=a:lower(),b:lower();R[#R+1]={x,y,a,b,n,x.."|"..y.."|"..("%020d"):format(tonumber(d)or 0).."|"..tostring(o.ID)}end end end end;table.sort(R,function(x,y)return x[6]&lt;y[6]end);local z=p*3+3;local i,n,l,v=0,0,"",nil;for _,r in ipairs(R)do if r[1]~=l then l=r[1];i=i+1;if i==z then v=r[3];n=0 elseif i&gt;z then break end end;if i==z then n=n+1 end end;return v and(v.."... ("..n..")")or"[N/A]"end)()}</Text>
+      <LineId>2006000023</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;local f=Variables:GetVariable("S3F")or 0;local p=Variables:GetVariable("S3R")or 0;local R={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local q=o.Nameable;local n=q and q.Name;if n then local a,b,d=n:match("^[LlAa]_([^_]+)_([^_]+)_(%d+)$");if a then local t=o.TradeRouteVehicle;if((t and t.IsAssignedOnTradeRoute and not t.IsPaused)and 1 or 2)==c then local x,y=a:lower(),b:lower();R[#R+1]={x,y,a,b,n,x.."|"..y.."|"..("%020d"):format(tonumber(d)or 0).."|"..tostring(o.ID)}end end end end;table.sort(R,function(x,y)return x[6]&lt;y[6]end);local z=p*3+1;local i,j,n=0,0,0;local a,b,u,v="","",nil,nil;for _,r in ipairs(R)do if r[1]~=a then a=r[1];b="";i=i+1;j=0 end;if i==f then if r[2]~=b then b=r[2];j=j+1 end;if j==z then u,v,n=r[3],r[4],n+1 elseif j&gt;z then break end elseif i&gt;f then break end end;return u and(u.."-"..v.." ("..n..")")or"[N/A]"end)()}</Text>
+      <LineId>2006000024</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;local f=Variables:GetVariable("S3F")or 0;local p=Variables:GetVariable("S3R")or 0;local R={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local q=o.Nameable;local n=q and q.Name;if n then local a,b,d=n:match("^[LlAa]_([^_]+)_([^_]+)_(%d+)$");if a then local t=o.TradeRouteVehicle;if((t and t.IsAssignedOnTradeRoute and not t.IsPaused)and 1 or 2)==c then local x,y=a:lower(),b:lower();R[#R+1]={x,y,a,b,n,x.."|"..y.."|"..("%020d"):format(tonumber(d)or 0).."|"..tostring(o.ID)}end end end end;table.sort(R,function(x,y)return x[6]&lt;y[6]end);local z=p*3+2;local i,j,n=0,0,0;local a,b,u,v="","",nil,nil;for _,r in ipairs(R)do if r[1]~=a then a=r[1];b="";i=i+1;j=0 end;if i==f then if r[2]~=b then b=r[2];j=j+1 end;if j==z then u,v,n=r[3],r[4],n+1 elseif j&gt;z then break end elseif i&gt;f then break end end;return u and(u.."-"..v.." ("..n..")")or"[N/A]"end)()}</Text>
+      <LineId>2006000025</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;local f=Variables:GetVariable("S3F")or 0;local p=Variables:GetVariable("S3R")or 0;local R={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local q=o.Nameable;local n=q and q.Name;if n then local a,b,d=n:match("^[LlAa]_([^_]+)_([^_]+)_(%d+)$");if a then local t=o.TradeRouteVehicle;if((t and t.IsAssignedOnTradeRoute and not t.IsPaused)and 1 or 2)==c then local x,y=a:lower(),b:lower();R[#R+1]={x,y,a,b,n,x.."|"..y.."|"..("%020d"):format(tonumber(d)or 0).."|"..tostring(o.ID)}end end end end;table.sort(R,function(x,y)return x[6]&lt;y[6]end);local z=p*3+3;local i,j,n=0,0,0;local a,b,u,v="","",nil,nil;for _,r in ipairs(R)do if r[1]~=a then a=r[1];b="";i=i+1;j=0 end;if i==f then if r[2]~=b then b=r[2];j=j+1 end;if j==z then u,v,n=r[3],r[4],n+1 elseif j&gt;z then break end elseif i&gt;f then break end end;return u and(u.."-"..v.." ("..n..")")or"[N/A]"end)()}</Text>
+      <LineId>2006000026</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;local f=Variables:GetVariable("S3F")or 0;local s=Variables:GetVariable("S3S")or 0;local p=Variables:GetVariable("S3Q")or 0;local g=(GameSession and GameSession.SessionGUID)or 0;local k=g.."|"..c.."|"..f.."|"..s.."|"..p;ShipFinderPersonalLabelCache=ShipFinderPersonalLabelCache or{};local v=ShipFinderPersonalLabelCache[k];if not v then local R={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local q=o.Nameable;local n=q and q.Name;if n then local a,b,d=n:match("^[LlAa]_([^_]+)_([^_]+)_(%d+)$");if a then local t=o.TradeRouteVehicle;if((t and t.IsAssignedOnTradeRoute and not t.IsPaused)and 1 or 2)==c then local x,y=a:lower(),b:lower();R[#R+1]={x,y,n,x.."|"..y.."|"..("%020d"):format(tonumber(d)or 0).."|"..tostring(o.ID)}end end end end;table.sort(R,function(x,y)return x[4]&lt;y[4]end);v={"[N/A]","[N/A]",""};local i,j,n=0,0,0;local a,b="","";for _,r in ipairs(R)do if r[1]~=a then a=r[1];b="";i=i+1;j=0 end;if i==f then if r[2]~=b then b=r[2];j=j+1;n=0 end;if j==s then n=n+1;local z=p*2+n;if z==p*2+1 then v[1]=r[3]elseif z==p*2+2 then v[2]=r[3];break end elseif j&gt;s then break end elseif i&gt;f then break end end;v[3]=n&gt;(p+1)*2 and"Mehr Schiffe ▶"or"";ShipFinderPersonalLabelCache[k]=v end;return v[1]end)()}</Text>
+      <LineId>2006000027</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;local f=Variables:GetVariable("S3F")or 0;local s=Variables:GetVariable("S3S")or 0;local p=Variables:GetVariable("S3Q")or 0;local g=(GameSession and GameSession.SessionGUID)or 0;local k=g.."|"..c.."|"..f.."|"..s.."|"..p;ShipFinderPersonalLabelCache=ShipFinderPersonalLabelCache or{};local v=ShipFinderPersonalLabelCache[k];if not v then local R={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local q=o.Nameable;local n=q and q.Name;if n then local a,b,d=n:match("^[LlAa]_([^_]+)_([^_]+)_(%d+)$");if a then local t=o.TradeRouteVehicle;if((t and t.IsAssignedOnTradeRoute and not t.IsPaused)and 1 or 2)==c then local x,y=a:lower(),b:lower();R[#R+1]={x,y,n,x.."|"..y.."|"..("%020d"):format(tonumber(d)or 0).."|"..tostring(o.ID)}end end end end;table.sort(R,function(x,y)return x[4]&lt;y[4]end);v={"[N/A]","[N/A]",""};local i,j,n=0,0,0;local a,b="","";for _,r in ipairs(R)do if r[1]~=a then a=r[1];b="";i=i+1;j=0 end;if i==f then if r[2]~=b then b=r[2];j=j+1;n=0 end;if j==s then n=n+1;local z=p*2+n;if z==p*2+1 then v[1]=r[3]elseif z==p*2+2 then v[2]=r[3];break end elseif j&gt;s then break end elseif i&gt;f then break end end;v[3]=n&gt;(p+1)*2 and"Mehr Schiffe ▶"or"";ShipFinderPersonalLabelCache[k]=v end;return v[2]end)()}</Text>
+      <LineId>2006000028</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;local p=Variables:GetVariable("S3Q")or 0;local g=(GameSession and GameSession.SessionGUID)or 0;local k="G|"..g.."|"..c.."|"..p;ShipFinderPersonalLabelCache=ShipFinderPersonalLabelCache or{};local v=ShipFinderPersonalLabelCache[k];if not v then local r={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local q=o.Nameable;local n=q and q.Name;if n then n=tostring(n);local tr=o.TradeRouteVehicle;local a=tr and tr.IsAssignedOnTradeRoute==true;local paused=tr and tr.IsPaused==true;local mil=o.Unit and o.Unit.IsMilitaryUnit==true;local z=0;if a and not paused then z=1 elseif (not mil) and a and paused then z=2 elseif mil then z=4 elseif (not mil) and (not a) then z=5 end;if z==c then r[#r+1]={n,n:lower().."|"..tostring(o.ID)}end end end;table.sort(r,function(x,y)return x[2]&lt;y[2]end);v={"","","",""};for i=1,3 do local e=r[p*3+i];if e then v[i]=e[1]end end;v[4]=#r&gt;((p+1)*3) and "Mehr Schiffe ▶" or "";ShipFinderPersonalLabelCache[k]=v end;return v[1]or"" end)()}</Text>
+      <LineId>2006000029</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;local p=Variables:GetVariable("S3Q")or 0;local g=(GameSession and GameSession.SessionGUID)or 0;local k="G|"..g.."|"..c.."|"..p;ShipFinderPersonalLabelCache=ShipFinderPersonalLabelCache or{};local v=ShipFinderPersonalLabelCache[k];if not v then local r={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local q=o.Nameable;local n=q and q.Name;if n then n=tostring(n);local tr=o.TradeRouteVehicle;local a=tr and tr.IsAssignedOnTradeRoute==true;local paused=tr and tr.IsPaused==true;local mil=o.Unit and o.Unit.IsMilitaryUnit==true;local z=0;if a and not paused then z=1 elseif (not mil) and a and paused then z=2 elseif mil then z=4 elseif (not mil) and (not a) then z=5 end;if z==c then r[#r+1]={n,n:lower().."|"..tostring(o.ID)}end end end;table.sort(r,function(x,y)return x[2]&lt;y[2]end);v={"","","",""};for i=1,3 do local e=r[p*3+i];if e then v[i]=e[1]end end;v[4]=#r&gt;((p+1)*3) and "Mehr Schiffe ▶" or "";ShipFinderPersonalLabelCache[k]=v end;return v[2]or"" end)()}</Text>
+      <LineId>2006000030</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;local p=Variables:GetVariable("S3Q")or 0;local g=(GameSession and GameSession.SessionGUID)or 0;local k="G|"..g.."|"..c.."|"..p;ShipFinderPersonalLabelCache=ShipFinderPersonalLabelCache or{};local v=ShipFinderPersonalLabelCache[k];if not v then local r={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local q=o.Nameable;local n=q and q.Name;if n then n=tostring(n);local tr=o.TradeRouteVehicle;local a=tr and tr.IsAssignedOnTradeRoute==true;local paused=tr and tr.IsPaused==true;local mil=o.Unit and o.Unit.IsMilitaryUnit==true;local z=0;if a and not paused then z=1 elseif (not mil) and a and paused then z=2 elseif mil then z=4 elseif (not mil) and (not a) then z=5 end;if z==c then r[#r+1]={n,n:lower().."|"..tostring(o.ID)}end end end;table.sort(r,function(x,y)return x[2]&lt;y[2]end);v={"","","",""};for i=1,3 do local e=r[p*3+i];if e then v[i]=e[1]end end;v[4]=#r&gt;((p+1)*3) and "Mehr Schiffe ▶" or "";ShipFinderPersonalLabelCache[k]=v end;return v[3]or"" end)()}</Text>
+      <LineId>2006000031</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local page=Variables:GetVariable("S3P") or 0; return page&gt;0 and "◀◀ Frühere Auswahl" or "" end)()}</Text>
+      <LineId>2006000032</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;local p=Variables:GetVariable("S3P")or 0;local R={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local q=o.Nameable;local n=q and q.Name;if n then local a,b,d=n:match("^[LlAa]_([^_]+)_([^_]+)_(%d+)$");if a then local t=o.TradeRouteVehicle;if((t and t.IsAssignedOnTradeRoute and not t.IsPaused)and 1 or 2)==c then local x,y=a:lower(),b:lower();R[#R+1]={x,y,a,b,n,x.."|"..y.."|"..("%020d"):format(tonumber(d)or 0).."|"..tostring(o.ID)}end end end end;table.sort(R,function(x,y)return x[6]&lt;y[6]end);local n,l=0,"";for _,r in ipairs(R)do if r[1]~=l then l=r[1];n=n+1 end end;return n&gt;(p+1)*3 and"Weitere Auswahl ▶▶"or""end)()}</Text>
+      <LineId>2006000033</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local page=Variables:GetVariable("S3R") or 0; return page&gt;0 and "◀◀ Frühere Auswahl" or "" end)()}</Text>
+      <LineId>2006000034</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;local f=Variables:GetVariable("S3F")or 0;local p=Variables:GetVariable("S3R")or 0;local R={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local q=o.Nameable;local n=q and q.Name;if n then local a,b,d=n:match("^[LlAa]_([^_]+)_([^_]+)_(%d+)$");if a then local t=o.TradeRouteVehicle;if((t and t.IsAssignedOnTradeRoute and not t.IsPaused)and 1 or 2)==c then local x,y=a:lower(),b:lower();R[#R+1]={x,y,a,b,n,x.."|"..y.."|"..("%020d"):format(tonumber(d)or 0).."|"..tostring(o.ID)}end end end end;table.sort(R,function(x,y)return x[6]&lt;y[6]end);local i,n=0,0;local a,b="","";for _,r in ipairs(R)do if r[1]~=a then a=r[1];b="";i=i+1 end;if i==f and r[2]~=b then b=r[2];n=n+1 elseif i&gt;f then break end end;return n&gt;(p+1)*3 and"Weitere Auswahl ▶▶"or""end)()}</Text>
+      <LineId>2006000035</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local page=Variables:GetVariable("S3Q") or 0; return page&gt;0 and "◀ Vorherige Schiffe" or "====================" end)()}</Text>
+      <LineId>2006000036</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;local f=Variables:GetVariable("S3F")or 0;local s=Variables:GetVariable("S3S")or 0;local p=Variables:GetVariable("S3Q")or 0;local g=(GameSession and GameSession.SessionGUID)or 0;local k=g.."|"..c.."|"..f.."|"..s.."|"..p;local C=ShipFinderPersonalLabelCache;local v=C and C[k];return v and v[3]or""end)()}</Text>
+      <LineId>2006000037</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;local p=Variables:GetVariable("S3Q")or 0;local g=(GameSession and GameSession.SessionGUID)or 0;local k="G|"..g.."|"..c.."|"..p;local C=ShipFinderPersonalLabelCache;local v=C and C[k];return v and v[4]or"" end)()}</Text>
+      <LineId>2006000038</LineId>
+    </Text>
+    <Text>
+      <Text>Ship Finder - Alphabetischer Katalog</Text>
+      <LineId>2003000000</LineId>
+    </Text>
+    <Text>Ship Finder - Alphabetischer Katalog</Text>
+    <Text>
+      <Text>Alphabetische Schiffssuche</Text>
+      <LineId>2003000001</LineId>
+    </Text>
+    <Text>
+      <Text>Wähle den ersten Buchstaben eines Schiffes in der aktuellen Provinz. Die Anzahlen sind aktuell.</Text>
+      <LineId>2003000002</LineId>
+    </Text>
+    <Text>
+      <Text>Alphabetische Schiffssuche</Text>
+      <LineId>2003000003</LineId>
+    </Text>
+    <Text>
+      <Text>Wähle ein bestimmtes Schiff. Leere Zeilen bedeuten, dass diese Seite weniger Schiffe enthält.</Text>
+      <LineId>2003000004</LineId>
+    </Text>
+    <Text>
+      <Text>[X] Schließen</Text>
+      <LineId>2003000005</LineId>
+    </Text>
+    <Text>
+      <Text>◀◀ Frühere Buchstaben</Text>
+      <LineId>2003000006</LineId>
+    </Text>
+    <Text>
+      <Text>Weitere Buchstaben ▶▶</Text>
+      <LineId>2003000007</LineId>
+    </Text>
+    <Text>
+      <Text>[A-Z] Buchstabenindex</Text>
+      <LineId>2003000008</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="A"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000009</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="B"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000010</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="C"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000011</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="D"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000012</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="E"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000013</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="F"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000014</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="G"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000015</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="H"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000016</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="I"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000017</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="J"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000018</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="K"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000019</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="L"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000020</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="M"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000021</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="N"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000022</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="O"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000023</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="P"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000024</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="Q"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000025</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="R"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000026</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="S"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000027</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="T"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000028</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="U"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000029</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="V"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000030</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="W"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000031</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="X"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000032</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="Y"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000033</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local letter="Z"; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable and string.upper(string.sub(tostring(object.Nameable.Name),1,1))==letter then count=count+1 end end; return letter.." ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000034</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable then local first=string.upper(string.sub(tostring(object.Nameable.Name),1,1)); if not string.match(first,"^[A-Z]$") then count=count+1 end end end; return "Sonstige ("..tostring(count)..")" end)()}</Text>
+      <LineId>2003000035</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local group=Variables:GetVariable("ShipFinderAlphabeticalDynamicGroup") or 0; local page=Variables:GetVariable("ShipFinderAlphabeticalDynamicPage") or 0; local sorted={}; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable then local first=string.upper(string.sub(tostring(object.Nameable.Name),1,1)); local matches=(group&gt;=1 and group&lt;=26 and first==string.char(64+group)) or (group==27 and not string.match(first,"^[A-Z]$")); if matches then table.insert(sorted,object) end end end; local function key(name) return string.gsub(string.lower(tostring(name)),"%d+",function(number) return string.format("%020d",tonumber(number)) end) end; table.sort(sorted,function(a,b) local ak,bk=key(a.Nameable.Name),key(b.Nameable.Name); if ak==bk then return a.ID&lt;b.ID end; return ak&lt;bk end); local object=sorted[(page*4)+1]; return object and "★ "..tostring(object.Nameable.Name) or "" end)()}</Text>
+      <LineId>2003000036</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local group=Variables:GetVariable("ShipFinderAlphabeticalDynamicGroup") or 0; local page=Variables:GetVariable("ShipFinderAlphabeticalDynamicPage") or 0; local sorted={}; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable then local first=string.upper(string.sub(tostring(object.Nameable.Name),1,1)); local matches=(group&gt;=1 and group&lt;=26 and first==string.char(64+group)) or (group==27 and not string.match(first,"^[A-Z]$")); if matches then table.insert(sorted,object) end end end; local function key(name) return string.gsub(string.lower(tostring(name)),"%d+",function(number) return string.format("%020d",tonumber(number)) end) end; table.sort(sorted,function(a,b) local ak,bk=key(a.Nameable.Name),key(b.Nameable.Name); if ak==bk then return a.ID&lt;b.ID end; return ak&lt;bk end); local object=sorted[(page*4)+2]; return object and "★ "..tostring(object.Nameable.Name) or "" end)()}</Text>
+      <LineId>2003000037</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local group=Variables:GetVariable("ShipFinderAlphabeticalDynamicGroup") or 0; local page=Variables:GetVariable("ShipFinderAlphabeticalDynamicPage") or 0; local sorted={}; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable then local first=string.upper(string.sub(tostring(object.Nameable.Name),1,1)); local matches=(group&gt;=1 and group&lt;=26 and first==string.char(64+group)) or (group==27 and not string.match(first,"^[A-Z]$")); if matches then table.insert(sorted,object) end end end; local function key(name) return string.gsub(string.lower(tostring(name)),"%d+",function(number) return string.format("%020d",tonumber(number)) end) end; table.sort(sorted,function(a,b) local ak,bk=key(a.Nameable.Name),key(b.Nameable.Name); if ak==bk then return a.ID&lt;b.ID end; return ak&lt;bk end); local object=sorted[(page*4)+3]; return object and "★ "..tostring(object.Nameable.Name) or "" end)()}</Text>
+      <LineId>2003000038</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local group=Variables:GetVariable("ShipFinderAlphabeticalDynamicGroup") or 0; local page=Variables:GetVariable("ShipFinderAlphabeticalDynamicPage") or 0; local sorted={}; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable then local first=string.upper(string.sub(tostring(object.Nameable.Name),1,1)); local matches=(group&gt;=1 and group&lt;=26 and first==string.char(64+group)) or (group==27 and not string.match(first,"^[A-Z]$")); if matches then table.insert(sorted,object) end end end; local function key(name) return string.gsub(string.lower(tostring(name)),"%d+",function(number) return string.format("%020d",tonumber(number)) end) end; table.sort(sorted,function(a,b) local ak,bk=key(a.Nameable.Name),key(b.Nameable.Name); if ak==bk then return a.ID&lt;b.ID end; return ak&lt;bk end); local object=sorted[(page*4)+4]; return object and "★ "..tostring(object.Nameable.Name) or "" end)()}</Text>
+      <LineId>2003000039</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local page=Variables:GetVariable("ShipFinderAlphabeticalDynamicPage") or 0; return page&gt;0 and "◀ Vorherige Schiffe" or "" end)()}</Text>
+      <LineId>2003000040</LineId>
+    </Text>
+    <Text>
+      <Text>{(function() local group=Variables:GetVariable("ShipFinderAlphabeticalDynamicGroup") or 0; local page=Variables:GetVariable("ShipFinderAlphabeticalDynamicPage") or 0; local count=0; local objects=Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}; for _,object in pairs(objects) do if object.Nameable then local first=string.upper(string.sub(tostring(object.Nameable.Name),1,1)); local matches=(group&gt;=1 and group&lt;=26 and first==string.char(64+group)) or (group==27 and not string.match(first,"^[A-Z]$")); if matches then count=count+1 end end end; return count&gt;((page+1)*4) and "Mehr Schiffe ▶" or "" end)()}</Text>
+      <LineId>2003000041</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;local p=Variables:GetVariable("S3Q")or 0;local k=GameSession.SessionGUID.."|P5|"..c.."|"..p.."|"..tostring(ShipFinderSelectedRouteName or"");ShipFinderPersonalLabelCache=ShipFinderPersonalLabelCache or{};local v=ShipFinderPersonalLabelCache[k];if not v then local r={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local n=o.Nameable and o.Nameable.Name;if n then n=tostring(n);local t=o.TradeRouteVehicle;local a=t and t.IsAssignedOnTradeRoute or false;local paused=t and t.IsPaused or false;local u=o.Unit and o.Unit.IsMilitaryUnit or false;local z=false;if c==1 then z=a and not paused elseif c==2 then z=(not u) and a and paused elseif c==4 then z=u elseif c==5 then z=(not u) and (not a) elseif c==6 then local rn=t and t.RouteName;z=a and not paused and rn~=nil and ShipFinderSelectedRouteName~=nil and tostring(rn)==tostring(ShipFinderSelectedRouteName) end;if z then r[#r+1]={name=n,key=n:lower(),id=tostring(o.ID)}end end end;table.sort(r,function(x,y)if x.key==y.key then return x.id&lt;y.id end;return x.key&lt;y.key end);v={"","",""};for i=1,3 do local x=r[p*3+i];if x then v[i]="★ "..x.name end end;ShipFinderPersonalLabelCache[k]=v end;return v[1]or"" end)()}</Text>
+      <LineId>2006000129</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;local p=Variables:GetVariable("S3Q")or 0;local k=GameSession.SessionGUID.."|P5|"..c.."|"..p.."|"..tostring(ShipFinderSelectedRouteName or"");ShipFinderPersonalLabelCache=ShipFinderPersonalLabelCache or{};local v=ShipFinderPersonalLabelCache[k];if not v then local r={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local n=o.Nameable and o.Nameable.Name;if n then n=tostring(n);local t=o.TradeRouteVehicle;local a=t and t.IsAssignedOnTradeRoute or false;local paused=t and t.IsPaused or false;local u=o.Unit and o.Unit.IsMilitaryUnit or false;local z=false;if c==1 then z=a and not paused elseif c==2 then z=(not u) and a and paused elseif c==4 then z=u elseif c==5 then z=(not u) and (not a) elseif c==6 then local rn=t and t.RouteName;z=a and not paused and rn~=nil and ShipFinderSelectedRouteName~=nil and tostring(rn)==tostring(ShipFinderSelectedRouteName) end;if z then r[#r+1]={name=n,key=n:lower(),id=tostring(o.ID)}end end end;table.sort(r,function(x,y)if x.key==y.key then return x.id&lt;y.id end;return x.key&lt;y.key end);v={"","",""};for i=1,3 do local x=r[p*3+i];if x then v[i]="★ "..x.name end end;ShipFinderPersonalLabelCache[k]=v end;return v[2]or"" end)()}</Text>
+      <LineId>2006000130</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;local p=Variables:GetVariable("S3Q")or 0;local k=GameSession.SessionGUID.."|P5|"..c.."|"..p.."|"..tostring(ShipFinderSelectedRouteName or"");ShipFinderPersonalLabelCache=ShipFinderPersonalLabelCache or{};local v=ShipFinderPersonalLabelCache[k];if not v then local r={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local n=o.Nameable and o.Nameable.Name;if n then n=tostring(n);local t=o.TradeRouteVehicle;local a=t and t.IsAssignedOnTradeRoute or false;local paused=t and t.IsPaused or false;local u=o.Unit and o.Unit.IsMilitaryUnit or false;local z=false;if c==1 then z=a and not paused elseif c==2 then z=(not u) and a and paused elseif c==4 then z=u elseif c==5 then z=(not u) and (not a) elseif c==6 then local rn=t and t.RouteName;z=a and not paused and rn~=nil and ShipFinderSelectedRouteName~=nil and tostring(rn)==tostring(ShipFinderSelectedRouteName) end;if z then r[#r+1]={name=n,key=n:lower(),id=tostring(o.ID)}end end end;table.sort(r,function(x,y)if x.key==y.key then return x.id&lt;y.id end;return x.key&lt;y.key end);v={"","",""};for i=1,3 do local x=r[p*3+i];if x then v[i]="★ "..x.name end end;ShipFinderPersonalLabelCache[k]=v end;return v[3]or"" end)()}</Text>
+      <LineId>2006000131</LineId>
+    </Text>
+    <Text>
+      <Text>Ship Finder</Text>
+      <LineId>2006000140</LineId>
+    </Text>
+    <Text>
+      <Text>Wähle ein Schiff aus der aktuellen Provinz.</Text>
+      <LineId>2006000141</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;local p=Variables:GetVariable("S3Q")or 0;local n=0;for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local t=o.TradeRouteVehicle;local a=t and t.IsAssignedOnTradeRoute or false;local paused=t and t.IsPaused or false;local u=o.Unit and o.Unit.IsMilitaryUnit or false;local z=false;if c==1 then z=a and not paused elseif c==2 then z=(not u) and a and paused elseif c==4 then z=u elseif c==5 then z=(not u) and (not a) elseif c==6 then local rn=t and t.RouteName;z=a and not paused and rn~=nil and ShipFinderSelectedRouteName~=nil and tostring(rn)==tostring(ShipFinderSelectedRouteName) end;if z then n=n+1 end end;return n&gt;(p+1)*3 and "Mehr Schiffe ▶" or "" end)()}</Text>
+      <LineId>2006000142</LineId>
+    </Text>
+    <Text>
+      <LineId>2006000143</LineId>
+      <Text>Dieses Schiff auswählen und zu seiner aktuellen Position springen.</Text>
+    </Text>
+    <Text>
+      <LineId>2006000144</LineId>
+      <Text>Eine weitere Seite mit Schiffen dieser Kategorie anzeigen.</Text>
+    </Text>
+    <Text>
+      <LineId>2006000145</LineId>
+      <Text>Unabhängige Schiffe</Text>
+    </Text>
+    <Text>
+      <LineId>2006000146</LineId>
+      <Text>Aktive Handelsrouten</Text>
+    </Text>
+    <Text>
+      <Text>Handelsrouten</Text>
+      <LineId>2006000240</LineId>
+    </Text>
+    <Text>
+      <Text>Schiffe auf Handelsroute</Text>
+      <LineId>2006000241</LineId>
+    </Text>
+    <Text>
+      <Text>Schiffe</Text>
+      <LineId>2006000242</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local p=Variables:GetVariable("S3RP")or 0;return p&gt;0 and "◀ Vorherige Routen" or "====================" end)()}</Text>
+      <LineId>2006000213</LineId>
+    </Text>
+    <Text>
+      <Text>◀ Zurück</Text>
+      <LineId>2006000217</LineId>
+    </Text>
+    <Text>
+      <Text>◀ Zurück</Text>
+      <LineId>2006000219</LineId>
+    </Text>
+    <Text>
+      <Text />
+      <LineId>2006000233</LineId>
+    </Text>
+    <Text>
+      <Text>Handelsroutengruppen</Text>
+      <LineId>2006000205</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local A=ui and ui.Scenes and ui.Scenes.TradeRoute and ui.Scenes.TradeRoute.TradeOverview and ui.Scenes.TradeRoute.TradeOverview.OverviewListData and ui.Scenes.TradeRoute.TradeOverview.OverviewListData.ArrayData;if not A then return "" end;local active={};for _,s in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local t=s.TradeRouteVehicle;if t and t.IsAssignedOnTradeRoute and not t.IsPaused and t.RouteName~=nil then active[tostring(t.RouteName)]=true end end;local NG={};local solo=false;for j=0,511 do local x=A[j];if x~=nil then local a,o=pcall(function()return x.IsGroupOpen end);local b,d=pcall(function()return x.ButtonData end);if a and b and type(o)=="boolean" and d~=nil then local f=nil;local n=nil;pcall(function()f=d.FolderID end);pcall(function()n=d.NameData and d.NameData.Text or nil end);NG[#NG+1]={f=f,n=n or ""} else local r=nil;local f=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);if type(r)=="number" and r&gt;=0 and f==-1 then solo=true end end end end;local function routesFor(F)local R={};for j=0,511 do local x=A[j];if x~=nil then local r=nil;local f=nil;local n=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);pcall(function()n=x.NameData and x.NameData.Text or nil end);if type(r)=="number" and r&gt;=0 and f==F and n~=nil and active[tostring(n)] then R[#R+1]=tostring(n) end end end;return R end;local VG={};for _,g in ipairs(NG)do local R=routesFor(g.f);if #R&gt;0 then VG[#VG+1]={n=g.n,f=g.f,r=R} end end;if solo then local R=routesFor(-1);if #R&gt;0 then VG[#VG+1]={n="Nicht gruppierte Routen",f=-1,r=R} end end;local g=VG[1];return g and tostring(g.n) or "" end)()}</Text>
+      <LineId>2006000200</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local A=ui and ui.Scenes and ui.Scenes.TradeRoute and ui.Scenes.TradeRoute.TradeOverview and ui.Scenes.TradeRoute.TradeOverview.OverviewListData and ui.Scenes.TradeRoute.TradeOverview.OverviewListData.ArrayData;if not A then return "" end;local active={};for _,s in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local t=s.TradeRouteVehicle;if t and t.IsAssignedOnTradeRoute and not t.IsPaused and t.RouteName~=nil then active[tostring(t.RouteName)]=true end end;local NG={};local solo=false;for j=0,511 do local x=A[j];if x~=nil then local a,o=pcall(function()return x.IsGroupOpen end);local b,d=pcall(function()return x.ButtonData end);if a and b and type(o)=="boolean" and d~=nil then local f=nil;local n=nil;pcall(function()f=d.FolderID end);pcall(function()n=d.NameData and d.NameData.Text or nil end);NG[#NG+1]={f=f,n=n or ""} else local r=nil;local f=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);if type(r)=="number" and r&gt;=0 and f==-1 then solo=true end end end end;local function routesFor(F)local R={};for j=0,511 do local x=A[j];if x~=nil then local r=nil;local f=nil;local n=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);pcall(function()n=x.NameData and x.NameData.Text or nil end);if type(r)=="number" and r&gt;=0 and f==F and n~=nil and active[tostring(n)] then R[#R+1]=tostring(n) end end end;return R end;local VG={};for _,g in ipairs(NG)do local R=routesFor(g.f);if #R&gt;0 then VG[#VG+1]={n=g.n,f=g.f,r=R} end end;if solo then local R=routesFor(-1);if #R&gt;0 then VG[#VG+1]={n="Nicht gruppierte Routen",f=-1,r=R} end end;local g=VG[2];return g and tostring(g.n) or "" end)()}</Text>
+      <LineId>2006000201</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local A=ui and ui.Scenes and ui.Scenes.TradeRoute and ui.Scenes.TradeRoute.TradeOverview and ui.Scenes.TradeRoute.TradeOverview.OverviewListData and ui.Scenes.TradeRoute.TradeOverview.OverviewListData.ArrayData;if not A then return "" end;local active={};for _,s in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local t=s.TradeRouteVehicle;if t and t.IsAssignedOnTradeRoute and not t.IsPaused and t.RouteName~=nil then active[tostring(t.RouteName)]=true end end;local NG={};local solo=false;for j=0,511 do local x=A[j];if x~=nil then local a,o=pcall(function()return x.IsGroupOpen end);local b,d=pcall(function()return x.ButtonData end);if a and b and type(o)=="boolean" and d~=nil then local f=nil;local n=nil;pcall(function()f=d.FolderID end);pcall(function()n=d.NameData and d.NameData.Text or nil end);NG[#NG+1]={f=f,n=n or ""} else local r=nil;local f=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);if type(r)=="number" and r&gt;=0 and f==-1 then solo=true end end end end;local function routesFor(F)local R={};for j=0,511 do local x=A[j];if x~=nil then local r=nil;local f=nil;local n=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);pcall(function()n=x.NameData and x.NameData.Text or nil end);if type(r)=="number" and r&gt;=0 and f==F and n~=nil and active[tostring(n)] then R[#R+1]=tostring(n) end end end;return R end;local VG={};for _,g in ipairs(NG)do local R=routesFor(g.f);if #R&gt;0 then VG[#VG+1]={n=g.n,f=g.f,r=R} end end;if solo then local R=routesFor(-1);if #R&gt;0 then VG[#VG+1]={n="Nicht gruppierte Routen",f=-1,r=R} end end;local g=VG[3];return g and tostring(g.n) or "" end)()}</Text>
+      <LineId>2006000202</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local A=ui and ui.Scenes and ui.Scenes.TradeRoute and ui.Scenes.TradeRoute.TradeOverview and ui.Scenes.TradeRoute.TradeOverview.OverviewListData and ui.Scenes.TradeRoute.TradeOverview.OverviewListData.ArrayData;if not A then return "" end;local active={};for _,s in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local t=s.TradeRouteVehicle;if t and t.IsAssignedOnTradeRoute and not t.IsPaused and t.RouteName~=nil then active[tostring(t.RouteName)]=true end end;local NG={};local solo=false;for j=0,511 do local x=A[j];if x~=nil then local a,o=pcall(function()return x.IsGroupOpen end);local b,d=pcall(function()return x.ButtonData end);if a and b and type(o)=="boolean" and d~=nil then local f=nil;local n=nil;pcall(function()f=d.FolderID end);pcall(function()n=d.NameData and d.NameData.Text or nil end);NG[#NG+1]={f=f,n=n or ""} else local r=nil;local f=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);if type(r)=="number" and r&gt;=0 and f==-1 then solo=true end end end end;local function routesFor(F)local R={};for j=0,511 do local x=A[j];if x~=nil then local r=nil;local f=nil;local n=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);pcall(function()n=x.NameData and x.NameData.Text or nil end);if type(r)=="number" and r&gt;=0 and f==F and n~=nil and active[tostring(n)] then R[#R+1]=tostring(n) end end end;return R end;local VG={};for _,g in ipairs(NG)do local R=routesFor(g.f);if #R&gt;0 then VG[#VG+1]={n=g.n,f=g.f,r=R} end end;if solo then local R=routesFor(-1);if #R&gt;0 then VG[#VG+1]={n="Nicht gruppierte Routen",f=-1,r=R} end end;local g=VG[4];return g and tostring(g.n) or "" end)()}</Text>
+      <LineId>2006000203</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local A=ui and ui.Scenes and ui.Scenes.TradeRoute and ui.Scenes.TradeRoute.TradeOverview and ui.Scenes.TradeRoute.TradeOverview.OverviewListData and ui.Scenes.TradeRoute.TradeOverview.OverviewListData.ArrayData;if not A then return "" end;local active={};for _,s in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local t=s.TradeRouteVehicle;if t and t.IsAssignedOnTradeRoute and not t.IsPaused and t.RouteName~=nil then active[tostring(t.RouteName)]=true end end;local NG={};local solo=false;for j=0,511 do local x=A[j];if x~=nil then local a,o=pcall(function()return x.IsGroupOpen end);local b,d=pcall(function()return x.ButtonData end);if a and b and type(o)=="boolean" and d~=nil then local f=nil;local n=nil;pcall(function()f=d.FolderID end);pcall(function()n=d.NameData and d.NameData.Text or nil end);NG[#NG+1]={f=f,n=n or ""} else local r=nil;local f=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);if type(r)=="number" and r&gt;=0 and f==-1 then solo=true end end end end;local function routesFor(F)local R={};for j=0,511 do local x=A[j];if x~=nil then local r=nil;local f=nil;local n=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);pcall(function()n=x.NameData and x.NameData.Text or nil end);if type(r)=="number" and r&gt;=0 and f==F and n~=nil and active[tostring(n)] then R[#R+1]=tostring(n) end end end;return R end;local VG={};for _,g in ipairs(NG)do local R=routesFor(g.f);if #R&gt;0 then VG[#VG+1]={n=g.n,f=g.f,r=R} end end;if solo then local R=routesFor(-1);if #R&gt;0 then VG[#VG+1]={n="Nicht gruppierte Routen",f=-1,r=R} end end;local g=VG[5];return g and tostring(g.n) or "" end)()}</Text>
+      <LineId>2006000204</LineId>
+    </Text>
+    <Text>
+      <Text>Wähle eine Handelsroutengruppe mit aktiven Schiffen in dieser Provinz.</Text>
+      <LineId>2006000206</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local A=ui and ui.Scenes and ui.Scenes.TradeRoute and ui.Scenes.TradeRoute.TradeOverview and ui.Scenes.TradeRoute.TradeOverview.OverviewListData and ui.Scenes.TradeRoute.TradeOverview.OverviewListData.ArrayData;if not A then return "" end;local active={};for _,s in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local t=s.TradeRouteVehicle;if t and t.IsAssignedOnTradeRoute and not t.IsPaused and t.RouteName~=nil then active[tostring(t.RouteName)]=true end end;local NG={};local solo=false;for j=0,511 do local x=A[j];if x~=nil then local a,o=pcall(function()return x.IsGroupOpen end);local b,d=pcall(function()return x.ButtonData end);if a and b and type(o)=="boolean" and d~=nil then local f=nil;local n=nil;pcall(function()f=d.FolderID end);pcall(function()n=d.NameData and d.NameData.Text or nil end);NG[#NG+1]={f=f,n=n or ""} else local r=nil;local f=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);if type(r)=="number" and r&gt;=0 and f==-1 then solo=true end end end end;local function routesFor(F)local R={};for j=0,511 do local x=A[j];if x~=nil then local r=nil;local f=nil;local n=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);pcall(function()n=x.NameData and x.NameData.Text or nil end);if type(r)=="number" and r&gt;=0 and f==F and n~=nil and active[tostring(n)] then R[#R+1]=tostring(n) end end end;return R end;local VG={};for _,g in ipairs(NG)do local R=routesFor(g.f);if #R&gt;0 then VG[#VG+1]={n=g.n,f=g.f,r=R} end end;if solo then local R=routesFor(-1);if #R&gt;0 then VG[#VG+1]={n="Nicht gruppierte Routen",f=-1,r=R} end end;local gi=Variables:GetVariable("S3G")or 1;local p=Variables:GetVariable("S3RP")or 0;local g=VG[gi];if not g then return "" end;local n=g.r[p*3+1];if not n then return "" end;local S={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local sn=o.Nameable and o.Nameable.Name;local t=o.TradeRouteVehicle;if sn and t and t.IsAssignedOnTradeRoute and not t.IsPaused and tostring(t.RouteName)==tostring(n) then S[#S+1]=tostring(sn) end end;table.sort(S,function(a,b)return a:lower()&lt;b:lower() end);if #S==1 then return "◆ "..tostring(n).." — ★ "..S[1] end;return "◆ "..tostring(n).." ["..tostring(#S).." Schiffe]" end)()}</Text>
+      <LineId>2006000210</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local A=ui and ui.Scenes and ui.Scenes.TradeRoute and ui.Scenes.TradeRoute.TradeOverview and ui.Scenes.TradeRoute.TradeOverview.OverviewListData and ui.Scenes.TradeRoute.TradeOverview.OverviewListData.ArrayData;if not A then return "" end;local active={};for _,s in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local t=s.TradeRouteVehicle;if t and t.IsAssignedOnTradeRoute and not t.IsPaused and t.RouteName~=nil then active[tostring(t.RouteName)]=true end end;local NG={};local solo=false;for j=0,511 do local x=A[j];if x~=nil then local a,o=pcall(function()return x.IsGroupOpen end);local b,d=pcall(function()return x.ButtonData end);if a and b and type(o)=="boolean" and d~=nil then local f=nil;local n=nil;pcall(function()f=d.FolderID end);pcall(function()n=d.NameData and d.NameData.Text or nil end);NG[#NG+1]={f=f,n=n or ""} else local r=nil;local f=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);if type(r)=="number" and r&gt;=0 and f==-1 then solo=true end end end end;local function routesFor(F)local R={};for j=0,511 do local x=A[j];if x~=nil then local r=nil;local f=nil;local n=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);pcall(function()n=x.NameData and x.NameData.Text or nil end);if type(r)=="number" and r&gt;=0 and f==F and n~=nil and active[tostring(n)] then R[#R+1]=tostring(n) end end end;return R end;local VG={};for _,g in ipairs(NG)do local R=routesFor(g.f);if #R&gt;0 then VG[#VG+1]={n=g.n,f=g.f,r=R} end end;if solo then local R=routesFor(-1);if #R&gt;0 then VG[#VG+1]={n="Nicht gruppierte Routen",f=-1,r=R} end end;local gi=Variables:GetVariable("S3G")or 1;local p=Variables:GetVariable("S3RP")or 0;local g=VG[gi];if not g then return "" end;local n=g.r[p*3+2];if not n then return "" end;local S={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local sn=o.Nameable and o.Nameable.Name;local t=o.TradeRouteVehicle;if sn and t and t.IsAssignedOnTradeRoute and not t.IsPaused and tostring(t.RouteName)==tostring(n) then S[#S+1]=tostring(sn) end end;table.sort(S,function(a,b)return a:lower()&lt;b:lower() end);if #S==1 then return "◆ "..tostring(n).." — ★ "..S[1] end;return "◆ "..tostring(n).." ["..tostring(#S).." Schiffe]" end)()}</Text>
+      <LineId>2006000211</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local A=ui and ui.Scenes and ui.Scenes.TradeRoute and ui.Scenes.TradeRoute.TradeOverview and ui.Scenes.TradeRoute.TradeOverview.OverviewListData and ui.Scenes.TradeRoute.TradeOverview.OverviewListData.ArrayData;if not A then return "" end;local active={};for _,s in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local t=s.TradeRouteVehicle;if t and t.IsAssignedOnTradeRoute and not t.IsPaused and t.RouteName~=nil then active[tostring(t.RouteName)]=true end end;local NG={};local solo=false;for j=0,511 do local x=A[j];if x~=nil then local a,o=pcall(function()return x.IsGroupOpen end);local b,d=pcall(function()return x.ButtonData end);if a and b and type(o)=="boolean" and d~=nil then local f=nil;local n=nil;pcall(function()f=d.FolderID end);pcall(function()n=d.NameData and d.NameData.Text or nil end);NG[#NG+1]={f=f,n=n or ""} else local r=nil;local f=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);if type(r)=="number" and r&gt;=0 and f==-1 then solo=true end end end end;local function routesFor(F)local R={};for j=0,511 do local x=A[j];if x~=nil then local r=nil;local f=nil;local n=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);pcall(function()n=x.NameData and x.NameData.Text or nil end);if type(r)=="number" and r&gt;=0 and f==F and n~=nil and active[tostring(n)] then R[#R+1]=tostring(n) end end end;return R end;local VG={};for _,g in ipairs(NG)do local R=routesFor(g.f);if #R&gt;0 then VG[#VG+1]={n=g.n,f=g.f,r=R} end end;if solo then local R=routesFor(-1);if #R&gt;0 then VG[#VG+1]={n="Nicht gruppierte Routen",f=-1,r=R} end end;local gi=Variables:GetVariable("S3G")or 1;local p=Variables:GetVariable("S3RP")or 0;local g=VG[gi];if not g then return "" end;local n=g.r[p*3+3];if not n then return "" end;local S={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local sn=o.Nameable and o.Nameable.Name;local t=o.TradeRouteVehicle;if sn and t and t.IsAssignedOnTradeRoute and not t.IsPaused and tostring(t.RouteName)==tostring(n) then S[#S+1]=tostring(sn) end end;table.sort(S,function(a,b)return a:lower()&lt;b:lower() end);if #S==1 then return "◆ "..tostring(n).." — ★ "..S[1] end;return "◆ "..tostring(n).." ["..tostring(#S).." Schiffe]" end)()}</Text>
+      <LineId>2006000212</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local A=ui and ui.Scenes and ui.Scenes.TradeRoute and ui.Scenes.TradeRoute.TradeOverview and ui.Scenes.TradeRoute.TradeOverview.OverviewListData and ui.Scenes.TradeRoute.TradeOverview.OverviewListData.ArrayData;if not A then return "" end;local active={};for _,s in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local t=s.TradeRouteVehicle;if t and t.IsAssignedOnTradeRoute and not t.IsPaused and t.RouteName~=nil then active[tostring(t.RouteName)]=true end end;local NG={};local solo=false;for j=0,511 do local x=A[j];if x~=nil then local a,o=pcall(function()return x.IsGroupOpen end);local b,d=pcall(function()return x.ButtonData end);if a and b and type(o)=="boolean" and d~=nil then local f=nil;local n=nil;pcall(function()f=d.FolderID end);pcall(function()n=d.NameData and d.NameData.Text or nil end);NG[#NG+1]={f=f,n=n or ""} else local r=nil;local f=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);if type(r)=="number" and r&gt;=0 and f==-1 then solo=true end end end end;local function routesFor(F)local R={};for j=0,511 do local x=A[j];if x~=nil then local r=nil;local f=nil;local n=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);pcall(function()n=x.NameData and x.NameData.Text or nil end);if type(r)=="number" and r&gt;=0 and f==F and n~=nil and active[tostring(n)] then R[#R+1]=tostring(n) end end end;return R end;local VG={};for _,g in ipairs(NG)do local R=routesFor(g.f);if #R&gt;0 then VG[#VG+1]={n=g.n,f=g.f,r=R} end end;if solo then local R=routesFor(-1);if #R&gt;0 then VG[#VG+1]={n="Nicht gruppierte Routen",f=-1,r=R} end end;local gi=Variables:GetVariable("S3G")or 1;local g=VG[gi];if not g then return "Keine aktiven Routen in dieser Provinz." end;return "Gruppe: "..tostring(g.n).."   -   "..tostring(#g.r).." aktive Route(n) in dieser Provinz." end)()}</Text>
+      <LineId>2006000216</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local A=ui and ui.Scenes and ui.Scenes.TradeRoute and ui.Scenes.TradeRoute.TradeOverview and ui.Scenes.TradeRoute.TradeOverview.OverviewListData and ui.Scenes.TradeRoute.TradeOverview.OverviewListData.ArrayData;if not A then return "" end;local active={};for _,s in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local t=s.TradeRouteVehicle;if t and t.IsAssignedOnTradeRoute and not t.IsPaused and t.RouteName~=nil then active[tostring(t.RouteName)]=true end end;local NG={};local solo=false;for j=0,511 do local x=A[j];if x~=nil then local a,o=pcall(function()return x.IsGroupOpen end);local b,d=pcall(function()return x.ButtonData end);if a and b and type(o)=="boolean" and d~=nil then local f=nil;local n=nil;pcall(function()f=d.FolderID end);pcall(function()n=d.NameData and d.NameData.Text or nil end);NG[#NG+1]={f=f,n=n or ""} else local r=nil;local f=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);if type(r)=="number" and r&gt;=0 and f==-1 then solo=true end end end end;local function routesFor(F)local R={};for j=0,511 do local x=A[j];if x~=nil then local r=nil;local f=nil;local n=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);pcall(function()n=x.NameData and x.NameData.Text or nil end);if type(r)=="number" and r&gt;=0 and f==F and n~=nil and active[tostring(n)] then R[#R+1]=tostring(n) end end end;return R end;local VG={};for _,g in ipairs(NG)do local R=routesFor(g.f);if #R&gt;0 then VG[#VG+1]={n=g.n,f=g.f,r=R} end end;if solo then local R=routesFor(-1);if #R&gt;0 then VG[#VG+1]={n="Nicht gruppierte Routen",f=-1,r=R} end end;local gi=Variables:GetVariable("S3G")or 1;local p=Variables:GetVariable("S3RP")or 0;local g=VG[gi];if not g then return "" end;return #g.r&gt;(p+1)*3 and "Mehr Routen ▶" or "" end)()}</Text>
+      <LineId>2006000214</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local A=ui and ui.Scenes and ui.Scenes.TradeRoute and ui.Scenes.TradeRoute.TradeOverview and ui.Scenes.TradeRoute.TradeOverview.OverviewListData and ui.Scenes.TradeRoute.TradeOverview.OverviewListData.ArrayData;if not A then return "" end;local active={};for _,s in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local t=s.TradeRouteVehicle;if t and t.IsAssignedOnTradeRoute and not t.IsPaused and t.RouteName~=nil then active[tostring(t.RouteName)]=true end end;local NG={};local solo=false;for j=0,511 do local x=A[j];if x~=nil then local a,o=pcall(function()return x.IsGroupOpen end);local b,d=pcall(function()return x.ButtonData end);if a and b and type(o)=="boolean" and d~=nil then local f=nil;local n=nil;pcall(function()f=d.FolderID end);pcall(function()n=d.NameData and d.NameData.Text or nil end);NG[#NG+1]={f=f,n=n or ""} else local r=nil;local f=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);if type(r)=="number" and r&gt;=0 and f==-1 then solo=true end end end end;local function routesFor(F)local R={};for j=0,511 do local x=A[j];if x~=nil then local r=nil;local f=nil;local n=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);pcall(function()n=x.NameData and x.NameData.Text or nil end);if type(r)=="number" and r&gt;=0 and f==F and n~=nil and active[tostring(n)] then R[#R+1]=tostring(n) end end end;return R end;local VG={};for _,g in ipairs(NG)do local R=routesFor(g.f);if #R&gt;0 then VG[#VG+1]={n=g.n,f=g.f,r=R} end end;if solo then local R=routesFor(-1);if #R&gt;0 then VG[#VG+1]={n="Nicht gruppierte Routen",f=-1,r=R} end end;local gi=Variables:GetVariable("S3G")or 1;local p=Variables:GetVariable("S3RP")or 0;local rs=Variables:GetVariable("S3RS")or 1;local g=VG[gi];if not g then return "Schiff auswählen." end;local n=g.r[p*3+rs] or "";return "Route: "..tostring(n).."   -   Wähle ein dieser Handelsroute zugewiesenes Schiff." end)()}</Text>
+      <LineId>2006000234</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local A=ui and ui.Scenes and ui.Scenes.TradeRoute and ui.Scenes.TradeRoute.TradeOverview and ui.Scenes.TradeRoute.TradeOverview.OverviewListData and ui.Scenes.TradeRoute.TradeOverview.OverviewListData.ArrayData;if not A then return "" end;local active={};for _,s in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local t=s.TradeRouteVehicle;if t and t.IsAssignedOnTradeRoute and not t.IsPaused and t.RouteName~=nil then active[tostring(t.RouteName)]=true end end;local NG={};local solo=false;for j=0,511 do local x=A[j];if x~=nil then local a,o=pcall(function()return x.IsGroupOpen end);local b,d=pcall(function()return x.ButtonData end);if a and b and type(o)=="boolean" and d~=nil then local f=nil;local n=nil;pcall(function()f=d.FolderID end);pcall(function()n=d.NameData and d.NameData.Text or nil end);NG[#NG+1]={f=f,n=n or ""} else local r=nil;local f=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);if type(r)=="number" and r&gt;=0 and f==-1 then solo=true end end end end;local function routesFor(F)local R={};for j=0,511 do local x=A[j];if x~=nil then local r=nil;local f=nil;local n=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);pcall(function()n=x.NameData and x.NameData.Text or nil end);if type(r)=="number" and r&gt;=0 and f==F and n~=nil and active[tostring(n)] then R[#R+1]=tostring(n) end end end;return R end;local VG={};for _,g in ipairs(NG)do local R=routesFor(g.f);if #R&gt;0 then VG[#VG+1]={n=g.n,f=g.f,r=R} end end;if solo then local R=routesFor(-1);if #R&gt;0 then VG[#VG+1]={n="Nicht gruppierte Routen",f=-1,r=R} end end;local gi=Variables:GetVariable("S3G")or 1;local p=Variables:GetVariable("S3RP")or 0;local rs=Variables:GetVariable("S3RS")or 1;local g=VG[gi];if not g then return "" end;local rn=g.r[p*3+rs];if not rn then return "" end;local S={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local n=o.Nameable and o.Nameable.Name;local t=o.TradeRouteVehicle;if n and t and t.IsAssignedOnTradeRoute and not t.IsPaused and tostring(t.RouteName)==tostring(rn) then S[#S+1]=tostring(n) end end;table.sort(S,function(a,b)return a:lower()&lt;b:lower() end);return S[1] and "★ "..S[1] or "" end)()}</Text>
+      <LineId>2006000230</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local A=ui and ui.Scenes and ui.Scenes.TradeRoute and ui.Scenes.TradeRoute.TradeOverview and ui.Scenes.TradeRoute.TradeOverview.OverviewListData and ui.Scenes.TradeRoute.TradeOverview.OverviewListData.ArrayData;if not A then return "" end;local active={};for _,s in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local t=s.TradeRouteVehicle;if t and t.IsAssignedOnTradeRoute and not t.IsPaused and t.RouteName~=nil then active[tostring(t.RouteName)]=true end end;local NG={};local solo=false;for j=0,511 do local x=A[j];if x~=nil then local a,o=pcall(function()return x.IsGroupOpen end);local b,d=pcall(function()return x.ButtonData end);if a and b and type(o)=="boolean" and d~=nil then local f=nil;local n=nil;pcall(function()f=d.FolderID end);pcall(function()n=d.NameData and d.NameData.Text or nil end);NG[#NG+1]={f=f,n=n or ""} else local r=nil;local f=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);if type(r)=="number" and r&gt;=0 and f==-1 then solo=true end end end end;local function routesFor(F)local R={};for j=0,511 do local x=A[j];if x~=nil then local r=nil;local f=nil;local n=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);pcall(function()n=x.NameData and x.NameData.Text or nil end);if type(r)=="number" and r&gt;=0 and f==F and n~=nil and active[tostring(n)] then R[#R+1]=tostring(n) end end end;return R end;local VG={};for _,g in ipairs(NG)do local R=routesFor(g.f);if #R&gt;0 then VG[#VG+1]={n=g.n,f=g.f,r=R} end end;if solo then local R=routesFor(-1);if #R&gt;0 then VG[#VG+1]={n="Nicht gruppierte Routen",f=-1,r=R} end end;local gi=Variables:GetVariable("S3G")or 1;local p=Variables:GetVariable("S3RP")or 0;local rs=Variables:GetVariable("S3RS")or 1;local g=VG[gi];if not g then return "" end;local rn=g.r[p*3+rs];if not rn then return "" end;local S={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local n=o.Nameable and o.Nameable.Name;local t=o.TradeRouteVehicle;if n and t and t.IsAssignedOnTradeRoute and not t.IsPaused and tostring(t.RouteName)==tostring(rn) then S[#S+1]=tostring(n) end end;table.sort(S,function(a,b)return a:lower()&lt;b:lower() end);return S[2] and "★ "..S[2] or "" end)()}</Text>
+      <LineId>2006000231</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()local A=ui and ui.Scenes and ui.Scenes.TradeRoute and ui.Scenes.TradeRoute.TradeOverview and ui.Scenes.TradeRoute.TradeOverview.OverviewListData and ui.Scenes.TradeRoute.TradeOverview.OverviewListData.ArrayData;if not A then return "" end;local active={};for _,s in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local t=s.TradeRouteVehicle;if t and t.IsAssignedOnTradeRoute and not t.IsPaused and t.RouteName~=nil then active[tostring(t.RouteName)]=true end end;local NG={};local solo=false;for j=0,511 do local x=A[j];if x~=nil then local a,o=pcall(function()return x.IsGroupOpen end);local b,d=pcall(function()return x.ButtonData end);if a and b and type(o)=="boolean" and d~=nil then local f=nil;local n=nil;pcall(function()f=d.FolderID end);pcall(function()n=d.NameData and d.NameData.Text or nil end);NG[#NG+1]={f=f,n=n or ""} else local r=nil;local f=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);if type(r)=="number" and r&gt;=0 and f==-1 then solo=true end end end end;local function routesFor(F)local R={};for j=0,511 do local x=A[j];if x~=nil then local r=nil;local f=nil;local n=nil;pcall(function()r=x.RouteID end);pcall(function()f=x.FolderID end);pcall(function()n=x.NameData and x.NameData.Text or nil end);if type(r)=="number" and r&gt;=0 and f==F and n~=nil and active[tostring(n)] then R[#R+1]=tostring(n) end end end;return R end;local VG={};for _,g in ipairs(NG)do local R=routesFor(g.f);if #R&gt;0 then VG[#VG+1]={n=g.n,f=g.f,r=R} end end;if solo then local R=routesFor(-1);if #R&gt;0 then VG[#VG+1]={n="Nicht gruppierte Routen",f=-1,r=R} end end;local gi=Variables:GetVariable("S3G")or 1;local p=Variables:GetVariable("S3RP")or 0;local rs=Variables:GetVariable("S3RS")or 1;local g=VG[gi];if not g then return "" end;local rn=g.r[p*3+rs];if not rn then return "" end;local S={};for _,o in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner)or{})do local n=o.Nameable and o.Nameable.Name;local t=o.TradeRouteVehicle;if n and t and t.IsAssignedOnTradeRoute and not t.IsPaused and tostring(t.RouteName)==tostring(rn) then S[#S+1]=tostring(n) end end;table.sort(S,function(a,b)return a:lower()&lt;b:lower() end);return S[3] and "★ "..S[3] or "" end)()}</Text>
+      <LineId>2006000232</LineId>
+    </Text>
+  </ModOp>
+  <Text>
+    <Text>Schiffe mit Handlungsbedarf</Text>
+    <LineId>2006000147</LineId>
+  </Text>
+  <Text>
+    <Text>Kriegsschiffe</Text>
+    <LineId>2006000148</LineId>
+  </Text>
+  <ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>{(function()return "Handelsrouten - "..tostring(ShipFinderSelectedRouteGroupName or "") end)()}</Text>
+      <LineId>2006000215</LineId>
+    </Text>
+    <Text>
+      <Text>{(function()return "Route: "..tostring(ShipFinderSelectedRouteName or "") end)()}</Text>
+      <LineId>2006000218</LineId>
+    </Text>
+  </ModOp>
+  <ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>{(function()local c=Variables:GetVariable("S3C")or 0;if c==1 then return "Aktive Handelsrouten" elseif c==2 then return "Handelsschiffe mit Handlungsbedarf" elseif c==4 then return "Kriegsschiffe" elseif c==5 then return "Unabhängige Schiffe" elseif c==6 then return "Schiffe - "..tostring(ShipFinderSelectedRouteName or "Handelsroute") else return "Ship Finder" end end)()}</Text>
+      <LineId>2006000220</LineId>
+    </Text>
+  </ModOp>
+  <ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>Schiffe nach Insel</Text>
+      <LineId>2006000250</LineId>
+    </Text>
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_SCAN_DE</Text>
+      <LineId>2006000251</LineId>
+    </Text>
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P1_DE</Text>
+      <LineId>2006000252</LineId>
+    </Text>
+  </ModOp>
+  <ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P2_DE</Text>
+      <LineId>2006000253</LineId>
+    </Text>
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P3_DE</Text>
+      <LineId>2006000254</LineId>
+    </Text>
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P4_DE</Text>
+      <LineId>2006000255</LineId>
+    </Text>
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P5_DE</Text>
+      <LineId>2006000256</LineId>
+    </Text>
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P6_DE</Text>
+      <LineId>2006000257</LineId>
+    </Text>
+  </ModOp>
+\n<ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P7_DE</Text>
+      <LineId>2006000258</LineId>
+    </Text>
+  </ModOp>\n\n<ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P8_DE</Text>
+      <LineId>2006000259</LineId>
+    </Text>
+  </ModOp>\n\n<ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P9_DE</Text>
+      <LineId>2006000260</LineId>
+    </Text>
+  </ModOp>\n\n<ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P10_DE</Text>
+      <LineId>2006000261</LineId>
+    </Text>
+  </ModOp>\n\n<ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P11_DE</Text>
+      <LineId>2006000262</LineId>
+    </Text>
+  </ModOp>\n\n<ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P12_DE</Text>
+      <LineId>2006000263</LineId>
+    </Text>
+  </ModOp>\n\n<ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P13_DE</Text>
+      <LineId>2006000264</LineId>
+    </Text>
+  </ModOp>\n\n<ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P14_DE</Text>
+      <LineId>2006000265</LineId>
+    </Text>
+  </ModOp>\n\n<ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P15_DE</Text>
+      <LineId>2006000266</LineId>
+    </Text>
+  </ModOp>\n\n<ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P16_DE</Text>
+      <LineId>2006000267</LineId>
+    </Text>
+  </ModOp>\n\n<ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P17_DE</Text>
+      <LineId>2006000268</LineId>
+    </Text>
+  </ModOp>\n\n<ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P18_DE</Text>
+      <LineId>2006000269</LineId>
+    </Text>
+  </ModOp>\n\n<ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P19_DE</Text>
+      <LineId>2006000270</LineId>
+    </Text>
+  </ModOp>\n\n<ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P20_DE</Text>
+      <LineId>2006000271</LineId>
+    </Text>
+  </ModOp>\n\n<ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P21_DE</Text>
+      <LineId>2006000272</LineId>
+    </Text>
+  </ModOp>\n\n<ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P22_DE</Text>
+      <LineId>2006000273</LineId>
+    </Text>
+  </ModOp>\n\n<ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P23_DE</Text>
+      <LineId>2006000274</LineId>
+    </Text>
+  </ModOp>\n\n<ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_REPORT_P24_DE</Text>
+      <LineId>2006000275</LineId>
+    </Text>
+  </ModOp>\n
+  <ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>Schiffe nach Insel</Text>
+      <LineId>2006000280</LineId>
+    </Text>
+  </ModOp>
+  <ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>Schiffe nach Insel anzeigen</Text>
+      <LineId>2006000281</LineId>
+    </Text>
+  </ModOp>
+  <ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>Inselverbindungen neu scannen</Text>
+      <LineId>2006000282</LineId>
+    </Text>
+  </ModOp>
+  <ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>Scan-Informationen</Text>
+      <LineId>2006000283</LineId>
+    </Text>
+  </ModOp>
+  <ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>Inselverbindungen werden zwischengespeichert. Schiffzuweisungen werden automatisch aktualisiert.</Text>
+      <LineId>2006000284</LineId>
+    </Text>
+  </ModOp>
+  <ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_SCAN_INFO_DE</Text>
+      <LineId>2006000285</LineId>
+    </Text>
+  </ModOp>
+  <ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPS_BY_ISLAND_FORCE_SCAN_DE</Text>
+      <LineId>2006000286</LineId>
+    </Text>
+  </ModOp>
+  <ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIPFINDER_CLOSE</Text>
+      <LineId>2006000297</LineId>
+    </Text>
+  </ModOp>
+  <ModOp Add="/TextExport/Texts[1]">
+    <Text>
+      <Text>SF_SHIP_UNAVAILABLE_DE</Text>
+      <LineId>2006000298</LineId>
+    </Text>
+  </ModOp>
+</ModOps>

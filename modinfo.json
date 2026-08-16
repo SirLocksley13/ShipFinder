@@ -1,0 +1,32 @@
+{
+  "ModID": "ship-finder-sirlocksley",
+  "Version": "1.1.0",
+  "Anno": 8,
+  "Difficulty": "cheat",
+  "RequiresNewGame": false,
+  "SafeToRemove": true,
+  "ModName": {
+    "English": "Ship Finder",
+    "German": "Ship Finder"
+  },
+  "Category": {
+    "English": "Mod",
+    "German": "Mod"
+  },
+  "Description": {
+    "English": "Find ships quickly in the current province. Browse active trade routes, independent ships, warships, ships needing attention, all ships A-Z, or find ships by island. Direct navigation and Ctrl+Alt+1-9 shortcuts help you jump to the ship you need. Includes English and German.",
+    "German": "Finde Schiffe schnell in der aktuellen Provinz. Durchsuche aktive Handelsrouten, unabhängige Schiffe, Kriegsschiffe, Schiffe mit Handlungsbedarf, alle Schiffe A-Z oder finde Schiffe nach Insel. Direkte Navigation und Ctrl+Alt+1-9 helfen beim schnellen Sprung zum gewünschten Schiff. Enthält Englisch und Deutsch."
+  },
+  "CreatorName": "Dr. Enrico Handrick",
+  "CreatorContact": "https://github.com/SirLocksley13/ShipFinder",
+  "Scripts": {
+    "Modules": [
+      "shipfinder/ship-finder.lua",
+      "shipfinder/island-filter-fast.lua",
+      "shipfinder/combined-root.lua"
+    ],
+    "Init": "ShipFinder = require(\"ship-finder\"); ShipFinderIslandFilterFast = require(\"island-filter-fast\"); ShipFinderCombinedRoot = require(\"combined-root\"); ShipFinderCombinedRoot:SetIslandFilterFast(ShipFinderIslandFilterFast)",
+    "Load": "ShipFinder:Load(); ShipFinderIslandFilterFast:Load(); ShipFinderCombinedRoot:Load()",
+    "Tick": "ShipFinderCombinedRoot:Tick()"
+  }
+}
