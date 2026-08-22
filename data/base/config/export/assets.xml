@@ -43,6 +43,7 @@
     <Item><Command>ShipFinderCombinedRoot:IslandShortcut(7)</Command><Active>Session</Active><Identifier>ShipFinderIslandShortcut7</Identifier><AvailableOnPlatforms>PC</AvailableOnPlatforms><InputTypes><Modern><KeyType>Control;Alt;Digit7</KeyType></Modern><Legacy><KeyType>Control;Alt;Digit7</KeyType></Legacy></InputTypes></Item>
     <Item><Command>ShipFinderCombinedRoot:IslandShortcut(8)</Command><Active>Session</Active><Identifier>ShipFinderIslandShortcut8</Identifier><AvailableOnPlatforms>PC</AvailableOnPlatforms><InputTypes><Modern><KeyType>Control;Alt;Digit8</KeyType></Modern><Legacy><KeyType>Control;Alt;Digit8</KeyType></Legacy></InputTypes></Item>
     <Item><Command>ShipFinderCombinedRoot:IslandShortcut(9)</Command><Active>Session</Active><Identifier>ShipFinderIslandShortcut9</Identifier><AvailableOnPlatforms>PC</AvailableOnPlatforms><InputTypes><Modern><KeyType>Control;Alt;Digit9</KeyType></Modern><Legacy><KeyType>Control;Alt;Digit9</KeyType></Legacy></InputTypes></Item>
+    <Item><Command>ShipFinderCombinedRoot:IslandAllIslands()</Command><Active>Session</Active><Identifier>ShipFinderAllIslandsShortcut</Identifier><AvailableOnPlatforms>PC</AvailableOnPlatforms><InputTypes><Modern><KeyType>Control;Alt;Digit0</KeyType></Modern><Legacy><KeyType>Control;Alt;Digit0</KeyType></Legacy></InputTypes></Item>
   </ModOp>
   <ModOp Type="add" GUID="23779" Path="/Values/ConditionVariableConfiguration/IntVariables">
     <Item><Name>S3C</Name><StartValue>0</StartValue><Comment>Selected live ship category</Comment></Item>
@@ -2122,7 +2123,7 @@
       </DecisionComponent>
     </Values>
   </Asset>
-<Asset><Template>StoryLine</Template><Values><Standard><GUID>2035050</GUID><Name>Ship Finder Public Storyline</Name></Standard><StoryLine><StartConnector><Item><Component>2035051</Component></Item></StartConnector></StoryLine><QuestComponent /><QuestComponentConnector /></Values></Asset><Asset><Template>DecisionRoot</Template><Values><Standard><GUID>2035051</GUID><Name>Ship Finder Public Root</Name></Standard><DecisionRoot><DecisionRootOutput><Item /><Item /><Item /></DecisionRootOutput><DecisionRootStartComponent>2035052</DecisionRootStartComponent><DecisionGovernorRequest><IsBaseAutoCreateAsset>1</IsBaseAutoCreateAsset><Values><GovernorRequest><RequestDescription>2006000000</RequestDescription><RequestPriority>100</RequestPriority><RequestTimeout>600000</RequestTimeout><RequestIcon>130038</RequestIcon><RequestParticipant>41</RequestParticipant><IsRequestMandatory>0</IsRequestMandatory></GovernorRequest></Values></DecisionGovernorRequest><UIType>Popup</UIType></DecisionRoot><QuestComponent /></Values></Asset><Asset><Template>Decision</Template><Values><Standard><GUID>2035052</GUID><Name>Ship Finder Public Main Menu</Name></Standard><Decision><DecisionScreenConfig><Headline>2006000001</Headline><Text>2006000002</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig><DecisionOptions><Item><OptionText>2006000016</OptionText></Item><Item><OptionText>2006000020</OptionText></Item><Item><OptionText>2006000019</OptionText></Item><Item><OptionText>2006000017</OptionText></Item><Item><OptionText>2006000039</OptionText></Item><Item><OptionText>2006000250</OptionText></Item><Item><OptionText>2006000010</OptionText></Item></DecisionOptions></Decision><QuestComponent /><DecisionComponent><DecisionOutputs><Item><SuccessOutput><Item><Component>2035151</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035165</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035164</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035152</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2043010</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099301</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099398</Component></Item></SuccessOutput></Item>
+<Asset><Template>StoryLine</Template><Values><Standard><GUID>2035050</GUID><Name>Ship Finder Public Storyline</Name></Standard><StoryLine><StartConnector><Item><Component>2035051</Component></Item></StartConnector></StoryLine><QuestComponent /><QuestComponentConnector /></Values></Asset><Asset><Template>DecisionRoot</Template><Values><Standard><GUID>2035051</GUID><Name>Ship Finder Public Root</Name></Standard><DecisionRoot><DecisionRootOutput><Item /><Item /><Item /></DecisionRootOutput><DecisionRootStartComponent>2035052</DecisionRootStartComponent><DecisionGovernorRequest><IsBaseAutoCreateAsset>1</IsBaseAutoCreateAsset><Values><GovernorRequest><RequestDescription>2006000000</RequestDescription><RequestPriority>100</RequestPriority><RequestTimeout>600000</RequestTimeout><RequestIcon>130038</RequestIcon><RequestParticipant>41</RequestParticipant><IsRequestMandatory>0</IsRequestMandatory></GovernorRequest></Values></DecisionGovernorRequest><UIType>Popup</UIType></DecisionRoot><QuestComponent /></Values></Asset><Asset><Template>Decision</Template><Values><Standard><GUID>2035052</GUID><Name>Ship Finder Public Main Menu</Name></Standard><Decision><DecisionScreenConfig><Headline>2006000001</Headline><Text>2006000002</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig><DecisionOptions><Item><OptionText>2006000016</OptionText></Item><Item><OptionText>2006000020</OptionText></Item><Item><OptionText>2006000019</OptionText></Item><Item><OptionText>2006000017</OptionText></Item><Item><OptionText>2006000039</OptionText></Item><Item><OptionText>2006000250</OptionText></Item><Item><OptionText>2006000010</OptionText></Item></DecisionOptions></Decision><QuestComponent /><DecisionComponent><DecisionOutputs><Item><SuccessOutput><Item><Component>2035151</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035165</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035164</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099535</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2043010</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099301</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099398</Component></Item></SuccessOutput></Item>
 </DecisionOutputs></DecisionComponent></Values></Asset><Asset>
     <Template>Sequence</Template>
     <Values>
@@ -2186,8 +2187,13 @@
             <VariableName>S3Q</VariableName>
             <ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>0</IntValue></IntVariableOrValue></Values></ModifierVariable>
           </ActionModifyVariable></Values></Action></Item>
+      
+          <Item><Action><Template>ActionModifyVariable</Template><Values><Action /><ActionModifyVariable>
+            <VariableName>S3L</VariableName><Modifier>Add</Modifier>
+            <ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>1000</IntValue></IntVariableOrValue></Values></ModifierVariable>
+          </ActionModifyVariable></Values></Action></Item>
       </SequenceActions></Sequence>
-      <QuestComponentConnector><Output><Item><Component>2035053</Component></Item></Output></QuestComponentConnector>
+      <QuestComponentConnector><Output><Item><Component>2099398</Component></Item></Output></QuestComponentConnector>
       <QuestComponent />
     </Values>
   </Asset>
@@ -2196,7 +2202,7 @@
     <Values>
       <Standard><GUID>2035053</GUID><Name>Public direct trade ship page</Name></Standard>
       <Decision>
-        <DecisionScreenConfig><Headline>2006000242</Headline><Text>2006000141</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig>
+        <DecisionScreenConfig><Headline>2006000242</Headline><Text>2006000303</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig>
         <DecisionOptions>
           <Item><OptionText>2006000129</OptionText><Infotip>2006000143</Infotip></Item>
           <Item><OptionText>2006000130</OptionText><Infotip>2006000143</Infotip></Item>
@@ -4287,7 +4293,7 @@
       </DecisionComponent>
     </Values>
   </Asset>
-<Asset><Template>StoryLine</Template><Values><Standard><GUID>2035050</GUID><Name>Ship Finder Public Storyline</Name></Standard><StoryLine><StartConnector><Item><Component>2035051</Component></Item></StartConnector></StoryLine><QuestComponent /><QuestComponentConnector /></Values></Asset><Asset><Template>DecisionRoot</Template><Values><Standard><GUID>2035051</GUID><Name>Ship Finder Public Root</Name></Standard><DecisionRoot><DecisionRootOutput><Item /><Item /><Item /></DecisionRootOutput><DecisionRootStartComponent>2035052</DecisionRootStartComponent><DecisionGovernorRequest><IsBaseAutoCreateAsset>1</IsBaseAutoCreateAsset><Values><GovernorRequest><RequestDescription>2006000000</RequestDescription><RequestPriority>100</RequestPriority><RequestTimeout>600000</RequestTimeout><RequestIcon>130038</RequestIcon><RequestParticipant>41</RequestParticipant><IsRequestMandatory>0</IsRequestMandatory></GovernorRequest></Values></DecisionGovernorRequest><UIType>Popup</UIType></DecisionRoot><QuestComponent /></Values></Asset><Asset><Template>Decision</Template><Values><Standard><GUID>2035052</GUID><Name>Ship Finder Public Main Menu</Name></Standard><Decision><DecisionScreenConfig><Headline>2006000001</Headline><Text>2006000002</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig><DecisionOptions><Item><OptionText>2006000016</OptionText></Item><Item><OptionText>2006000020</OptionText></Item><Item><OptionText>2006000019</OptionText></Item><Item><OptionText>2006000017</OptionText></Item><Item><OptionText>2006000039</OptionText></Item><Item><OptionText>2006000250</OptionText></Item><Item><OptionText>2006000010</OptionText></Item></DecisionOptions></Decision><QuestComponent /><DecisionComponent><DecisionOutputs><Item><SuccessOutput><Item><Component>2035151</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035165</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035164</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035152</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2043010</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099301</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099398</Component></Item></SuccessOutput></Item>
+<Asset><Template>StoryLine</Template><Values><Standard><GUID>2035050</GUID><Name>Ship Finder Public Storyline</Name></Standard><StoryLine><StartConnector><Item><Component>2035051</Component></Item></StartConnector></StoryLine><QuestComponent /><QuestComponentConnector /></Values></Asset><Asset><Template>DecisionRoot</Template><Values><Standard><GUID>2035051</GUID><Name>Ship Finder Public Root</Name></Standard><DecisionRoot><DecisionRootOutput><Item /><Item /><Item /></DecisionRootOutput><DecisionRootStartComponent>2035052</DecisionRootStartComponent><DecisionGovernorRequest><IsBaseAutoCreateAsset>1</IsBaseAutoCreateAsset><Values><GovernorRequest><RequestDescription>2006000000</RequestDescription><RequestPriority>100</RequestPriority><RequestTimeout>600000</RequestTimeout><RequestIcon>130038</RequestIcon><RequestParticipant>41</RequestParticipant><IsRequestMandatory>0</IsRequestMandatory></GovernorRequest></Values></DecisionGovernorRequest><UIType>Popup</UIType></DecisionRoot><QuestComponent /></Values></Asset><Asset><Template>Decision</Template><Values><Standard><GUID>2035052</GUID><Name>Ship Finder Public Main Menu</Name></Standard><Decision><DecisionScreenConfig><Headline>2006000001</Headline><Text>2006000002</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig><DecisionOptions><Item><OptionText>2006000016</OptionText></Item><Item><OptionText>2006000020</OptionText></Item><Item><OptionText>2006000019</OptionText></Item><Item><OptionText>2006000017</OptionText></Item><Item><OptionText>2006000039</OptionText></Item><Item><OptionText>2006000250</OptionText></Item><Item><OptionText>2006000010</OptionText></Item></DecisionOptions></Decision><QuestComponent /><DecisionComponent><DecisionOutputs><Item><SuccessOutput><Item><Component>2035151</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035165</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035164</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099535</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2043010</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099301</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099398</Component></Item></SuccessOutput></Item>
 </DecisionOutputs></DecisionComponent></Values></Asset><Asset>
     <Template>Sequence</Template>
     <Values>
@@ -4351,8 +4357,13 @@
             <VariableName>S3Q</VariableName>
             <ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>0</IntValue></IntVariableOrValue></Values></ModifierVariable>
           </ActionModifyVariable></Values></Action></Item>
+      
+          <Item><Action><Template>ActionModifyVariable</Template><Values><Action /><ActionModifyVariable>
+            <VariableName>S3L</VariableName><Modifier>Add</Modifier>
+            <ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>1000</IntValue></IntVariableOrValue></Values></ModifierVariable>
+          </ActionModifyVariable></Values></Action></Item>
       </SequenceActions></Sequence>
-      <QuestComponentConnector><Output><Item><Component>2035053</Component></Item></Output></QuestComponentConnector>
+      <QuestComponentConnector><Output><Item><Component>2099398</Component></Item></Output></QuestComponentConnector>
       <QuestComponent />
     </Values>
   </Asset>
@@ -4361,7 +4372,7 @@
     <Values>
       <Standard><GUID>2035053</GUID><Name>Public direct trade ship page</Name></Standard>
       <Decision>
-        <DecisionScreenConfig><Headline>2006000242</Headline><Text>2006000141</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig>
+        <DecisionScreenConfig><Headline>2006000242</Headline><Text>2006000303</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig>
         <DecisionOptions>
           <Item><OptionText>2006000129</OptionText><Infotip>2006000143</Infotip></Item>
           <Item><OptionText>2006000130</OptionText><Infotip>2006000143</Infotip></Item>
@@ -6452,7 +6463,7 @@
       </DecisionComponent>
     </Values>
   </Asset>
-<Asset><Template>StoryLine</Template><Values><Standard><GUID>2035050</GUID><Name>Ship Finder Public Storyline</Name></Standard><StoryLine><StartConnector><Item><Component>2035051</Component></Item></StartConnector></StoryLine><QuestComponent /><QuestComponentConnector /></Values></Asset><Asset><Template>DecisionRoot</Template><Values><Standard><GUID>2035051</GUID><Name>Ship Finder Public Root</Name></Standard><DecisionRoot><DecisionRootOutput><Item /><Item /><Item /></DecisionRootOutput><DecisionRootStartComponent>2035052</DecisionRootStartComponent><DecisionGovernorRequest><IsBaseAutoCreateAsset>1</IsBaseAutoCreateAsset><Values><GovernorRequest><RequestDescription>2006000000</RequestDescription><RequestPriority>100</RequestPriority><RequestTimeout>600000</RequestTimeout><RequestIcon>130038</RequestIcon><RequestParticipant>41</RequestParticipant><IsRequestMandatory>0</IsRequestMandatory></GovernorRequest></Values></DecisionGovernorRequest><UIType>Popup</UIType></DecisionRoot><QuestComponent /></Values></Asset><Asset><Template>Decision</Template><Values><Standard><GUID>2035052</GUID><Name>Ship Finder Public Main Menu</Name></Standard><Decision><DecisionScreenConfig><Headline>2006000001</Headline><Text>2006000002</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig><DecisionOptions><Item><OptionText>2006000016</OptionText></Item><Item><OptionText>2006000020</OptionText></Item><Item><OptionText>2006000019</OptionText></Item><Item><OptionText>2006000017</OptionText></Item><Item><OptionText>2006000039</OptionText></Item><Item><OptionText>2006000250</OptionText></Item><Item><OptionText>2006000010</OptionText></Item></DecisionOptions></Decision><QuestComponent /><DecisionComponent><DecisionOutputs><Item><SuccessOutput><Item><Component>2035151</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035165</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035164</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035152</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2043010</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099301</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099398</Component></Item></SuccessOutput></Item>
+<Asset><Template>StoryLine</Template><Values><Standard><GUID>2035050</GUID><Name>Ship Finder Public Storyline</Name></Standard><StoryLine><StartConnector><Item><Component>2035051</Component></Item></StartConnector></StoryLine><QuestComponent /><QuestComponentConnector /></Values></Asset><Asset><Template>DecisionRoot</Template><Values><Standard><GUID>2035051</GUID><Name>Ship Finder Public Root</Name></Standard><DecisionRoot><DecisionRootOutput><Item /><Item /><Item /></DecisionRootOutput><DecisionRootStartComponent>2035052</DecisionRootStartComponent><DecisionGovernorRequest><IsBaseAutoCreateAsset>1</IsBaseAutoCreateAsset><Values><GovernorRequest><RequestDescription>2006000000</RequestDescription><RequestPriority>100</RequestPriority><RequestTimeout>600000</RequestTimeout><RequestIcon>130038</RequestIcon><RequestParticipant>41</RequestParticipant><IsRequestMandatory>0</IsRequestMandatory></GovernorRequest></Values></DecisionGovernorRequest><UIType>Popup</UIType></DecisionRoot><QuestComponent /></Values></Asset><Asset><Template>Decision</Template><Values><Standard><GUID>2035052</GUID><Name>Ship Finder Public Main Menu</Name></Standard><Decision><DecisionScreenConfig><Headline>2006000001</Headline><Text>2006000002</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig><DecisionOptions><Item><OptionText>2006000016</OptionText></Item><Item><OptionText>2006000020</OptionText></Item><Item><OptionText>2006000019</OptionText></Item><Item><OptionText>2006000017</OptionText></Item><Item><OptionText>2006000039</OptionText></Item><Item><OptionText>2006000250</OptionText></Item><Item><OptionText>2006000010</OptionText></Item></DecisionOptions></Decision><QuestComponent /><DecisionComponent><DecisionOutputs><Item><SuccessOutput><Item><Component>2035151</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035165</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035164</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099535</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2043010</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099301</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099398</Component></Item></SuccessOutput></Item>
 </DecisionOutputs></DecisionComponent></Values></Asset><Asset>
     <Template>Sequence</Template>
     <Values>
@@ -6516,8 +6527,13 @@
             <VariableName>S3Q</VariableName>
             <ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>0</IntValue></IntVariableOrValue></Values></ModifierVariable>
           </ActionModifyVariable></Values></Action></Item>
+      
+          <Item><Action><Template>ActionModifyVariable</Template><Values><Action /><ActionModifyVariable>
+            <VariableName>S3L</VariableName><Modifier>Add</Modifier>
+            <ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>1000</IntValue></IntVariableOrValue></Values></ModifierVariable>
+          </ActionModifyVariable></Values></Action></Item>
       </SequenceActions></Sequence>
-      <QuestComponentConnector><Output><Item><Component>2035053</Component></Item></Output></QuestComponentConnector>
+      <QuestComponentConnector><Output><Item><Component>2099398</Component></Item></Output></QuestComponentConnector>
       <QuestComponent />
     </Values>
   </Asset>
@@ -6526,7 +6542,7 @@
     <Values>
       <Standard><GUID>2035053</GUID><Name>Public direct trade ship page</Name></Standard>
       <Decision>
-        <DecisionScreenConfig><Headline>2006000242</Headline><Text>2006000141</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig>
+        <DecisionScreenConfig><Headline>2006000242</Headline><Text>2006000303</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig>
         <DecisionOptions>
           <Item><OptionText>2006000129</OptionText><Infotip>2006000143</Infotip></Item>
           <Item><OptionText>2006000130</OptionText><Infotip>2006000143</Infotip></Item>
@@ -8617,7 +8633,7 @@
       </DecisionComponent>
     </Values>
   </Asset>
-<Asset><Template>StoryLine</Template><Values><Standard><GUID>2035050</GUID><Name>Ship Finder Public Storyline</Name></Standard><StoryLine><StartConnector><Item><Component>2035051</Component></Item></StartConnector></StoryLine><QuestComponent /><QuestComponentConnector /></Values></Asset><Asset><Template>DecisionRoot</Template><Values><Standard><GUID>2035051</GUID><Name>Ship Finder Public Root</Name></Standard><DecisionRoot><DecisionRootOutput><Item /><Item /><Item /></DecisionRootOutput><DecisionRootStartComponent>2035052</DecisionRootStartComponent><DecisionGovernorRequest><IsBaseAutoCreateAsset>1</IsBaseAutoCreateAsset><Values><GovernorRequest><RequestDescription>2006000000</RequestDescription><RequestPriority>100</RequestPriority><RequestTimeout>600000</RequestTimeout><RequestIcon>130038</RequestIcon><RequestParticipant>41</RequestParticipant><IsRequestMandatory>0</IsRequestMandatory></GovernorRequest></Values></DecisionGovernorRequest><UIType>Popup</UIType></DecisionRoot><QuestComponent /></Values></Asset><Asset><Template>Decision</Template><Values><Standard><GUID>2035052</GUID><Name>Ship Finder Public Main Menu</Name></Standard><Decision><DecisionScreenConfig><Headline>2006000001</Headline><Text>2006000002</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig><DecisionOptions><Item><OptionText>2006000016</OptionText></Item><Item><OptionText>2006000020</OptionText></Item><Item><OptionText>2006000019</OptionText></Item><Item><OptionText>2006000017</OptionText></Item><Item><OptionText>2006000039</OptionText></Item><Item><OptionText>2006000250</OptionText></Item><Item><OptionText>2006000010</OptionText></Item></DecisionOptions></Decision><QuestComponent /><DecisionComponent><DecisionOutputs><Item><SuccessOutput><Item><Component>2035151</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035165</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035164</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035152</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2043010</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099301</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099398</Component></Item></SuccessOutput></Item>
+<Asset><Template>StoryLine</Template><Values><Standard><GUID>2035050</GUID><Name>Ship Finder Public Storyline</Name></Standard><StoryLine><StartConnector><Item><Component>2035051</Component></Item></StartConnector></StoryLine><QuestComponent /><QuestComponentConnector /></Values></Asset><Asset><Template>DecisionRoot</Template><Values><Standard><GUID>2035051</GUID><Name>Ship Finder Public Root</Name></Standard><DecisionRoot><DecisionRootOutput><Item /><Item /><Item /></DecisionRootOutput><DecisionRootStartComponent>2035052</DecisionRootStartComponent><DecisionGovernorRequest><IsBaseAutoCreateAsset>1</IsBaseAutoCreateAsset><Values><GovernorRequest><RequestDescription>2006000000</RequestDescription><RequestPriority>100</RequestPriority><RequestTimeout>600000</RequestTimeout><RequestIcon>130038</RequestIcon><RequestParticipant>41</RequestParticipant><IsRequestMandatory>0</IsRequestMandatory></GovernorRequest></Values></DecisionGovernorRequest><UIType>Popup</UIType></DecisionRoot><QuestComponent /></Values></Asset><Asset><Template>Decision</Template><Values><Standard><GUID>2035052</GUID><Name>Ship Finder Public Main Menu</Name></Standard><Decision><DecisionScreenConfig><Headline>2006000001</Headline><Text>2006000002</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig><DecisionOptions><Item><OptionText>2006000016</OptionText></Item><Item><OptionText>2006000020</OptionText></Item><Item><OptionText>2006000019</OptionText></Item><Item><OptionText>2006000017</OptionText></Item><Item><OptionText>2006000039</OptionText></Item><Item><OptionText>2006000250</OptionText></Item><Item><OptionText>2006000010</OptionText></Item></DecisionOptions></Decision><QuestComponent /><DecisionComponent><DecisionOutputs><Item><SuccessOutput><Item><Component>2035151</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035165</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035164</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099535</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2043010</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099301</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099398</Component></Item></SuccessOutput></Item>
 </DecisionOutputs></DecisionComponent></Values></Asset><Asset>
     <Template>Sequence</Template>
     <Values>
@@ -8681,8 +8697,13 @@
             <VariableName>S3Q</VariableName>
             <ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>0</IntValue></IntVariableOrValue></Values></ModifierVariable>
           </ActionModifyVariable></Values></Action></Item>
+      
+          <Item><Action><Template>ActionModifyVariable</Template><Values><Action /><ActionModifyVariable>
+            <VariableName>S3L</VariableName><Modifier>Add</Modifier>
+            <ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>1000</IntValue></IntVariableOrValue></Values></ModifierVariable>
+          </ActionModifyVariable></Values></Action></Item>
       </SequenceActions></Sequence>
-      <QuestComponentConnector><Output><Item><Component>2035053</Component></Item></Output></QuestComponentConnector>
+      <QuestComponentConnector><Output><Item><Component>2099398</Component></Item></Output></QuestComponentConnector>
       <QuestComponent />
     </Values>
   </Asset>
@@ -8691,7 +8712,7 @@
     <Values>
       <Standard><GUID>2035053</GUID><Name>Public direct trade ship page</Name></Standard>
       <Decision>
-        <DecisionScreenConfig><Headline>2006000242</Headline><Text>2006000141</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig>
+        <DecisionScreenConfig><Headline>2006000242</Headline><Text>2006000303</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig>
         <DecisionOptions>
           <Item><OptionText>2006000129</OptionText><Infotip>2006000143</Infotip></Item>
           <Item><OptionText>2006000130</OptionText><Infotip>2006000143</Infotip></Item>
@@ -10782,7 +10803,24 @@
       </DecisionComponent>
     </Values>
   </Asset>
-<Asset><Template>StoryLine</Template><Values><Standard><GUID>2035050</GUID><Name>Ship Finder Independent Storyline</Name></Standard><StoryLine><StartConnector><Item><Component>2035051</Component></Item></StartConnector></StoryLine><QuestComponent /><QuestComponentConnector /></Values></Asset><Asset><Template>DecisionRoot</Template><Values><Standard><GUID>2035051</GUID><Name>Ship Finder Public Root</Name></Standard><DecisionRoot><DecisionRootOutput><Item /><Item /><Item /></DecisionRootOutput><DecisionRootStartComponent>2035052</DecisionRootStartComponent><DecisionGovernorRequest><IsBaseAutoCreateAsset>1</IsBaseAutoCreateAsset><Values><GovernorRequest><RequestDescription>2006000000</RequestDescription><RequestPriority>100</RequestPriority><RequestTimeout>600000</RequestTimeout><RequestIcon>130038</RequestIcon><RequestParticipant>41</RequestParticipant><IsRequestMandatory>0</IsRequestMandatory></GovernorRequest></Values></DecisionGovernorRequest><UIType>Popup</UIType></DecisionRoot><QuestComponent /></Values></Asset><Asset><Template>Decision</Template><Values><Standard><GUID>2035052</GUID><Name>Ship Finder Public Main Menu</Name></Standard><Decision><DecisionScreenConfig><Headline>2006000001</Headline><Text>2006000002</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig><DecisionOptions><Item><OptionText>2006000016</OptionText></Item><Item><OptionText>2006000020</OptionText></Item><Item><OptionText>2006000019</OptionText></Item><Item><OptionText>2006000017</OptionText></Item><Item><OptionText>2006000039</OptionText></Item><Item><OptionText>2006000250</OptionText></Item><Item><OptionText>2006000010</OptionText></Item></DecisionOptions></Decision><QuestComponent /><DecisionComponent><DecisionOutputs><Item><SuccessOutput><Item><Component>2035151</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035165</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035164</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035152</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2043010</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099301</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2099398</Component></Item></SuccessOutput></Item>
+<Asset><Template>StoryLine</Template><Values><Standard><GUID>2035050</GUID><Name>Ship Finder Independent Storyline</Name></Standard><StoryLine><StartConnector><Item><Component>2035051</Component></Item></StartConnector></StoryLine><QuestComponent /><QuestComponentConnector /></Values></Asset>
+<Asset><Template>DecisionRoot</Template><Values><Standard><GUID>2035051</GUID><Name>Ship Finder Public Root</Name></Standard><DecisionRoot><DecisionRootOutput><Item /><Item /><Item /></DecisionRootOutput><DecisionRootStartComponent>2035052</DecisionRootStartComponent><DecisionGovernorRequest><IsBaseAutoCreateAsset>1</IsBaseAutoCreateAsset><Values><GovernorRequest><RequestDescription>2006000000</RequestDescription><RequestPriority>100</RequestPriority><RequestTimeout>600000</RequestTimeout><RequestIcon>130038</RequestIcon><RequestParticipant>41</RequestParticipant><IsRequestMandatory>0</IsRequestMandatory></GovernorRequest></Values></DecisionGovernorRequest><UIType>Popup</UIType></DecisionRoot><QuestComponent /></Values></Asset>
+<Asset><Template>Decision</Template><Values><Standard><GUID>2035052</GUID><Name>Ship Finder Public Main Menu</Name></Standard><Decision><DecisionScreenConfig><Headline>2006000001</Headline><Text>2006000002</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig><DecisionOptions>
+<Item><OptionText>2006000320</OptionText></Item>
+<Item><OptionText>2006000020</OptionText></Item>
+<Item><OptionText>2006000019</OptionText></Item>
+<Item><OptionText>2006000017</OptionText></Item>
+<Item><OptionText>2006000250</OptionText></Item>
+<Item><OptionText>2006000321</OptionText></Item>
+<Item><OptionText>2006000325</OptionText></Item>
+</DecisionOptions></Decision><QuestComponent /><DecisionComponent><DecisionOutputs>
+<Item><SuccessOutput><Item><Component>2099520</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2035165</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2035164</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2099535</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2099301</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2099501</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2099398</Component></Item></SuccessOutput></Item>
 </DecisionOutputs></DecisionComponent></Values></Asset><Asset>
     <Template>Sequence</Template>
     <Values>
@@ -10846,8 +10884,13 @@
             <VariableName>S3Q</VariableName>
             <ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>0</IntValue></IntVariableOrValue></Values></ModifierVariable>
           </ActionModifyVariable></Values></Action></Item>
+      
+          <Item><Action><Template>ActionModifyVariable</Template><Values><Action /><ActionModifyVariable>
+            <VariableName>S3L</VariableName><Modifier>Add</Modifier>
+            <ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>1000</IntValue></IntVariableOrValue></Values></ModifierVariable>
+          </ActionModifyVariable></Values></Action></Item>
       </SequenceActions></Sequence>
-      <QuestComponentConnector><Output><Item><Component>2035053</Component></Item></Output></QuestComponentConnector>
+      <QuestComponentConnector><Output><Item><Component>2099398</Component></Item></Output></QuestComponentConnector>
       <QuestComponent />
     </Values>
   </Asset>
@@ -10856,7 +10899,7 @@
     <Values>
       <Standard><GUID>2035053</GUID><Name>Public direct trade ship page</Name></Standard>
       <Decision>
-        <DecisionScreenConfig><Headline>2006000242</Headline><Text>2006000141</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig>
+        <DecisionScreenConfig><Headline>2006000242</Headline><Text>2006000303</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig>
         <DecisionOptions>
           <Item><OptionText>2006000129</OptionText><Infotip>2006000143</Infotip></Item>
           <Item><OptionText>2006000130</OptionText><Infotip>2006000143</Infotip></Item>
@@ -11094,9 +11137,9 @@
 <Standard><GUID>2099010</GUID><Name>Native Routes in Selected Group</Name></Standard>
 <Decision><DecisionScreenConfig><Headline>2006000240</Headline><Text>2006000216</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig>
 <DecisionOptions>
-<Item><OptionText>2006000210</OptionText></Item>
-<Item><OptionText>2006000211</OptionText></Item>
-<Item><OptionText>2006000212</OptionText></Item>
+<Item><OptionText>2006000310</OptionText></Item>
+<Item><OptionText>2006000311</OptionText></Item>
+<Item><OptionText>2006000312</OptionText></Item>
 <Item><OptionText>2006000213</OptionText></Item>
 <Item><OptionText>2006000214</OptionText></Item>
 <Item><OptionText>2006000217</OptionText></Item>
@@ -11221,5 +11264,654 @@
 <Asset><Template>FunctionImmediate</Template><Values><Standard><GUID>2099401</GUID><Name>Ship Finder Unavailable Ship Immediate</Name></Standard><Function><FunctionSuccessOutput><Item><Component>2099402</Component></Item></FunctionSuccessOutput></Function><QuestComponent/><PreConditionList><Condition><Template>ConditionAlwaysTrue</Template><Values><Condition/><ConditionAlwaysTrue/></Values></Condition></PreConditionList></Values></Asset>
 <Asset><Template>Sequence</Template><Values><Standard><GUID>2099402</GUID><Name>Open Ship Finder Unavailable Ship Parchment</Name></Standard><Sequence><SequenceActions><Item><Action><Template>ActionTriggerTextPopup</Template><Values><ActionTriggerTextPopup><TextPopup>2099403</TextPopup></ActionTriggerTextPopup><Action/></Values></Action></Item></SequenceActions></Sequence><QuestComponentConnector/><QuestComponent/></Values></Asset>
 <Asset><Template>TextPopup</Template><Values><Standard><GUID>2099403</GUID><Name>Ship Finder Unavailable Ship Parchment</Name></Standard><TextPopup><Type>ScrollVertical01</Type><Pages><Item><Text>2006000298</Text></Item></Pages></TextPopup></Values></Asset>
+
+<!-- Ship Finder v1.3.0: compact Find Ships navigation. -->
+<Asset><Template>Decision</Template><Values>
+<Standard><GUID>2099520</GUID><Name>Ship Finder Find Ships Menu</Name></Standard>
+<Decision><DecisionScreenConfig><Headline>2006000320</Headline><Text>2006000324</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig>
+<DecisionOptions>
+<Item><OptionText>2006000039</OptionText></Item>
+<Item><OptionText>2006000016</OptionText></Item>
+<Item><OptionText>2006000011</OptionText></Item>
+<Item><OptionText>2006000010</OptionText></Item>
+</DecisionOptions></Decision><QuestComponent/>
+<DecisionComponent><DecisionOutputs>
+<Item><SuccessOutput><Item><Component>2043010</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2035151</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2035052</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2099398</Component></Item></SuccessOutput></Item>
+</DecisionOutputs></DecisionComponent>
+</Values></Asset>
+
+<!-- Ship Finder v1.3.0: fleet navigation plus separate live summary. -->
+<Asset><Template>Decision</Template><Values>
+<Standard><GUID>2099501</GUID><Name>Ship Finder Fleet Overview Menu</Name></Standard>
+<Decision><DecisionScreenConfig><Headline>2006000321</Headline><Text>2006000323</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig>
+<DecisionOptions>
+<Item><OptionText>2006000322</OptionText></Item>
+<Item><OptionText>2006000431</OptionText></Item>
+<Item><OptionText>2006000432</OptionText></Item>
+<Item><OptionText>2006000020</OptionText></Item>
+<Item><OptionText>2006000019</OptionText></Item>
+<Item><OptionText>2006000011</OptionText></Item>
+<Item><OptionText>2006000010</OptionText></Item>
+</DecisionOptions></Decision><QuestComponent/>
+<DecisionComponent><DecisionOutputs>
+<Item><SuccessOutput><Item><Component>2099536</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2099531</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2099532</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2099533</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2099534</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2035052</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2099398</Component></Item></SuccessOutput></Item>
+</DecisionOutputs></DecisionComponent>
+</Values></Asset>
+
+<Asset><Template>Decision</Template><Values>
+<Standard><GUID>2099510</GUID><Name>Ship Finder Current Province Fleet Summary</Name></Standard>
+<Decision><DecisionScreenConfig><Headline>2006000300</Headline><Text>2006000301</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig>
+<DecisionOptions>
+<Item><OptionText>2006000330</OptionText></Item>
+<Item><OptionText>2006000331</OptionText></Item>
+<Item><OptionText>2006000332</OptionText></Item>
+<Item><OptionText>2006000333</OptionText></Item>
+<Item><OptionText>2006000011</OptionText></Item>
+<Item><OptionText>2006000010</OptionText></Item>
+</DecisionOptions></Decision><QuestComponent/>
+<DecisionComponent><DecisionOutputs>
+<Item><SuccessOutput><Item><Component>2043010</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2035052</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2035052</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2099001</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2099501</Component></Item></SuccessOutput></Item>
+<Item><SuccessOutput><Item><Component>2099398</Component></Item></SuccessOutput></Item>
+</DecisionOutputs></DecisionComponent>
+</Values></Asset>
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099511</GUID><Name>Refresh Ship Finder Fleet Summary</Name></Standard>
+<Sequence><SequenceActions/></Sequence>
+<QuestComponentConnector><Output><Item><Component>2099510</Component></Item></Output></QuestComponentConnector><QuestComponent/>
+</Values></Asset>
+
+<!-- Ship Finder v1.4.6: visible empty-state label on the safe first-page row. -->
+<Asset><Template>Decision</Template><Values><Standard><GUID>2035053</GUID><Name>Public direct trade ship page with visible empty state</Name></Standard><Decision><DecisionScreenConfig><Headline>2006000242</Headline><Text>2006000303</Text><LeftParticipant>41</LeftParticipant></DecisionScreenConfig><DecisionOptions><Item><OptionText>2006000129</OptionText><Infotip>2006000143</Infotip></Item><Item><OptionText>2006000130</OptionText><Infotip>2006000143</Infotip></Item><Item><OptionText>2006000131</OptionText><Infotip>2006000143</Infotip></Item><Item><OptionText>2006000337</OptionText><Infotip>2006000144</Infotip></Item><Item><OptionText>2006000142</OptionText><Infotip>2006000144</Infotip></Item><Item><OptionText>2006000011</OptionText><Infotip>2006000145</Infotip></Item><Item><OptionText>2006000010</OptionText><Infotip>2006000146</Infotip></Item></DecisionOptions></Decision><QuestComponent/><DecisionComponent><DecisionOutputs><Item><SuccessOutput><Item><Component>2035195</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035196</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035197</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035156</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035157</Component></Item></SuccessOutput></Item><Item><SuccessOutput><Item><Component>2035052</Component></Item></SuccessOutput></Item><Item/></DecisionOutputs></DecisionComponent></Values></Asset>
+
+<!-- Ship Finder v1.3.2: safe first-page navigation overrides. -->
+<Asset><Template>Sequence</Template><Values><Standard><GUID>2035144</GUID><Name>First live route ships</Name></Standard><Sequence><SequenceActions>
+<Item><Action><Template>ActionModifyVariable</Template><Values><Action/><ActionModifyVariable><VariableName>S3Q</VariableName><ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>0</IntValue></IntVariableOrValue></Values></ModifierVariable></ActionModifyVariable></Values></Action></Item>
+</SequenceActions></Sequence><QuestComponentConnector><Output><Item><Component>2035013</Component></Item></Output></QuestComponentConnector><QuestComponent/></Values></Asset>
+
+<Asset><Template>Sequence</Template><Values><Standard><GUID>2035146</GUID><Name>First live category ships</Name></Standard><Sequence><SequenceActions>
+<Item><Action><Template>ActionModifyVariable</Template><Values><Action/><ActionModifyVariable><VariableName>S3Q</VariableName><ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>0</IntValue></IntVariableOrValue></Values></ModifierVariable></ActionModifyVariable></Values></Action></Item>
+</SequenceActions></Sequence><QuestComponentConnector><Output><Item><Component>2035014</Component></Item></Output></QuestComponentConnector><QuestComponent/></Values></Asset>
+
+<Asset><Template>Sequence</Template><Values><Standard><GUID>2035156</GUID><Name>First public category ships</Name></Standard><Sequence><SequenceActions>
+<Item><Action><Template>ActionModifyVariable</Template><Values><Action/><ActionModifyVariable><VariableName>S3Q</VariableName><ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>0</IntValue></IntVariableOrValue></Values></ModifierVariable></ActionModifyVariable></Values></Action></Item>
+</SequenceActions></Sequence><QuestComponentConnector><Output><Item><Component>2035053</Component></Item></Output></QuestComponentConnector><QuestComponent/></Values></Asset>
+
+<Asset><Template>Sequence</Template><Values><Standard><GUID>2099014</GUID><Name>First native route page</Name></Standard><Sequence><SequenceActions>
+<Item><Action><Template>ActionModifyVariable</Template><Values><Action/><ActionModifyVariable><VariableName>S3RP</VariableName><ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>0</IntValue></IntVariableOrValue></Values></ModifierVariable></ActionModifyVariable></Values></Action></Item>
+</SequenceActions></Sequence><QuestComponentConnector><Output><Item><Component>2099010</Component></Item></Output></QuestComponentConnector><QuestComponent/></Values></Asset>
+
+<Asset><Template>Sequence</Template><Values><Standard><GUID>2099021</GUID><Name>First ship page on selected route</Name></Standard><Sequence><SequenceActions>
+<Item><Action><Template>ActionModifyVariable</Template><Values><Action/><ActionModifyVariable><VariableName>S3Q</VariableName><ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>0</IntValue></IntVariableOrValue></Values></ModifierVariable></ActionModifyVariable></Values></Action></Item>
+</SequenceActions></Sequence><QuestComponentConnector><Output><Item><Component>2099020</Component></Item></Output></QuestComponentConnector><QuestComponent/></Values></Asset>
+
+
+  <!-- Ship Finder v1.4.29: dedicated single-page Attention parchment.
+       Uses the already-proven page-1 marker LineId. Runtime replaces the marker text. -->
+  <Asset>
+    <Template>TextPopup</Template>
+    <Values>
+      <Standard>
+        <GUID>2099213</GUID>
+        <Name>Ship Finder Attention Single Page Popup</Name>
+      </Standard>
+      <TextPopup>
+        <Type>ScrollVertical01</Type>
+        <Pages>
+          <Item><Text>2006000252</Text></Item>
+        </Pages>
+      </TextPopup>
+    </Values>
+  </Asset>
+
+  <Asset>
+    <Template>Sequence</Template>
+    <Values>
+      <Standard>
+        <GUID>2099212</GUID>
+        <Name>Open Ship Finder Attention Single Page</Name>
+      </Standard>
+      <Sequence>
+        <SequenceActions>
+          <Item>
+            <Action>
+              <Template>ActionTriggerTextPopup</Template>
+              <Values>
+                <ActionTriggerTextPopup>
+                  <TextPopup>2099213</TextPopup>
+                </ActionTriggerTextPopup>
+                <Action />
+              </Values>
+            </Action>
+          </Item>
+        </SequenceActions>
+      </Sequence>
+      <QuestComponentConnector />
+      <QuestComponent />
+    </Values>
+  </Asset>
+
+  <Asset>
+    <Template>FunctionImmediate</Template>
+    <Values>
+      <Standard>
+        <GUID>2099211</GUID>
+        <Name>Ship Finder Attention Single Page Immediate</Name>
+      </Standard>
+      <Function>
+        <FunctionSuccessOutput>
+          <Item><Component>2099212</Component></Item>
+        </FunctionSuccessOutput>
+      </Function>
+      <QuestComponent />
+      <PreConditionList>
+        <Condition>
+          <Template>ConditionAlwaysTrue</Template>
+          <Values><Condition /><ConditionAlwaysTrue /></Values>
+        </Condition>
+      </PreConditionList>
+    </Values>
+  </Asset>
+
+  <Asset>
+    <Template>StoryLine</Template>
+    <Values>
+      <Standard>
+        <GUID>2099210</GUID>
+        <Name>Ship Finder Attention Single Page Storyline</Name>
+      </Standard>
+      <StoryLine>
+        <StartConnector>
+          <Item><Component>2099211</Component></Item>
+        </StartConnector>
+      </StoryLine>
+      <QuestComponent />
+      <QuestComponentConnector />
+    </Values>
+  </Asset>
+
+
+
+<!-- Ship Finder v1.4.32: Fleet Overview parchment handoff.
+     Fleet Overview uses the same proven architecture as Attention:
+     Decision -> existing-variable signal -> Safe Close -> global Tick -> TextPopup. -->
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099530</GUID><Name>Open Fleet Overview Parchment Signal</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionModifyVariable</Template><Values><Action/><ActionModifyVariable>
+<VariableName>S3F</VariableName><Modifier>Add</Modifier>
+<ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>1000</IntValue></IntVariableOrValue></Values></ModifierVariable>
+</ActionModifyVariable></Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector><Output><Item><Component>2099398</Component></Item></Output></QuestComponentConnector>
+<QuestComponent/>
+</Values></Asset>
+
+<Asset><Template>TextPopup</Template><Values>
+<Standard><GUID>2099543</GUID><Name>Ship Finder Fleet Overview Parchment</Name></Standard>
+<TextPopup><Type>ScrollVertical01</Type><Pages><Item><Text>2006000430</Text></Item></Pages></TextPopup>
+</Values></Asset>
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099542</GUID><Name>Open Ship Finder Fleet Overview Parchment</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionTriggerTextPopup</Template><Values>
+<ActionTriggerTextPopup><TextPopup>2099543</TextPopup></ActionTriggerTextPopup><Action/>
+</Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector/><QuestComponent/>
+</Values></Asset>
+
+<Asset><Template>FunctionImmediate</Template><Values>
+<Standard><GUID>2099541</GUID><Name>Ship Finder Fleet Overview Immediate</Name></Standard>
+<Function><FunctionSuccessOutput><Item><Component>2099542</Component></Item></FunctionSuccessOutput></Function>
+<QuestComponent/>
+<PreConditionList><Condition><Template>ConditionAlwaysTrue</Template><Values><Condition/><ConditionAlwaysTrue/></Values></Condition></PreConditionList>
+</Values></Asset>
+
+<Asset><Template>StoryLine</Template><Values>
+<Standard><GUID>2099540</GUID><Name>Ship Finder Fleet Overview Storyline</Name></Standard>
+<StoryLine><StartConnector><Item><Component>2099541</Component></Item></StartConnector></StoryLine>
+<QuestComponent/><QuestComponentConnector/>
+</Values></Asset>
+
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099531</GUID><Name>Open Fleet All Ships Parchment Signal</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionModifyVariable</Template><Values><Action/><ActionModifyVariable>
+<VariableName>S3F</VariableName><Modifier>Add</Modifier>
+<ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>2000</IntValue></IntVariableOrValue></Values></ModifierVariable>
+</ActionModifyVariable></Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector><Output><Item><Component>2099398</Component></Item></Output></QuestComponentConnector>
+<QuestComponent/>
+</Values></Asset>
+
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099532</GUID><Name>Open Fleet Route Allocation Parchment Signal</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionModifyVariable</Template><Values><Action/><ActionModifyVariable>
+<VariableName>S3F</VariableName><Modifier>Add</Modifier>
+<ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>3000</IntValue></IntVariableOrValue></Values></ModifierVariable>
+</ActionModifyVariable></Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector><Output><Item><Component>2099398</Component></Item></Output></QuestComponentConnector>
+<QuestComponent/>
+</Values></Asset>
+
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099533</GUID><Name>Open Fleet Independent Ships Parchment Signal</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionModifyVariable</Template><Values><Action/><ActionModifyVariable>
+<VariableName>S3F</VariableName><Modifier>Add</Modifier>
+<ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>4000</IntValue></IntVariableOrValue></Values></ModifierVariable>
+</ActionModifyVariable></Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector><Output><Item><Component>2099398</Component></Item></Output></QuestComponentConnector>
+<QuestComponent/>
+</Values></Asset>
+
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099534</GUID><Name>Open Fleet Warships Parchment Signal</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionModifyVariable</Template><Values><Action/><ActionModifyVariable>
+<VariableName>S3F</VariableName><Modifier>Add</Modifier>
+<ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>5000</IntValue></IntVariableOrValue></Values></ModifierVariable>
+</ActionModifyVariable></Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector><Output><Item><Component>2099398</Component></Item></Output></QuestComponentConnector>
+<QuestComponent/>
+</Values></Asset>
+
+
+<Asset><Template>TextPopup</Template><Values>
+<Standard><GUID>2099661</GUID><Name>Ship Finder Fleet Report 1 Page Popup</Name></Standard>
+<TextPopup><Type>ScrollVertical01</Type><Pages><Item><Text>2006000252</Text></Item></Pages></TextPopup>
+</Values></Asset>
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099641</GUID><Name>Open Ship Finder Fleet Report 1 Page Popup</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionTriggerTextPopup</Template><Values>
+<ActionTriggerTextPopup><TextPopup>2099661</TextPopup></ActionTriggerTextPopup><Action/>
+</Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector/><QuestComponent/>
+</Values></Asset>
+
+<Asset><Template>FunctionImmediate</Template><Values>
+<Standard><GUID>2099621</GUID><Name>Ship Finder Fleet Report 1 Page Immediate</Name></Standard>
+<Function><FunctionSuccessOutput><Item><Component>2099641</Component></Item></FunctionSuccessOutput></Function>
+<QuestComponent/>
+<PreConditionList><Condition><Template>ConditionAlwaysTrue</Template><Values><Condition/><ConditionAlwaysTrue/></Values></Condition></PreConditionList>
+</Values></Asset>
+
+<Asset><Template>StoryLine</Template><Values>
+<Standard><GUID>2099601</GUID><Name>Ship Finder Fleet Report 1 Page Storyline</Name></Standard>
+<StoryLine><StartConnector><Item><Component>2099621</Component></Item></StartConnector></StoryLine>
+<QuestComponent/><QuestComponentConnector/>
+</Values></Asset>
+
+
+<Asset><Template>TextPopup</Template><Values>
+<Standard><GUID>2099662</GUID><Name>Ship Finder Fleet Report 2 Page Popup</Name></Standard>
+<TextPopup><Type>ScrollVertical01</Type><Pages><Item><Text>2006000252</Text></Item><Item><Text>2006000253</Text></Item></Pages></TextPopup>
+</Values></Asset>
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099642</GUID><Name>Open Ship Finder Fleet Report 2 Page Popup</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionTriggerTextPopup</Template><Values>
+<ActionTriggerTextPopup><TextPopup>2099662</TextPopup></ActionTriggerTextPopup><Action/>
+</Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector/><QuestComponent/>
+</Values></Asset>
+
+<Asset><Template>FunctionImmediate</Template><Values>
+<Standard><GUID>2099622</GUID><Name>Ship Finder Fleet Report 2 Page Immediate</Name></Standard>
+<Function><FunctionSuccessOutput><Item><Component>2099642</Component></Item></FunctionSuccessOutput></Function>
+<QuestComponent/>
+<PreConditionList><Condition><Template>ConditionAlwaysTrue</Template><Values><Condition/><ConditionAlwaysTrue/></Values></Condition></PreConditionList>
+</Values></Asset>
+
+<Asset><Template>StoryLine</Template><Values>
+<Standard><GUID>2099602</GUID><Name>Ship Finder Fleet Report 2 Page Storyline</Name></Standard>
+<StoryLine><StartConnector><Item><Component>2099622</Component></Item></StartConnector></StoryLine>
+<QuestComponent/><QuestComponentConnector/>
+</Values></Asset>
+
+
+<Asset><Template>TextPopup</Template><Values>
+<Standard><GUID>2099663</GUID><Name>Ship Finder Fleet Report 3 Page Popup</Name></Standard>
+<TextPopup><Type>ScrollVertical01</Type><Pages><Item><Text>2006000252</Text></Item><Item><Text>2006000253</Text></Item><Item><Text>2006000254</Text></Item></Pages></TextPopup>
+</Values></Asset>
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099643</GUID><Name>Open Ship Finder Fleet Report 3 Page Popup</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionTriggerTextPopup</Template><Values>
+<ActionTriggerTextPopup><TextPopup>2099663</TextPopup></ActionTriggerTextPopup><Action/>
+</Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector/><QuestComponent/>
+</Values></Asset>
+
+<Asset><Template>FunctionImmediate</Template><Values>
+<Standard><GUID>2099623</GUID><Name>Ship Finder Fleet Report 3 Page Immediate</Name></Standard>
+<Function><FunctionSuccessOutput><Item><Component>2099643</Component></Item></FunctionSuccessOutput></Function>
+<QuestComponent/>
+<PreConditionList><Condition><Template>ConditionAlwaysTrue</Template><Values><Condition/><ConditionAlwaysTrue/></Values></Condition></PreConditionList>
+</Values></Asset>
+
+<Asset><Template>StoryLine</Template><Values>
+<Standard><GUID>2099603</GUID><Name>Ship Finder Fleet Report 3 Page Storyline</Name></Standard>
+<StoryLine><StartConnector><Item><Component>2099623</Component></Item></StartConnector></StoryLine>
+<QuestComponent/><QuestComponentConnector/>
+</Values></Asset>
+
+
+<Asset><Template>TextPopup</Template><Values>
+<Standard><GUID>2099664</GUID><Name>Ship Finder Fleet Report 4 Page Popup</Name></Standard>
+<TextPopup><Type>ScrollVertical01</Type><Pages><Item><Text>2006000252</Text></Item><Item><Text>2006000253</Text></Item><Item><Text>2006000254</Text></Item><Item><Text>2006000255</Text></Item></Pages></TextPopup>
+</Values></Asset>
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099644</GUID><Name>Open Ship Finder Fleet Report 4 Page Popup</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionTriggerTextPopup</Template><Values>
+<ActionTriggerTextPopup><TextPopup>2099664</TextPopup></ActionTriggerTextPopup><Action/>
+</Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector/><QuestComponent/>
+</Values></Asset>
+
+<Asset><Template>FunctionImmediate</Template><Values>
+<Standard><GUID>2099624</GUID><Name>Ship Finder Fleet Report 4 Page Immediate</Name></Standard>
+<Function><FunctionSuccessOutput><Item><Component>2099644</Component></Item></FunctionSuccessOutput></Function>
+<QuestComponent/>
+<PreConditionList><Condition><Template>ConditionAlwaysTrue</Template><Values><Condition/><ConditionAlwaysTrue/></Values></Condition></PreConditionList>
+</Values></Asset>
+
+<Asset><Template>StoryLine</Template><Values>
+<Standard><GUID>2099604</GUID><Name>Ship Finder Fleet Report 4 Page Storyline</Name></Standard>
+<StoryLine><StartConnector><Item><Component>2099624</Component></Item></StartConnector></StoryLine>
+<QuestComponent/><QuestComponentConnector/>
+</Values></Asset>
+
+
+<Asset><Template>TextPopup</Template><Values>
+<Standard><GUID>2099665</GUID><Name>Ship Finder Fleet Report 5 Page Popup</Name></Standard>
+<TextPopup><Type>ScrollVertical01</Type><Pages><Item><Text>2006000252</Text></Item><Item><Text>2006000253</Text></Item><Item><Text>2006000254</Text></Item><Item><Text>2006000255</Text></Item><Item><Text>2006000256</Text></Item></Pages></TextPopup>
+</Values></Asset>
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099645</GUID><Name>Open Ship Finder Fleet Report 5 Page Popup</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionTriggerTextPopup</Template><Values>
+<ActionTriggerTextPopup><TextPopup>2099665</TextPopup></ActionTriggerTextPopup><Action/>
+</Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector/><QuestComponent/>
+</Values></Asset>
+
+<Asset><Template>FunctionImmediate</Template><Values>
+<Standard><GUID>2099625</GUID><Name>Ship Finder Fleet Report 5 Page Immediate</Name></Standard>
+<Function><FunctionSuccessOutput><Item><Component>2099645</Component></Item></FunctionSuccessOutput></Function>
+<QuestComponent/>
+<PreConditionList><Condition><Template>ConditionAlwaysTrue</Template><Values><Condition/><ConditionAlwaysTrue/></Values></Condition></PreConditionList>
+</Values></Asset>
+
+<Asset><Template>StoryLine</Template><Values>
+<Standard><GUID>2099605</GUID><Name>Ship Finder Fleet Report 5 Page Storyline</Name></Standard>
+<StoryLine><StartConnector><Item><Component>2099625</Component></Item></StartConnector></StoryLine>
+<QuestComponent/><QuestComponentConnector/>
+</Values></Asset>
+
+
+<Asset><Template>TextPopup</Template><Values>
+<Standard><GUID>2099666</GUID><Name>Ship Finder Fleet Report 6 Page Popup</Name></Standard>
+<TextPopup><Type>ScrollVertical01</Type><Pages><Item><Text>2006000252</Text></Item><Item><Text>2006000253</Text></Item><Item><Text>2006000254</Text></Item><Item><Text>2006000255</Text></Item><Item><Text>2006000256</Text></Item><Item><Text>2006000257</Text></Item></Pages></TextPopup>
+</Values></Asset>
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099646</GUID><Name>Open Ship Finder Fleet Report 6 Page Popup</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionTriggerTextPopup</Template><Values>
+<ActionTriggerTextPopup><TextPopup>2099666</TextPopup></ActionTriggerTextPopup><Action/>
+</Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector/><QuestComponent/>
+</Values></Asset>
+
+<Asset><Template>FunctionImmediate</Template><Values>
+<Standard><GUID>2099626</GUID><Name>Ship Finder Fleet Report 6 Page Immediate</Name></Standard>
+<Function><FunctionSuccessOutput><Item><Component>2099646</Component></Item></FunctionSuccessOutput></Function>
+<QuestComponent/>
+<PreConditionList><Condition><Template>ConditionAlwaysTrue</Template><Values><Condition/><ConditionAlwaysTrue/></Values></Condition></PreConditionList>
+</Values></Asset>
+
+<Asset><Template>StoryLine</Template><Values>
+<Standard><GUID>2099606</GUID><Name>Ship Finder Fleet Report 6 Page Storyline</Name></Standard>
+<StoryLine><StartConnector><Item><Component>2099626</Component></Item></StartConnector></StoryLine>
+<QuestComponent/><QuestComponentConnector/>
+</Values></Asset>
+
+
+<Asset><Template>TextPopup</Template><Values>
+<Standard><GUID>2099667</GUID><Name>Ship Finder Fleet Report 7 Page Popup</Name></Standard>
+<TextPopup><Type>ScrollVertical01</Type><Pages><Item><Text>2006000252</Text></Item><Item><Text>2006000253</Text></Item><Item><Text>2006000254</Text></Item><Item><Text>2006000255</Text></Item><Item><Text>2006000256</Text></Item><Item><Text>2006000257</Text></Item><Item><Text>2006000258</Text></Item></Pages></TextPopup>
+</Values></Asset>
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099647</GUID><Name>Open Ship Finder Fleet Report 7 Page Popup</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionTriggerTextPopup</Template><Values>
+<ActionTriggerTextPopup><TextPopup>2099667</TextPopup></ActionTriggerTextPopup><Action/>
+</Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector/><QuestComponent/>
+</Values></Asset>
+
+<Asset><Template>FunctionImmediate</Template><Values>
+<Standard><GUID>2099627</GUID><Name>Ship Finder Fleet Report 7 Page Immediate</Name></Standard>
+<Function><FunctionSuccessOutput><Item><Component>2099647</Component></Item></FunctionSuccessOutput></Function>
+<QuestComponent/>
+<PreConditionList><Condition><Template>ConditionAlwaysTrue</Template><Values><Condition/><ConditionAlwaysTrue/></Values></Condition></PreConditionList>
+</Values></Asset>
+
+<Asset><Template>StoryLine</Template><Values>
+<Standard><GUID>2099607</GUID><Name>Ship Finder Fleet Report 7 Page Storyline</Name></Standard>
+<StoryLine><StartConnector><Item><Component>2099627</Component></Item></StartConnector></StoryLine>
+<QuestComponent/><QuestComponentConnector/>
+</Values></Asset>
+
+
+<Asset><Template>TextPopup</Template><Values>
+<Standard><GUID>2099668</GUID><Name>Ship Finder Fleet Report 8 Page Popup</Name></Standard>
+<TextPopup><Type>ScrollVertical01</Type><Pages><Item><Text>2006000252</Text></Item><Item><Text>2006000253</Text></Item><Item><Text>2006000254</Text></Item><Item><Text>2006000255</Text></Item><Item><Text>2006000256</Text></Item><Item><Text>2006000257</Text></Item><Item><Text>2006000258</Text></Item><Item><Text>2006000259</Text></Item></Pages></TextPopup>
+</Values></Asset>
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099648</GUID><Name>Open Ship Finder Fleet Report 8 Page Popup</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionTriggerTextPopup</Template><Values>
+<ActionTriggerTextPopup><TextPopup>2099668</TextPopup></ActionTriggerTextPopup><Action/>
+</Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector/><QuestComponent/>
+</Values></Asset>
+
+<Asset><Template>FunctionImmediate</Template><Values>
+<Standard><GUID>2099628</GUID><Name>Ship Finder Fleet Report 8 Page Immediate</Name></Standard>
+<Function><FunctionSuccessOutput><Item><Component>2099648</Component></Item></FunctionSuccessOutput></Function>
+<QuestComponent/>
+<PreConditionList><Condition><Template>ConditionAlwaysTrue</Template><Values><Condition/><ConditionAlwaysTrue/></Values></Condition></PreConditionList>
+</Values></Asset>
+
+<Asset><Template>StoryLine</Template><Values>
+<Standard><GUID>2099608</GUID><Name>Ship Finder Fleet Report 8 Page Storyline</Name></Standard>
+<StoryLine><StartConnector><Item><Component>2099628</Component></Item></StartConnector></StoryLine>
+<QuestComponent/><QuestComponentConnector/>
+</Values></Asset>
+
+
+<Asset><Template>TextPopup</Template><Values>
+<Standard><GUID>2099669</GUID><Name>Ship Finder Fleet Report 9 Page Popup</Name></Standard>
+<TextPopup><Type>ScrollVertical01</Type><Pages><Item><Text>2006000252</Text></Item><Item><Text>2006000253</Text></Item><Item><Text>2006000254</Text></Item><Item><Text>2006000255</Text></Item><Item><Text>2006000256</Text></Item><Item><Text>2006000257</Text></Item><Item><Text>2006000258</Text></Item><Item><Text>2006000259</Text></Item><Item><Text>2006000260</Text></Item></Pages></TextPopup>
+</Values></Asset>
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099649</GUID><Name>Open Ship Finder Fleet Report 9 Page Popup</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionTriggerTextPopup</Template><Values>
+<ActionTriggerTextPopup><TextPopup>2099669</TextPopup></ActionTriggerTextPopup><Action/>
+</Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector/><QuestComponent/>
+</Values></Asset>
+
+<Asset><Template>FunctionImmediate</Template><Values>
+<Standard><GUID>2099629</GUID><Name>Ship Finder Fleet Report 9 Page Immediate</Name></Standard>
+<Function><FunctionSuccessOutput><Item><Component>2099649</Component></Item></FunctionSuccessOutput></Function>
+<QuestComponent/>
+<PreConditionList><Condition><Template>ConditionAlwaysTrue</Template><Values><Condition/><ConditionAlwaysTrue/></Values></Condition></PreConditionList>
+</Values></Asset>
+
+<Asset><Template>StoryLine</Template><Values>
+<Standard><GUID>2099609</GUID><Name>Ship Finder Fleet Report 9 Page Storyline</Name></Standard>
+<StoryLine><StartConnector><Item><Component>2099629</Component></Item></StartConnector></StoryLine>
+<QuestComponent/><QuestComponentConnector/>
+</Values></Asset>
+
+
+<Asset><Template>TextPopup</Template><Values>
+<Standard><GUID>2099670</GUID><Name>Ship Finder Fleet Report 10 Page Popup</Name></Standard>
+<TextPopup><Type>ScrollVertical01</Type><Pages><Item><Text>2006000252</Text></Item><Item><Text>2006000253</Text></Item><Item><Text>2006000254</Text></Item><Item><Text>2006000255</Text></Item><Item><Text>2006000256</Text></Item><Item><Text>2006000257</Text></Item><Item><Text>2006000258</Text></Item><Item><Text>2006000259</Text></Item><Item><Text>2006000260</Text></Item><Item><Text>2006000261</Text></Item></Pages></TextPopup>
+</Values></Asset>
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099650</GUID><Name>Open Ship Finder Fleet Report 10 Page Popup</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionTriggerTextPopup</Template><Values>
+<ActionTriggerTextPopup><TextPopup>2099670</TextPopup></ActionTriggerTextPopup><Action/>
+</Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector/><QuestComponent/>
+</Values></Asset>
+
+<Asset><Template>FunctionImmediate</Template><Values>
+<Standard><GUID>2099630</GUID><Name>Ship Finder Fleet Report 10 Page Immediate</Name></Standard>
+<Function><FunctionSuccessOutput><Item><Component>2099650</Component></Item></FunctionSuccessOutput></Function>
+<QuestComponent/>
+<PreConditionList><Condition><Template>ConditionAlwaysTrue</Template><Values><Condition/><ConditionAlwaysTrue/></Values></Condition></PreConditionList>
+</Values></Asset>
+
+<Asset><Template>StoryLine</Template><Values>
+<Standard><GUID>2099610</GUID><Name>Ship Finder Fleet Report 10 Page Storyline</Name></Standard>
+<StoryLine><StartConnector><Item><Component>2099630</Component></Item></StartConnector></StoryLine>
+<QuestComponent/><QuestComponentConnector/>
+</Values></Asset>
+
+
+<Asset><Template>TextPopup</Template><Values>
+<Standard><GUID>2099671</GUID><Name>Ship Finder Fleet Report 11 Page Popup</Name></Standard>
+<TextPopup><Type>ScrollVertical01</Type><Pages><Item><Text>2006000252</Text></Item><Item><Text>2006000253</Text></Item><Item><Text>2006000254</Text></Item><Item><Text>2006000255</Text></Item><Item><Text>2006000256</Text></Item><Item><Text>2006000257</Text></Item><Item><Text>2006000258</Text></Item><Item><Text>2006000259</Text></Item><Item><Text>2006000260</Text></Item><Item><Text>2006000261</Text></Item><Item><Text>2006000262</Text></Item></Pages></TextPopup>
+</Values></Asset>
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099651</GUID><Name>Open Ship Finder Fleet Report 11 Page Popup</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionTriggerTextPopup</Template><Values>
+<ActionTriggerTextPopup><TextPopup>2099671</TextPopup></ActionTriggerTextPopup><Action/>
+</Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector/><QuestComponent/>
+</Values></Asset>
+
+<Asset><Template>FunctionImmediate</Template><Values>
+<Standard><GUID>2099631</GUID><Name>Ship Finder Fleet Report 11 Page Immediate</Name></Standard>
+<Function><FunctionSuccessOutput><Item><Component>2099651</Component></Item></FunctionSuccessOutput></Function>
+<QuestComponent/>
+<PreConditionList><Condition><Template>ConditionAlwaysTrue</Template><Values><Condition/><ConditionAlwaysTrue/></Values></Condition></PreConditionList>
+</Values></Asset>
+
+<Asset><Template>StoryLine</Template><Values>
+<Standard><GUID>2099611</GUID><Name>Ship Finder Fleet Report 11 Page Storyline</Name></Standard>
+<StoryLine><StartConnector><Item><Component>2099631</Component></Item></StartConnector></StoryLine>
+<QuestComponent/><QuestComponentConnector/>
+</Values></Asset>
+
+
+<Asset><Template>TextPopup</Template><Values>
+<Standard><GUID>2099672</GUID><Name>Ship Finder Fleet Report 12 Page Popup</Name></Standard>
+<TextPopup><Type>ScrollVertical01</Type><Pages><Item><Text>2006000252</Text></Item><Item><Text>2006000253</Text></Item><Item><Text>2006000254</Text></Item><Item><Text>2006000255</Text></Item><Item><Text>2006000256</Text></Item><Item><Text>2006000257</Text></Item><Item><Text>2006000258</Text></Item><Item><Text>2006000259</Text></Item><Item><Text>2006000260</Text></Item><Item><Text>2006000261</Text></Item><Item><Text>2006000262</Text></Item><Item><Text>2006000263</Text></Item></Pages></TextPopup>
+</Values></Asset>
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099652</GUID><Name>Open Ship Finder Fleet Report 12 Page Popup</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionTriggerTextPopup</Template><Values>
+<ActionTriggerTextPopup><TextPopup>2099672</TextPopup></ActionTriggerTextPopup><Action/>
+</Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector/><QuestComponent/>
+</Values></Asset>
+
+<Asset><Template>FunctionImmediate</Template><Values>
+<Standard><GUID>2099632</GUID><Name>Ship Finder Fleet Report 12 Page Immediate</Name></Standard>
+<Function><FunctionSuccessOutput><Item><Component>2099652</Component></Item></FunctionSuccessOutput></Function>
+<QuestComponent/>
+<PreConditionList><Condition><Template>ConditionAlwaysTrue</Template><Values><Condition/><ConditionAlwaysTrue/></Values></Condition></PreConditionList>
+</Values></Asset>
+
+<Asset><Template>StoryLine</Template><Values>
+<Standard><GUID>2099612</GUID><Name>Ship Finder Fleet Report 12 Page Storyline</Name></Standard>
+<StoryLine><StartConnector><Item><Component>2099632</Component></Item></StartConnector></StoryLine>
+<QuestComponent/><QuestComponentConnector/>
+</Values></Asset>
+
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099535</GUID><Name>Open Attention Parchment Proven Fleet Signal</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionModifyVariable</Template><Values><Action/><ActionModifyVariable>
+<VariableName>S3F</VariableName><Modifier>Add</Modifier>
+<ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>6000</IntValue></IntVariableOrValue></Values></ModifierVariable>
+</ActionModifyVariable></Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector><Output><Item><Component>2099398</Component></Item></Output></QuestComponentConnector>
+<QuestComponent/>
+</Values></Asset>
+
+
+<Asset><Template>Sequence</Template><Values>
+<Standard><GUID>2099536</GUID><Name>Open Fleet Summary Robust Post Yield Signal</Name></Standard>
+<Sequence><SequenceActions>
+<Item><Action><Template>ActionModifyVariable</Template><Values><Action/><ActionModifyVariable>
+<VariableName>S3L</VariableName><Modifier>Add</Modifier>
+<ModifierVariable><Template>IntVariableOrValue</Template><Values><IntVariableOrValue><IntValue>10000</IntValue></IntVariableOrValue></Values></ModifierVariable>
+</ActionModifyVariable></Values></Action></Item>
+</SequenceActions></Sequence>
+<QuestComponentConnector><Output><Item><Component>2099398</Component></Item></Output></QuestComponentConnector>
+<QuestComponent/>
+</Values></Asset>
 
 </ModOps>

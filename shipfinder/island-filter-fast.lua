@@ -1,6 +1,6 @@
 local Fast = {}
 
-local PREFIX = "[Ship Finder Island Filter Fast Scan 1.1.0]"
+local PREFIX = "[Ship Finder Island Filter Fast Scan 1.4.9 Native Route Attention]"
 
 Fast.active = false
 Fast.phase = "idle"
@@ -25,9 +25,46 @@ Fast.popupOpenedByUs = false
 Fast.pendingStatus = nil
 Fast.repairRoutes = {}
 Fast.repairIndex = 0
+Fast.repairVerifiedRouteIDs = {}
+Fast.scanTiming = nil
+Fast.filterTiming = nil
+Fast.repairTiming = nil
 
 local function log(text)
     system.log(PREFIX .. " | " .. tostring(text))
+end
+
+-- Capture several clocks because Anno builds do not expose one documented,
+-- guaranteed high-resolution wall clock to Lua. Log timestamps remain the
+-- authoritative wall-time evidence; these deltas make slow phases searchable.
+local function timingSnapshot()
+    local snapshot = { wall = nil, cpu = nil, play = nil }
+
+    pcall(function()
+        if os and type(os.time) == "function" then snapshot.wall = os.time() end
+    end)
+    pcall(function()
+        if os and type(os.clock) == "function" then snapshot.cpu = os.clock() end
+    end)
+    pcall(function()
+        snapshot.play = tonumber(Game and Game.PlayTime or nil)
+    end)
+
+    return snapshot
+end
+
+local function timingDeltaText(startSnapshot)
+    local now = timingSnapshot()
+    local wall = startSnapshot and startSnapshot.wall and now.wall
+        and (now.wall - startSnapshot.wall) or nil
+    local cpu = startSnapshot and startSnapshot.cpu and now.cpu
+        and (now.cpu - startSnapshot.cpu) or nil
+    local play = startSnapshot and startSnapshot.play and now.play
+        and (now.play - startSnapshot.play) or nil
+
+    return "elapsedWallSec=" .. tostring(wall)
+        .. " | elapsedCpuSec=" .. tostring(cpu)
+        .. " | elapsedPlayTimeRaw=" .. tostring(play)
 end
 
 local function getSceneParts()
@@ -432,6 +469,9 @@ function Fast:GetResult()
 end
 
 function Fast:Start()
+    self.scanTiming = timingSnapshot()
+    self.filterTiming = nil
+    self.repairTiming = nil
     self.active = false
     self.phase = "idle"
     self.buttons = {}
@@ -455,10 +495,14 @@ function Fast:Start()
     self.pendingStatus = nil
     self.repairRoutes = {}
     self.repairIndex = 0
+    self.repairVerifiedRouteIDs = {}
 
     local _, overview, filter, islandList, buttons, rows = getSceneParts()
     if overview == nil or filter == nil or islandList == nil or buttons == nil or rows == nil then
-        log("START REJECT | reason=filter-surface-unavailable")
+        log(
+            "START REJECT | reason=filter-surface-unavailable"
+            .. " | " .. timingDeltaText(self.scanTiming)
+        )
         return false
     end
 
@@ -481,7 +525,10 @@ function Fast:Start()
     self.activeRouteCount = countTable(self.activeRouteIDs)
 
     if self.activeRouteCount < 1 then
-        log("START REJECT | reason=no-active-routes-visible")
+        log(
+            "START REJECT | reason=no-active-routes-visible"
+            .. " | " .. timingDeltaText(self.scanTiming)
+        )
         return false
     end
 
@@ -527,7 +574,11 @@ function Fast:Tick()
             -- Some native list models populate one event-loop turn after opening.
             self.current = self.current + 1
             if self.current < 3 then
-                log("ENUMERATE WAIT | tick=" .. tostring(self.current) .. " | size=" .. tostring(size))
+                log(
+                    "ENUMERATE WAIT | tick=" .. tostring(self.current)
+                    .. " | size=" .. tostring(size)
+                    .. " | " .. timingDeltaText(self.scanTiming)
+                )
                 return nil
             end
             self.rejectReason = "island-buttons-empty"
@@ -574,6 +625,7 @@ function Fast:Tick()
             .. " | success=" .. tostring(ok)
             .. " | result=" .. tostring(result)
         )
+        self.filterTiming = timingSnapshot()
         if not ok then
             self.rejectReason = "first-filter-click-failed"
             clearSelectedButtons()
@@ -631,6 +683,8 @@ function Fast:Tick()
             .. " | ships=" .. tostring(shipCount)
             .. " | accepted=" .. tostring(accepted)
             .. " | signature=" .. tostring(signature)
+            .. " | " .. timingDeltaText(self.filterTiming)
+            .. " | total." .. timingDeltaText(self.scanTiming)
         )
 
         -- Turn off the current filter and turn on the next one before returning.
@@ -648,6 +702,7 @@ function Fast:Tick()
                 .. " | success=" .. tostring(ok)
                 .. " | result=" .. tostring(result)
             )
+            self.filterTiming = timingSnapshot()
             if not ok then
                 self.rejectReason = "filter-click-failed:" .. tostring(self.current)
                 clearSelectedButtons()
@@ -659,6 +714,11 @@ function Fast:Tick()
         end
 
         closeFilterPopupIfNeeded()
+        log(
+            "FILTER LOOP COMPLETE"
+            .. " | filters=" .. tostring(#self.buttons)
+            .. " | " .. timingDeltaText(self.scanTiming)
+        )
         self.phase = "validate"
         return nil
     end
@@ -700,6 +760,7 @@ function Fast:Tick()
             .. " | acceptedIslands=" .. tostring(self.acceptedIslands)
             .. " | deficientRoutes=" .. tostring(#self.repairRoutes)
             .. " | baseComplete=" .. tostring(baseComplete)
+            .. " | " .. timingDeltaText(self.scanTiming)
         )
 
         if baseComplete and #self.repairRoutes == 0 then
@@ -717,6 +778,7 @@ function Fast:Tick()
                 .. " | rebuilds=" .. tostring(#self.buttons)
                 .. " | targetedRepairs=0"
                 .. " | strictStationCoverage=true"
+                .. " | " .. timingDeltaText(self.scanTiming)
             )
 
             return "accepted"
@@ -726,6 +788,7 @@ function Fast:Tick()
             self.repairIndex = 1
             local repair = self.repairRoutes[1]
             local ok, result = focusRouteByID(repair.routeID)
+            self.repairTiming = timingSnapshot()
 
             log(
                 "REPAIR FOCUS BY ID"
@@ -797,6 +860,8 @@ function Fast:Tick()
             .. " | editRouteName=" .. tostring(editRouteName)
             .. " | expectedRouteName=" .. tostring(expectedRouteName)
             .. " | completeRead=" .. tostring(completeRead)
+            .. " | " .. timingDeltaText(self.repairTiming)
+            .. " | total." .. timingDeltaText(self.scanTiming)
         )
 
         if not completeRead then
@@ -813,12 +878,19 @@ function Fast:Tick()
         end
 
         mergeRouteStations(repair.route, entries)
+        -- Route topology records distinct island membership, while the native
+        -- station collection records every stop. A route may legitimately stop
+        -- at the same island more than once. Once the focused read returned the
+        -- exact native station count for the expected route, its topology is
+        -- complete even when the distinct-island count is smaller.
+        self.repairVerifiedRouteIDs[repair.routeID] = true
 
         self.repairIndex = self.repairIndex + 1
         local nextRepair = self.repairRoutes[self.repairIndex]
 
         if nextRepair ~= nil then
             local ok, result = focusRouteByID(nextRepair.routeID)
+            self.repairTiming = timingSnapshot()
 
             log(
                 "REPAIR NEXT BY ID"
@@ -846,7 +918,10 @@ function Fast:Tick()
             local expected = expectedStationCount(routeID)
             local discovered = discoveredMembershipCount(routeID)
 
-            if expected > 0 and discovered < expected then
+            if expected > 0
+                and discovered < expected
+                and not self.repairVerifiedRouteIDs[routeID]
+            then
                 remaining = remaining + 1
             end
         end
@@ -867,6 +942,7 @@ function Fast:Tick()
                 .. " | targetedRepairs=" .. tostring(#self.repairRoutes)
                 .. " | topologyRoutes=" .. tostring(countTable(self.routeIslandMap))
                 .. " | strictStationCoverage=true"
+                .. " | " .. timingDeltaText(self.scanTiming)
             )
 
             return "accepted"
@@ -886,7 +962,11 @@ function Fast:Tick()
         self.pendingStatus = "rejected"
         self.active = false
         self.phase = "done"
-        log("FAST REJECT | reason=" .. tostring(self.rejectReason) .. " | fallback=proven sequential scan")
+        log(
+            "FAST REJECT | reason=" .. tostring(self.rejectReason)
+            .. " | fallback=proven sequential scan"
+            .. " | " .. timingDeltaText(self.scanTiming)
+        )
         return "rejected"
     end
 

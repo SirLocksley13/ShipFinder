@@ -55,56 +55,115 @@ local function getSelectedNativeRouteName()
     return routes[rp*3+rs]
 end
 
-local selectedNativeRouteName = getSelectedNativeRouteName()
-
 system.log("[Ship Finder Public Category] handler entered")
 
 local category = Variables:GetVariable("S3C") or 0
 local page = Variables:GetVariable("S3Q") or 0
 local slot = Variables:GetVariable("S3L") or 1
+local records = nil
+local queryOk, queryError = pcall(function()
+    if category == 2 then
+        -- The Patch 2.0 native-warning query is repeated in this Action script
+        -- context. The module method can abort here even though it works while
+        -- building the menu. Querying again also guarantees fresh live objects.
+        local issues = {}
+        local manager = TradeRoute and TradeRoute.get and TradeRoute.get() or nil
+        for _, issue in pairs(
+            (manager and manager.TradeRoutesWithIssues) or {}
+        ) do
+            local valid = issue ~= nil
+            local issueName = nil
+            pcall(function()
+                if issue.isValid then valid = issue:isValid() end
+            end)
+            pcall(function() issueName = issue.Name end)
+            if valid and issueName ~= nil then
+                local key = string.lower(
+                    tostring(issueName):gsub("^%s+", ""):gsub("%s+$", "")
+                )
+                issues[key] = true
+            end
+        end
 
-local records = {}
-for _, object in pairs(Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}) do
-    local nameable = object.Nameable
-    local rawName = nameable and nameable.Name
-    if rawName ~= nil then
-        local name = tostring(rawName)
-        local route = object.TradeRouteVehicle
-        local assigned = route and route.IsAssignedOnTradeRoute or false
-        local paused = route and route.IsPaused or false
-        local unit = object.Unit
-        local military = unit and unit.IsMilitaryUnit or false
-        local include = false
-
-        if category == 1 then
-            include = assigned and not paused
-        elseif category == 2 then
-            include = (not military) and assigned and paused
-        elseif category == 4 then
-            include = military
-        elseif category == 5 then
-            include = (not military) and (not assigned)
-        elseif category == 6 then
+        records = {}
+        for _, object in pairs(
+            Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}
+        ) do
+            local name = object.Nameable and object.Nameable.Name
+            local route = object.TradeRouteVehicle
+            local assigned = route and route.IsAssignedOnTradeRoute == true
             local routeName = route and route.RouteName or nil
-            include = assigned and (not paused)
-                and routeName ~= nil
-                and selectedNativeRouteName ~= nil
-                and tostring(routeName) == tostring(selectedNativeRouteName)
-        end
+            local military = object.Unit
+                and object.Unit.IsMilitaryUnit == true
+            local issueKey = routeName and string.lower(
+                tostring(routeName):gsub("^%s+", ""):gsub("%s+$", "")
+            ) or nil
 
-        if include then
-            records[#records + 1] = {
-                name = name,
-                key = string.lower(name) .. "|" .. tostring(object.ID),
-                object = object
-            }
+            if name ~= nil
+                and assigned
+                and not military
+                and issueKey ~= nil
+                and issues[issueKey] == true
+            then
+                local textName = tostring(name)
+                records[#records + 1] = {
+                    name = textName,
+                    key = string.lower(textName) .. "|" .. tostring(object.ID),
+                    object = object,
+                }
+            end
         end
+        table.sort(records, function(a, b) return a.key < b.key end)
+    elseif category == 4 or category == 5 then
+        -- Warships and Independent Ships must also be queried locally in the
+        -- Action-script context. ShipFinderCombinedRoot is unavailable here,
+        -- even though the same module methods work while building the menu.
+        records = {}
+        for _, object in pairs(
+            Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}
+        ) do
+            local rawName = object.Nameable and object.Nameable.Name
+            if rawName ~= nil then
+                local route = object.TradeRouteVehicle
+                local assigned = route
+                    and route.IsAssignedOnTradeRoute == true
+                local military = object.Unit
+                    and object.Unit.IsMilitaryUnit == true
+                local include = (category == 4 and military)
+                    or (category == 5 and not military and not assigned)
+
+                if include then
+                    local name = tostring(rawName)
+                    records[#records + 1] = {
+                        name = name,
+                        key = string.lower(name)
+                            .. "|" .. tostring(object.ID),
+                        object = object,
+                    }
+                end
+            end
+        end
+        table.sort(records, function(a, b) return a.key < b.key end)
+    else
+        local selectedNativeRouteName = nil
+        if category == 6 then
+            selectedNativeRouteName = getSelectedNativeRouteName()
+        end
+        records = ShipFinderCombinedRoot:GetPublicCategoryShips(
+            category,
+            selectedNativeRouteName
+        )
     end
-end
-
-table.sort(records, function(a, b)
-    return a.key < b.key
 end)
+
+if not queryOk then
+    system.log(
+        "[Ship Finder Public Category] query ERROR"
+        .. " | category=" .. tostring(category)
+        .. " | error=" .. tostring(queryError)
+    )
+    return
+end
 
 local selected = records[page * 3 + slot]
 system.log(
@@ -117,21 +176,28 @@ system.log(
 )
 
 if selected then
-    local ok, err = pcall(function()
-        Selection:SelectByID(selected.object.ID)
-        Scripts:JumpToObject(selected.object.ID)
+    local nativeID = selected.object.ID
+    local selectOk, selectError = pcall(function()
+        Selection:SelectByID(nativeID)
+    end)
+    local jumpOk, jumpError = pcall(function()
+        Scripts:JumpToObject(nativeID)
     end)
 
-    if ok then
+    if selectOk and jumpOk then
         system.log(
             "[Ship Finder Public Category] jump completed"
-            .. " | objectId=" .. tostring(selected.object.ID)
+            .. " | objectId=" .. tostring(nativeID)
+            .. " | freshQuery=true"
         )
     else
         system.log(
             "[Ship Finder Public Category] jump ERROR"
-            .. " | objectId=" .. tostring(selected.object.ID)
-            .. " | error=" .. tostring(err)
+            .. " | objectId=" .. tostring(nativeID)
+            .. " | selectSuccess=" .. tostring(selectOk)
+            .. " | jumpSuccess=" .. tostring(jumpOk)
+            .. " | selectError=" .. tostring(selectError or "")
+            .. " | jumpError=" .. tostring(jumpError or "")
         )
     end
 end

@@ -1,32 +1,73 @@
-# Ship Finder v1.1.0
+# Ship Finder v1.5.0
 
-**Ship Finder** helps you find and jump to ships quickly in Anno 117: Pax Romana.
+**Ship Finder** helps you find ships quickly and jump directly to them in
+Anno 117: Pax Romana.
 
 ## Open Ship Finder
-Press **Ctrl+Alt+F**.
+
+**Ctrl+Alt+F**
+
+The main menu opens immediately. Trade-route scanning is performed only by
+features that actually need it.
 
 ## Main features
+
 - Active Trade Routes
 - Independent Ships
 - Warships
 - Ships Needing Attention
-- All Ships A-Z
 - Ships by Island
-- Direct ship navigation
-- Ctrl+Alt+1-9 shortcuts on supported reports
-- English and German localization
+- Fleet Overview
+  - Fleet Summary
+  - All Ships
+  - Route Allocation
+  - Independent Ships
+  - Warships
+- All Ships A-Z
+- Direct ship jumps from numbered parchment entries
+
+## Ships Needing Attention
+
+Uses Anno 117 Patch 2.0's native trade-route issue list.
+
+Detailed presentation currently includes:
+
+- ALL SHIPS PAUSED
+- WAIT FOR GOODS — affected island
+- safe station/generic fallbacks for warning states not yet identified in detail
+
+The Trade Route scan starts only after **Ships Needing Attention** is selected.
+The Governor menu closes first, then the scan runs from global Tick context,
+preserving the proven freeze-safe UI flow.
 
 ## Ships by Island
-Ships are grouped by the islands served by their assigned trade routes. The first use may perform a short scan of island connections. Ship assignments are refreshed automatically; use **Rescan Island Connections** after changing route stops or if the result appears incorrect.
 
-A ship travelling between provinces can temporarily remain listed but may not be jumpable until it is available again in the current province.
+Lists islands alphabetically and shows ships assigned to routes serving the
+selected island. A ship may correctly appear under more than one island.
+
+## Shortcuts
+
+- **Ctrl+Alt+F** — open Ship Finder
+- **Ctrl+Alt+1-9** — jump to the numbered ship shown on supported parchments
+- **Ctrl+Alt+0** — return/back depending on the current Ship Finder context
+
+The former development shortcut **Ctrl+Alt+P has been removed**.
 
 ## Languages
+
 - English
 - German
+- French
 
-The mod name remains **Ship Finder** in both languages.
+The product name remains **Ship Finder** in all languages.
 
-## Author
-Dr. Enrico Handrick  
-GitHub: SirLocksley13
+## Safety
+
+Ship Finder is read-only. It does not change trade routes, cargo settings or
+ship assignments.
+
+## Compatibility
+
+Prepared for Anno 117 Patch 2.0.
+
+Creator: **Dr. Enrico Handrick**

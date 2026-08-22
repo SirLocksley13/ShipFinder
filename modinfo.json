@@ -1,21 +1,24 @@
 {
   "ModID": "ship-finder-sirlocksley",
-  "Version": "1.1.0",
+  "Version": "1.5.0",
   "Anno": 8,
   "Difficulty": "cheat",
   "RequiresNewGame": false,
   "SafeToRemove": true,
   "ModName": {
     "English": "Ship Finder",
-    "German": "Ship Finder"
+    "German": "Ship Finder",
+    "French": "Ship Finder"
   },
   "Category": {
     "English": "Mod",
-    "German": "Mod"
+    "German": "Mod",
+    "French": "Mod"
   },
   "Description": {
-    "English": "Find ships quickly in the current province. Browse active trade routes, independent ships, warships, ships needing attention, all ships A-Z, or find ships by island. Direct navigation and Ctrl+Alt+1-9 shortcuts help you jump to the ship you need. Includes English and German.",
-    "German": "Finde Schiffe schnell in der aktuellen Provinz. Durchsuche aktive Handelsrouten, unabhängige Schiffe, Kriegsschiffe, Schiffe mit Handlungsbedarf, alle Schiffe A-Z oder finde Schiffe nach Insel. Direkte Navigation und Ctrl+Alt+1-9 helfen beim schnellen Sprung zum gewünschten Schiff. Enthält Englisch und Deutsch."
+    "English": "Find the ship you need and jump to it. Ship Finder adds a fast in-game fleet navigation menu for Anno 117 with Active Trade Routes, Independent Ships, Warships, Ships Needing Attention, Ships by Island and Fleet Overview. Ships Needing Attention uses Patch 2.0's native trade-route warnings and can show All Ships Paused or Wait for Goods together with the affected island. Ctrl+Alt+F opens the menu immediately; heavier trade-route scanning runs only when the selected feature needs it. Numbered shortcuts jump directly to ships. Available in English, German and French. Read-only: no trade route or cargo settings are changed.",
+    "German": "Finde das gesuchte Schiff und springe direkt dorthin. Ship Finder ergänzt Anno 117 um ein schnelles In-Game-Menü für die Flottennavigation mit Aktiven Handelsrouten, Unabhängigen Schiffen, Kriegsschiffen, Schiffen mit Handlungsbedarf, Schiffen nach Insel und Flottenübersicht. Schiffe mit Handlungsbedarf nutzt die nativen Handelsrouten-Warnungen aus Patch 2.0 und kann unter anderem Alle Schiffe pausiert oder Auf Waren warten inklusive der betroffenen Insel anzeigen. Ctrl+Alt+F öffnet das Menü sofort; aufwendigere Handelsrouten-Scans laufen nur, wenn die gewählte Funktion sie benötigt. Nummerierte Tastenkürzel springen direkt zu Schiffen. Verfügbar auf Englisch, Deutsch und Französisch. Read-only: Handelsrouten und Ladungseinstellungen werden nicht verändert.",
+    "French": "Trouvez rapidement le navire recherché et accédez-y directement. Ship Finder ajoute à Anno 117 un menu de navigation de flotte en jeu avec Routes commerciales actives, Navires indépendants, Navires de guerre, Navires nécessitant votre attention, Navires par île et Vue d’ensemble de la flotte. Navires nécessitant votre attention exploite les avertissements natifs des routes commerciales de la mise à jour 2.0 et peut notamment afficher Tous les navires en pause ou Attendre avant de charger avec l’île concernée. Ctrl+Alt+F ouvre immédiatement le menu ; les analyses plus poussées des routes commerciales ne s’exécutent que lorsqu’elles sont nécessaires. Les raccourcis numérotés permettent d’accéder directement aux navires. Disponible en anglais, allemand et français. Lecture seule : aucune route commerciale ni configuration de cargaison n’est modifiée."
   },
   "CreatorName": "Dr. Enrico Handrick",
   "CreatorContact": "https://github.com/SirLocksley13/ShipFinder",

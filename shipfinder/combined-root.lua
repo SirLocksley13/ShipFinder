@@ -5689,6 +5689,7 @@ local islandFullIndex = {}
 local islandFullIndexRouteCount = 0
 local islandScanRequested = false
 local islandScanStartDelay = 0
+local islandScanReason = nil
 local islandScanMarkerHandled = false
 local islandReportMarkerHandled = false
 local ISLAND_REPORT_STORYLINE = 2099200
@@ -6257,7 +6258,446 @@ local function tickIslandFocusedRouteProbe()
 end
 
 
+
+-- ============================================================================
+-- Ship Finder v1.5.0 on-demand production Attention detail
+--
+-- Ctrl+Alt+F no longer opens/scans the native Trade Route UI. The main menu
+-- opens immediately. Only after Ships Needing Attention is selected and the
+-- Governor NarrativeSequence has safely left do we start the native Trade
+-- Route UI scan. Route-wide All Ships Paused is read directly; unresolved live
+-- routes use real TradeRouteGoodData station rows read-only. No route settings
+-- are changed.
+-- ============================================================================
+ShipFinderAttentionWarningDetailCache =
+    ShipFinderAttentionWarningDetailCache or {}
+
+ShipFinderAttentionWarningStatesProbe =
+    ShipFinderAttentionWarningStatesProbe or {
+        active = false,
+        queue = {},
+        index = 0,
+        phase = "idle",
+        focusedName = nil,
+    }
+
+function ShipFinderAttentionWarningStatesTruthy(value)
+    if value == true then return true end
+    if value == 1 then return true end
+    local text = string.lower(tostring(value or ""))
+    return text == "true" or text == "1"
+end
+
+function ShipFinderAttentionWarningStatesAdvanceRoute()
+    local state = ShipFinderAttentionWarningStatesProbe
+    state.index = state.index + 1
+
+    if state.index > #state.queue then
+        state.active = false
+        state.phase = "done"
+
+        local count = 0
+        for _ in pairs(
+            ShipFinderAttentionWarningDetailCache or {}
+        ) do
+            count = count + 1
+        end
+
+        system.log(
+            "[Ship Finder Attention Detail 1.5.0] COMPLETE"
+            .. " | routesDetailed=" .. tostring(count)
+        )
+        return true
+    end
+
+    state.phase = "focusRoute"
+    ShipFinderAttentionWarningStatesFocusCurrent()
+    return true
+end
+
+function ShipFinderAttentionWarningStatesStart()
+    local state = ShipFinderAttentionWarningStatesProbe
+    state.active = false
+    state.queue = {}
+    state.index = 0
+    state.phase = "idle"
+    state.focusedName = nil
+
+    ShipFinderAttentionWarningDetailCache = {}
+
+    local issueSnapshot =
+        ShipFinderNativeIssueRouteCache
+        or ShipFinderNativeIssueRouteSnapshot()
+
+    -- Only collect expensive station detail for routes that can actually
+    -- appear in the current province's Attention parchment and whose
+    -- route-wide warning is not already solved by AllShipsPausedActive.
+    local wanted = {}
+
+    for _, object in pairs(
+        Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}
+    ) do
+        local vehicle = object.TradeRouteVehicle
+        local military =
+            object.Unit and object.Unit.IsMilitaryUnit == true
+        local assigned =
+            vehicle and vehicle.IsAssignedOnTradeRoute == true
+        local routeName =
+            vehicle and vehicle.RouteName or nil
+
+        if assigned
+            and not military
+            and routeName ~= nil
+        then
+            local key =
+                ShipFinderNativeRouteKey(routeName)
+            local issue = issueSnapshot[key]
+
+            if issue ~= nil
+                and issue.allShipsPaused ~= true
+                and (tonumber(issue.activeErrorCount) or 0) > 0
+            then
+                wanted[key] = issue
+            end
+        end
+    end
+
+    local wantedCount = 0
+    for _ in pairs(wanted) do
+        wantedCount = wantedCount + 1
+    end
+
+    if wantedCount == 0 then
+        system.log(
+            "[Ship Finder Attention Detail 1.5.0] START"
+            .. " | success=false"
+            .. " | reason=no-live-unresolved-issue-routes"
+        )
+        return false
+    end
+
+    local arr = nil
+    pcall(function()
+        arr = ui
+            and ui.Scenes
+            and ui.Scenes.TradeRoute
+            and ui.Scenes.TradeRoute.TradeOverview
+            and ui.Scenes.TradeRoute.TradeOverview.OverviewListData
+            and ui.Scenes.TradeRoute.TradeOverview.OverviewListData.ArrayData
+            or nil
+    end)
+
+    if arr == nil then
+        system.log(
+            "[Ship Finder Attention Detail 1.5.0] START"
+            .. " | success=false"
+            .. " | reason=overview-array-missing"
+        )
+        return false
+    end
+
+    local seen = false
+    local emptyTail = 0
+
+    for i = 0, 511 do
+        local okRow, row = pcall(function()
+            return arr[i]
+        end)
+
+        if okRow and row ~= nil then
+            local rowText = tostring(row)
+            if string.find(rowText, "weak null", 1, true) == nil then
+                seen = true
+                emptyTail = 0
+
+                local routeID, routeName = nil, nil
+                pcall(function() routeID = row.RouteID end)
+                pcall(function()
+                    routeName =
+                        row.NameData and row.NameData.Text or nil
+                end)
+
+                if type(routeID) == "number"
+                    and routeID >= 0
+                    and routeName ~= nil
+                then
+                    local key =
+                        ShipFinderNativeRouteKey(tostring(routeName))
+
+                    if wanted[key] ~= nil then
+                        state.queue[#state.queue + 1] = {
+                            row = row,
+                            routeID = routeID,
+                            routeName = tostring(routeName),
+                        }
+                    end
+                end
+            elseif seen then
+                emptyTail = emptyTail + 1
+            end
+        elseif seen then
+            emptyTail = emptyTail + 1
+        end
+
+        if seen and emptyTail >= 16 then break end
+    end
+
+    table.sort(state.queue, function(a, b)
+        return string.lower(a.routeName or "")
+            < string.lower(b.routeName or "")
+    end)
+
+    if #state.queue == 0 then
+        system.log(
+            "[Ship Finder Attention Detail 1.5.0] START"
+            .. " | success=false"
+            .. " | reason=no-live-issue-route-rows"
+        )
+        return false
+    end
+
+    state.active = true
+    state.index = 1
+    state.phase = "focusRoute"
+
+    system.log(
+        "[Ship Finder Attention Detail 1.5.0] START"
+        .. " | success=true"
+        .. " | liveUnresolvedRoutes="
+        .. tostring(#state.queue)
+        .. " | detail=warning-station-and-wait-setting"
+    )
+
+    return true
+end
+
+function ShipFinderAttentionWarningStatesFocusCurrent()
+    local state = ShipFinderAttentionWarningStatesProbe
+    local rec = state.queue[state.index]
+    if rec == nil then return false end
+
+    local pressed = false
+    local errorText = ""
+
+    local fn = nil
+    pcall(function()
+        fn = rec.row.PrimaryButtonPressed
+    end)
+
+    if type(fn) == "function" then
+        local ok, err = pcall(function()
+            return rec.row:PrimaryButtonPressed()
+        end)
+        pressed = ok
+        errorText = tostring(err or "")
+    else
+        local button = nil
+        pcall(function()
+            button = rec.row.ButtonData
+        end)
+
+        local buttonFn = nil
+        if button ~= nil then
+            pcall(function()
+                buttonFn = button.PrimaryButtonPressed
+            end)
+        end
+
+        if type(buttonFn) == "function" then
+            local ok, err = pcall(function()
+                return button:PrimaryButtonPressed()
+            end)
+            pressed = ok
+            errorText = tostring(err or "")
+        end
+    end
+
+    state.focusedName = rec.routeName
+    state.phase = "readRoute"
+
+    if not pressed then
+        system.log(
+            "[Ship Finder Attention Detail 1.5.0] FOCUS FAILED"
+            .. " | index=" .. tostring(state.index)
+            .. "/" .. tostring(#state.queue)
+            .. " | routeID=" .. tostring(rec.routeID)
+            .. " | routeName=" .. tostring(rec.routeName)
+            .. " | error=" .. errorText
+        )
+    end
+
+    return pressed
+end
+
+function ShipFinderAttentionWarningStatesReadRoute()
+    local state = ShipFinderAttentionWarningStatesProbe
+    local rec = state.queue[state.index]
+    if rec == nil then return false end
+
+    local selection = ui
+        and ui.Scenes
+        and ui.Scenes.TradeRoute
+        and ui.Scenes.TradeRoute.TradeGoodSelection
+        or nil
+
+    local data = nil
+    pcall(function()
+        data = selection and selection.TradeRouteGoodData or nil
+    end)
+
+    local helper =
+        halo and halo["PhoenixArray<halo::CTradeRouteGoodData>"]
+        or nil
+
+    local size = 0
+    local sizeOk, sizeErr = pcall(function()
+        size = helper and data and helper.GetSize(data) or 0
+    end)
+
+    local warningStations = {}
+
+    if sizeOk and helper ~= nil and data ~= nil then
+        for i = 0, (tonumber(size) or 0) - 1 do
+            local row = nil
+            local rowOk = pcall(function()
+                row = helper.GetElement(data, i)
+            end)
+
+            if rowOk and row ~= nil then
+                local stationHasWarning = nil
+                pcall(function()
+                    stationHasWarning = row.StationHasWarning
+                end)
+
+                if ShipFinderAttentionWarningStatesTruthy(
+                    stationHasWarning
+                ) then
+                    local islandName = nil
+                    local stationID = nil
+                    local waitGoods = nil
+                    local waitUnload = nil
+                    local waitGoodsActive = false
+                    local waitUnloadActive = false
+
+                    pcall(function() islandName = row.IslandName end)
+                    pcall(function() stationID = row.StationID end)
+                    pcall(function()
+                        waitGoods = row.WaitForGoodsButtonData
+                    end)
+                    pcall(function()
+                        waitUnload = row.WaitToUnloadButtonData
+                    end)
+
+                    if waitGoods ~= nil then
+                        pcall(function()
+                            waitGoodsActive =
+                                waitGoods.IsActive == true
+                        end)
+                    end
+
+                    if waitUnload ~= nil then
+                        pcall(function()
+                            waitUnloadActive =
+                                waitUnload.IsActive == true
+                        end)
+                    end
+
+                    warningStations[#warningStations + 1] = {
+                        islandName = tostring(islandName or ""),
+                        stationID = stationID,
+                        waitForGoods = waitGoodsActive,
+                        waitToUnload = waitUnloadActive,
+                    }
+                end
+            end
+        end
+    end
+
+    local detail = {
+        kind = "route_warning",
+        islandName = "",
+        stationCount = #warningStations,
+    }
+
+    if #warningStations == 1 then
+        local station = warningStations[1]
+        detail.islandName = station.islandName
+        detail.stationID = station.stationID
+        detail.waitForGoods = station.waitForGoods == true
+        detail.waitToUnload = station.waitToUnload == true
+
+        -- Runtime validation across both provinces repeatedly showed:
+        -- native station warning + WaitForGoods=true, while same-route controls
+        -- were false; cargo-slot and ship warning surfaces were not active.
+        -- We intentionally report the proven UI state and do NOT claim that
+        -- the inaccessible low-level enum is LongWaitingTimeActive.
+        if station.waitForGoods == true
+            and station.waitToUnload ~= true
+        then
+            detail.kind = "wait_for_goods"
+        elseif station.waitToUnload == true then
+            detail.kind = "wait_to_unload"
+        else
+            detail.kind = "station_warning"
+        end
+    elseif #warningStations > 1 then
+        detail.kind = "station_warning"
+        local islands = {}
+        for _, station in ipairs(warningStations) do
+            if station.islandName ~= "" then
+                islands[#islands + 1] = station.islandName
+            end
+        end
+        detail.islandName = table.concat(islands, ", ")
+    end
+
+    ShipFinderAttentionWarningDetailCache[
+        ShipFinderNativeRouteKey(rec.routeName)
+    ] = detail
+
+    system.log(
+        "[Ship Finder Attention Detail 1.5.0] DETAIL"
+        .. " | routeID=" .. tostring(rec.routeID)
+        .. " | routeName=" .. tostring(rec.routeName)
+        .. " | kind=" .. tostring(detail.kind)
+        .. " | islandName=" .. tostring(detail.islandName)
+        .. " | warningStations="
+        .. tostring(detail.stationCount)
+        .. " | waitForGoods="
+        .. tostring(detail.waitForGoods)
+        .. " | waitToUnload="
+        .. tostring(detail.waitToUnload)
+        .. " | sizeReadSuccess="
+        .. tostring(sizeOk)
+        .. " | sizeReadError="
+        .. tostring(sizeErr or "")
+    )
+
+    return ShipFinderAttentionWarningStatesAdvanceRoute()
+end
+
+function ShipFinderAttentionWarningStatesTick()
+    local state = ShipFinderAttentionWarningStatesProbe
+    if state.active ~= true then return false end
+
+    if state.phase == "focusRoute" then
+        ShipFinderAttentionWarningStatesFocusCurrent()
+        return true
+    end
+
+    if state.phase == "readRoute" then
+        ShipFinderAttentionWarningStatesReadRoute()
+        return true
+    end
+
+    state.active = false
+    return false
+end
+
 local TRUE_TOGGLE_PREFIX = "[Ship Finder Native TradeRoute Toggle 1.1.0]"
+ShipFinderAttentionScanRequested =
+    ShipFinderAttentionScanRequested or false
+
 local nativeTradeRouteToggleActive = false
 local nativeTradeRouteToggleStage = 0
 local nativeTradeRouteToggleTicks = 0
@@ -6269,6 +6709,29 @@ local nativeTradeRouteNormalizePending = false
 
 local function ntLog(text)
     system.log(TRUE_TOGGLE_PREFIX .. " | " .. tostring(text))
+end
+
+local function islandScanTimingText()
+    local nowWall = nil
+    local nowCpu = nil
+    pcall(function()
+        if os and type(os.time) == "function" then nowWall = os.time() end
+    end)
+    pcall(function()
+        if os and type(os.clock) == "function" then nowCpu = os.clock() end
+    end)
+
+    local wall = ShipFinderIslandCache
+        and ShipFinderIslandCache.scanStartedWallTime
+        and nowWall
+        and (nowWall - ShipFinderIslandCache.scanStartedWallTime) or nil
+    local cpu = ShipFinderIslandCache
+        and ShipFinderIslandCache.scanStartedCpuClock
+        and nowCpu
+        and (nowCpu - ShipFinderIslandCache.scanStartedCpuClock) or nil
+
+    return "scanElapsedWallSec=" .. tostring(wall)
+        .. " | scanElapsedCpuSec=" .. tostring(cpu)
 end
 
 local function ntGetOverviewArray()
@@ -6359,7 +6822,10 @@ local function ntOpenShipFinderMenu()
 end
 
 local function ntFinish(reason)
-    ntLog("FINISH | reason=" .. tostring(reason))
+    ntLog(
+        "FINISH | reason=" .. tostring(reason)
+        .. " | " .. islandScanTimingText()
+    )
     nativeTradeRouteToggleActive = false
     nativeTradeRouteToggleStage = 0
     nativeTradeRouteToggleTicks = 0
@@ -6389,6 +6855,19 @@ local function ntFinish(reason)
             .. " | success=" .. tostring(ok)
             .. " | error=" .. tostring(err or "")
         )
+        return
+    end
+
+    if ShipFinderAttentionScanRequested == true then
+        ShipFinderAttentionScanRequested = false
+
+        system.log(
+            "[Ship Finder Attention On-Demand 1.5.0] SCAN COMPLETE"
+            .. " | action=open-attention-parchment"
+            .. " | reason=" .. tostring(reason)
+        )
+
+        CombinedRoot:_sf1425OpenAttentionParchmentNow()
         return
     end
 
@@ -6646,6 +7125,7 @@ local function ntTick()
                 "OPENED"
                 .. " | rows=" .. tostring(rows)
                 .. " | groupsVisible=" .. tostring(groupsVisible)
+                .. " | " .. islandScanTimingText()
             )
 
             nativeTradeRouteExpandedGroups = ntExpandCollapsedGroups()
@@ -6672,6 +7152,7 @@ local function ntTick()
                 .. " | rowsBefore=" .. tostring(nativeTradeRouteRowsAtOpen)
                 .. " | rowsAfterExpand=" .. tostring(expandedRows)
                 .. " | groupsRequested=" .. tostring(nativeTradeRouteExpandedGroups)
+                .. " | " .. islandScanTimingText()
             )
 
             -- Normal Ctrl+Alt+F stays fast. The expensive island scan is only
@@ -6696,6 +7177,7 @@ local function ntTick()
                         .. " | callSuccess=" .. tostring(fastOk)
                         .. " | started=" .. tostring(fastStarted)
                         .. " | result=" .. tostring(fastResult)
+                        .. " | " .. islandScanTimingText()
                     )
                 end
 
@@ -6704,6 +7186,7 @@ local function ntTick()
                         "ISLAND FILTER FAST NOT STARTED"
                         .. " | fastReady=" .. tostring(fastReady)
                         .. " | fallback=proven sequential scan"
+                        .. " | " .. islandScanTimingText()
                     )
                     pcall(startIslandFocusedRouteProbe)
                 end
@@ -6712,6 +7195,17 @@ local function ntTick()
             -- Production path: the native hierarchy is proven. Build the cache directly;
             -- do not run the expensive 119-row introspection diagnostic mapper anymore.
             pcall(buildProductionTradeRouteCache)
+
+            -- v1.4.41 diagnostic: while the Trade Route overview is already open,
+            -- focus only the native issue routes and inspect the UI's WarningStates.
+            -- Skip this extra diagnostic when a Ships-by-Island scan is running.
+            if not islandScanRequested
+                and ShipFinderAttentionWarningStatesStart()
+            then
+                nativeTradeRouteToggleStage = 30
+                nativeTradeRouteToggleTicks = 0
+                return true
+            end
 
             if nativeTradeRouteToggleOpenedByUs then
                 if islandFocusProbePending
@@ -6758,6 +7252,29 @@ local function ntTick()
         return true
     end
 
+    if nativeTradeRouteToggleStage == 30 then
+        if ShipFinderAttentionWarningStatesProbe
+            and ShipFinderAttentionWarningStatesProbe.active == true
+        then
+            ShipFinderAttentionWarningStatesTick()
+            return true
+        end
+
+        local ok, result = pcall(function()
+            return Scripts:ToggleTraderouteMenu()
+        end)
+
+        ntLog(
+            "CLOSE CALL AFTER WARNINGSTATES PROBE"
+            .. " | success=" .. tostring(ok)
+            .. " | result=" .. tostring(result)
+        )
+
+        nativeTradeRouteToggleStage = 3
+        nativeTradeRouteToggleTicks = 0
+        return true
+    end
+
     if nativeTradeRouteToggleStage == 20 then
         if CombinedRoot.islandFilterFast
             and CombinedRoot.islandFilterFast.IsActive
@@ -6772,6 +7289,7 @@ local function ntTick()
                     "ISLAND FILTER FAST ERROR"
                     .. " | error=" .. tostring(fastStatus)
                     .. " | fallback=proven sequential scan"
+                    .. " | " .. islandScanTimingText()
                 )
                 pcall(startIslandFocusedRouteProbe)
                 return true
@@ -6796,9 +7314,13 @@ local function ntTick()
                 ntLog(
                     "ISLAND FILTER FAST ACCEPTED"
                     .. " | routes=" .. tostring(islandFullIndexRouteCount)
+                    .. " | " .. islandScanTimingText()
                 )
             elseif fastStatus == "rejected" then
-                ntLog("ISLAND FILTER FAST REJECTED | starting proven sequential fallback")
+                ntLog(
+                    "ISLAND FILTER FAST REJECTED | starting proven sequential fallback"
+                    .. " | " .. islandScanTimingText()
+                )
                 pcall(startIslandFocusedRouteProbe)
                 return true
             else
@@ -6808,7 +7330,10 @@ local function ntTick()
             and CombinedRoot.islandFilterFast.pendingStatus == "rejected"
             and not islandFocusProbePending
         then
-            ntLog("ISLAND FILTER FAST REJECTED | starting proven sequential fallback")
+            ntLog(
+                "ISLAND FILTER FAST REJECTED | starting proven sequential fallback"
+                .. " | " .. islandScanTimingText()
+            )
             CombinedRoot.islandFilterFast.pendingStatus = nil
             pcall(startIslandFocusedRouteProbe)
             return true
@@ -6954,6 +7479,8 @@ local function islandReportText()
 
     if tostring(ShipFinderUILanguage or "") == "de" then
         return "SCHIFFE NACH INSEL\n\nBericht nicht verfügbar."
+    elseif tostring(ShipFinderUILanguage or "") == "fr" then
+        return "NAVIRES PAR ÎLE\n\nRapport indisponible."
     end
     return "SHIPS BY ISLAND\n\nReport unavailable."
 end
@@ -6980,6 +7507,17 @@ function CombinedRoot:_sf1199NormalizeLocalizedMarker(text)
             "[Ship Finder Localization 1.1.0] MARKER"
             .. " | raw=" .. raw
             .. " | language=de"
+        )
+        return base
+    end
+
+    base = string.match(raw, "^(SF_.+)_FR$")
+    if base ~= nil then
+        ShipFinderUILanguage = "fr"
+        system.log(
+            "[Ship Finder Localization 1.1.0] MARKER"
+            .. " | raw=" .. raw
+            .. " | language=fr"
         )
         return base
     end
@@ -7020,15 +7558,25 @@ local function tickShipsByIslandUI()
 
         if text == "SF_SHIP_UNAVAILABLE" then
             local d = ShipFinderIslandUnavailable or {}
-            local shipName = tostring(d.shipName or (tostring(ShipFinderUILanguage or "") == "de" and "Dieses Schiff" or "This ship"))
-            local routeName = tostring(d.routeName or "")
             local de = tostring(ShipFinderUILanguage or "") == "de"
+            local fr = tostring(ShipFinderUILanguage or "") == "fr"
+            local shipName = tostring(
+                d.shipName
+                or (de and "Dieses Schiff"
+                    or (fr and "Ce navire" or "This ship"))
+            )
+            local routeName = tostring(d.routeName or "")
             local message = nil
             if de then
                 message = "SCHIFF NICHT VERFÜGBAR\n\n"
                     .. shipName
                     .. " befindet sich derzeit außerhalb dieser Provinz und kann momentan nicht angezeigt werden."
                 if routeName ~= "" then message = message .. "\n\nHandelsroute: " .. routeName end
+            elseif fr then
+                message = "NAVIRE INDISPONIBLE\n\n"
+                    .. shipName
+                    .. " se trouve actuellement hors de cette province et ne peut pas être affiché pour le moment."
+                if routeName ~= "" then message = message .. "\n\nRoute commerciale : " .. routeName end
             else
                 message = "SHIP NOT AVAILABLE\n\n"
                     .. shipName
@@ -7038,7 +7586,7 @@ local function tickShipsByIslandUI()
             local okWrite, writeErr = pcall(function() content.Text = message end)
             system.log(
                 "[Ship Finder Island Navigation 1.1.0] UNAVAILABLE PARCHMENT WRITE"
-                .. " | language=" .. (de and "de" or "en")
+                .. " | language=" .. (de and "de" or (fr and "fr" or "en"))
                 .. " | success=" .. tostring(okWrite)
                 .. " | ship=" .. tostring(shipName)
                 .. " | error=" .. tostring(writeErr or "")
@@ -7046,10 +7594,40 @@ local function tickShipsByIslandUI()
             return true
         end
 
+        if text == "SF_FLEET_OVERVIEW" then
+            if ShipFinderFleetReport ~= nil then
+                ShipFinderFleetReport.opening = false
+                ShipFinderFleetReport.active = true
+                ShipFinderFleetReport.mode = "summary"
+                ShipFinderFleetReport.page = 0
+                ShipFinderFleetReport.visible = {}
+            end
+
+            local de = tostring(ShipFinderUILanguage or "") == "de"
+            local fr = tostring(ShipFinderUILanguage or "") == "fr"
+            local report = CombinedRoot:FleetOverviewParchmentText(de)
+            local okWrite, writeErr = pcall(function()
+                content.Text = report
+            end)
+            system.log(
+                "[Ship Finder Fleet Analysis 1.4.36] REPORT WRITE"
+                .. " | language=" .. tostring(de and "de" or (fr and "fr" or "en"))
+                .. " | success=" .. tostring(okWrite)
+                .. " | chars=" .. tostring(#tostring(report or ""))
+                .. " | error=" .. tostring(writeErr or "")
+            )
+            return true
+        end
+
         if text == "SF_SHIPS_BY_ISLAND_SCAN_INFO" then
-            local info = tostring(ShipFinderUILanguage or "") == "de"
-                and "SCHIFFE NACH INSEL — SCAN-INFORMATIONEN\n\nScan-Informationen nicht verfügbar."
-                or "SHIPS BY ISLAND — SCAN INFORMATION\n\nScan information unavailable."
+            local info = nil
+            if tostring(ShipFinderUILanguage or "") == "de" then
+                info = "SCHIFFE NACH INSEL — SCAN-INFORMATIONEN\n\nScan-Informationen nicht verfügbar."
+            elseif tostring(ShipFinderUILanguage or "") == "fr" then
+                info = "NAVIRES PAR ÎLE — INFORMATIONS SUR L’ANALYSE\n\nInformations d’analyse indisponibles."
+            else
+                info = "SHIPS BY ISLAND — SCAN INFORMATION\n\nScan information unavailable."
+            end
             if ShipFinderIslandCache and ShipFinderIslandCache.scanInfoText then
                 info = ShipFinderIslandCache.scanInfoText()
             end
@@ -7071,6 +7649,7 @@ local function tickShipsByIslandUI()
         if text == "SF_SHIPS_BY_ISLAND_FORCE_SCAN"
             and not islandScanMarkerHandled
         then
+            islandScanReason = "manual-rescan"
             if ShipFinderIslandCache then
                 ShipFinderIslandCache.invalidate("manual-rescan")
             end
@@ -7114,7 +7693,12 @@ local function tickShipsByIslandUI()
                     end)
 
                     islandScanStartDelay = -2
+                    islandScanReason = nil
                     return true
+                end
+
+                if islandScanReason == nil then
+                    islandScanReason = tostring(cacheReason or "cache-miss")
                 end
 
                 system.log(
@@ -7125,22 +7709,48 @@ local function tickShipsByIslandUI()
                 )
             end
 
+            if islandScanReason == nil then
+                islandScanReason = "cache-api-unavailable"
+            end
+
             local okWrite, writeErr = pcall(function()
+                local manualRescan = islandScanReason == "manual-rescan"
                 if tostring(ShipFinderUILanguage or "") == "de" then
-                    content.Text =
-                        "SCHIFFE NACH INSEL\n\n"
-                        .. "Aktive Handelsrouten werden gescannt und ihre tatsächlichen Inselziele ermittelt.\n\n"
-                        .. "Dieser ausführliche Scan wird nur bei Auswahl von „Schiffe nach Insel“ ausgeführt."
+                    if manualRescan then
+                        content.Text =
+                            "SCHIFFE NACH INSEL\n\n"
+                            .. "Inselverbindungen werden erneut erfasst. Bei großen Spielständen kann dies etwas länger dauern."
+                    else
+                        content.Text =
+                            "SCHIFFE NACH INSEL\n\n"
+                            .. "Inselverbindungen werden zum ersten Mal erfasst. Bei großen Spielständen kann dies etwas länger dauern. Spätere Aufrufe verwenden zwischengespeicherte Ergebnisse."
+                    end
+                elseif tostring(ShipFinderUILanguage or "") == "fr" then
+                    if manualRescan then
+                        content.Text =
+                            "NAVIRES PAR ÎLE\n\n"
+                            .. "Nouvelle analyse des liaisons entre îles. Cela peut prendre un peu plus de temps sur les grandes sauvegardes."
+                    else
+                        content.Text =
+                            "NAVIRES PAR ÎLE\n\n"
+                            .. "Première analyse des liaisons entre îles. Cela peut prendre un peu plus de temps sur les grandes sauvegardes. Les ouvertures suivantes utilisent les résultats mis en cache."
+                    end
                 else
-                    content.Text =
-                        "SHIPS BY ISLAND\n\n"
-                        .. "Scanning active trade routes and reading their real island destinations.\n\n"
-                        .. "This deeper scan is only performed when you choose Ships by Island."
+                    if manualRescan then
+                        content.Text =
+                            "SHIPS BY ISLAND\n\n"
+                            .. "Rescanning island connections. Large savegames may take a little longer."
+                    else
+                        content.Text =
+                            "SHIPS BY ISLAND\n\n"
+                            .. "Scanning island connections for the first time. Large savegames may take a little longer. Later openings use cached results."
+                    end
                 end
             end)
 
             system.log(
                 "[Ship Finder Ships by Island 1.1.0] SCAN MARKER"
+                .. " | reason=" .. tostring(islandScanReason)
                 .. " | writeSuccess=" .. tostring(okWrite)
                 .. " | error=" .. tostring(writeErr or "")
             )
@@ -7169,14 +7779,113 @@ local function tickShipsByIslandUI()
             islandReportMarkerHandled = true
             islandScanMarkerHandled = false
 
-            if ShipFinderIslandUI then
-                ShipFinderIslandUI.jumpInProgress = false
-                local pages = ShipFinderIslandUI.buildPages()
-                local maxPage = math.max(0, #pages - 1)
-                ShipFinderIslandUI.page = math.min(nativePage, maxPage)
+            if ShipFinderFleetReport ~= nil
+                and (ShipFinderFleetReport.opening == true
+                    or ShipFinderFleetReport.active == true)
+            then
+                ShipFinderFleetReport.opening = false
+                ShipFinderFleetReport.active = true
+
+                local report = nil
+                local reportOk, reportErr = pcall(function()
+                    report = ShipFinderFleetReport.pageText(nativePage)
+                end)
+
+                if not reportOk then
+                    local de = tostring(ShipFinderUILanguage or "") == "de"
+                    local fr = tostring(ShipFinderUILanguage or "") == "fr"
+                    report = de
+                        and "FLOTTENÜBERSICHT\n\nBericht konnte nicht aufgebaut werden."
+                        or (fr
+                            and "VUE D’ENSEMBLE DE LA FLOTTE\n\nLe rapport n’a pas pu être généré."
+                            or "FLEET OVERVIEW\n\nReport could not be built.")
+
+                    system.log(
+                        "[Ship Finder Fleet Analysis 1.4.36] REPORT BUILD ERROR"
+                        .. " | mode=" .. tostring(ShipFinderFleetReport.mode or "")
+                        .. " | nativePage=" .. tostring(nativePage + 1)
+                        .. " | error=" .. tostring(reportErr or "")
+                    )
+                end
+
+                local okWrite, writeErr = pcall(function()
+                    content.Text = report
+                end)
+                system.log(
+                    "[Ship Finder Fleet Analysis 1.4.36] REPORT WRITE"
+                    .. " | mode=" .. tostring(ShipFinderFleetReport.mode or "")
+                    .. " | nativePage=" .. tostring(nativePage + 1)
+                    .. " | effectivePage=" .. tostring((ShipFinderFleetReport.page or 0) + 1)
+                    .. " | buildSuccess=" .. tostring(reportOk)
+                    .. " | success=" .. tostring(okWrite)
+                    .. " | chars=" .. tostring(#tostring(report or ""))
+                    .. " | error=" .. tostring(writeErr or "")
+                )
+                return true
             end
 
-            local report = islandReportText()
+            if ShipFinderAttentionParchmentTest ~= nil
+                and (ShipFinderAttentionParchmentTest.opening == true
+                    or ShipFinderAttentionParchmentTest.active == true)
+            then
+                ShipFinderAttentionParchmentTest.opening = false
+                ShipFinderAttentionParchmentTest.active = true
+                local report = ShipFinderAttentionParchmentTest.pageText(nativePage)
+                local okWrite, writeErr = pcall(function()
+                    content.Text = report
+                end)
+                system.log(
+                    "[Ship Finder Attention Report 1.4.31] REPORT WRITE"
+                    .. " | sharedStoryline=2099200"
+                    .. " | sharedPopup=2099191"
+                    .. " | nativePage=" .. tostring(nativePage + 1)
+                    .. " | effectivePage=" .. tostring(ShipFinderAttentionParchmentTest.page + 1)
+                    .. " | success=" .. tostring(okWrite)
+                    .. " | chars=" .. tostring(#tostring(report or ""))
+                    .. " | error=" .. tostring(writeErr or "")
+                )
+                return true
+            end
+
+            local reportMode = "island-index"
+            if ShipFinderIslandUI then
+                ShipFinderIslandUI.jumpInProgress = false
+                if ShipFinderIslandUI.resumeMode
+                    and ShipFinderIslandUI.resumeIslandPageText
+                then
+                    local _, _, resumePage =
+                        ShipFinderIslandUI.resumeIslandPageText(nativePage)
+                    ShipFinderIslandUI.page = resumePage or 0
+                    reportMode = "last-island-resume"
+                elseif ShipFinderIslandUI.mode == "ships"
+                    and ShipFinderIslandUI.shipPageText
+                then
+                    ShipFinderIslandUI.shipPage = nativePage
+                    reportMode = "selected-island"
+                else
+                    ShipFinderIslandUI.mode = "islands"
+                    ShipFinderIslandUI.islandPage = nativePage
+                end
+            end
+
+            local report = nil
+            if ShipFinderIslandUI
+                and ShipFinderIslandUI.resumeMode
+                and ShipFinderIslandUI.resumeIslandPageText
+            then
+                report = ShipFinderIslandUI.resumeIslandPageText(
+                    ShipFinderIslandUI.page or 0
+                )
+            elseif ShipFinderIslandUI
+                and ShipFinderIslandUI.mode == "ships"
+                and ShipFinderIslandUI.shipPageText
+            then
+                report = ShipFinderIslandUI.shipPageText()
+            elseif ShipFinderIslandUI and ShipFinderIslandUI.islandPageText then
+                report = ShipFinderIslandUI.islandPageText()
+            else
+                report = islandReportText()
+            end
             local islandCount = 0
             for _ in pairs(islandFullIndex or {}) do
                 islandCount = islandCount + 1
@@ -7189,6 +7898,7 @@ local function tickShipsByIslandUI()
             system.log(
                 "[Ship Finder Ships by Island 1.1.0] REPORT WRITE"
                 .. " | success=" .. tostring(okWrite)
+                .. " | mode=" .. tostring(reportMode)
                 .. " | nativePage=" .. tostring(nativePage + 1)
                 .. " | effectivePage=" .. tostring((ShipFinderIslandUI.page or 0) + 1)
                 .. " | chars=" .. tostring(#report)
@@ -7209,13 +7919,29 @@ local function tickShipsByIslandUI()
             islandFullIndexReset()
             if ShipFinderIslandCache then
                 ShipFinderIslandCache.scanStartedPlayTime = nil
+                ShipFinderIslandCache.scanStartedWallTime = nil
+                ShipFinderIslandCache.scanStartedCpuClock = nil
+                ShipFinderIslandCache.scanStartReason = islandScanReason
                 pcall(function()
                     ShipFinderIslandCache.scanStartedPlayTime = Game and Game.PlayTime or nil
+                end)
+                pcall(function()
+                    if os and type(os.time) == "function" then
+                        ShipFinderIslandCache.scanStartedWallTime = os.time()
+                    end
+                end)
+                pcall(function()
+                    if os and type(os.clock) == "function" then
+                        ShipFinderIslandCache.scanStartedCpuClock = os.clock()
+                    end
                 end)
             end
 
             system.log(
                 "[Ship Finder Ships by Island 1.1.0] ON-DEMAND SCAN START"
+                .. " | reason=" .. tostring(islandScanReason)
+                .. " | cacheValid="
+                .. tostring(ShipFinderIslandCache and ShipFinderIslandCache.valid == true)
             )
 
             directOpenPending = false
@@ -7456,14 +8182,883 @@ function CombinedRoot:_sf1197TickIslandJumpWatch()
     return false
 end
 
+
+
+-- Ship Finder v1.4.31 Attention immediate post-yield handoff.
+-- Runtime v1.4.30 timing proved:
+--   Leave NarrativeSequence -> signal visible ~0.34 s later
+--   signal -> next global Tick StoryLine request ~0.49 s later
+--   request -> TextPopup visible ~0.38 s later
+--
+-- The S3L +1000 signal is already only visible AFTER the menu NarrativeSequence
+-- has yielded. Therefore v1.4.31 removes the final artificial next-Tick delay:
+-- when the post-yield signal is detected from normal global Tick context, it
+-- requests the already-proven Attention StoryLine immediately in that same Tick.
+--
+-- This is still fundamentally different from the old freezing builds:
+-- nothing is opened from inside the Decision/Action context and no UI close is
+-- issued by Lua. The proven Safe Close path 2035152 -> 2099398 finishes first.
+CombinedRoot.AttentionMenuParchmentBridge = CombinedRoot.AttentionMenuParchmentBridge or {
+    observedSignal = nil,
+    phase = "idle",
+    ticks = 0,
+}
+
+function CombinedRoot:_sf1425AttentionSignal()
+    local ok, value = pcall(function()
+        return Variables:GetVariable("S3L")
+    end)
+    if not ok or value == nil then return 0 end
+    return tonumber(value) or 0
+end
+
+function CombinedRoot:_sf1425ResetAttentionMenuBridge()
+    local bridge = self.AttentionMenuParchmentBridge
+    bridge.observedSignal = self:_sf1425AttentionSignal()
+    bridge.phase = "idle"
+    bridge.ticks = 0
+    system.log(
+        "[Ship Finder Attention Immediate Bridge 1.4.31] RESET"
+        .. " | signal=" .. tostring(bridge.observedSignal)
+        .. " | attentionConnector=2099398"
+        .. " | extraSettleTicks=0"
+        .. " | extraPendingTick=false"
+    )
+end
+
+function CombinedRoot:_sf1425OpenAttentionParchmentNow()
+    if ShipFinderAttentionParchmentTest == nil then
+        system.log(
+            "[Ship Finder Attention Immediate Bridge 1.4.31] ABORT"
+            .. " | reason=parchment-state-missing"
+        )
+        return false
+    end
+
+    ShipFinderAttentionParchmentTest.pendingOpen = false
+    ShipFinderAttentionParchmentTest.active = false
+    ShipFinderAttentionParchmentTest.opening = true
+    ShipFinderAttentionParchmentTest.page = 0
+    ShipFinderAttentionParchmentTest.visible = {}
+
+    local attentionCount = #ShipFinderAttentionParchmentTest.records()
+    local attentionStoryline =
+        attentionCount <= 9 and 2099210 or ISLAND_REPORT_STORYLINE
+
+    local ok, err = pcall(function()
+        GovernorDecision:CheatStartGovernorDecisionForCurrentPlayerNet(
+            attentionStoryline
+        )
+    end)
+
+    system.log(
+        "[Ship Finder Attention Report 1.4.31] STORYLINE REQUEST"
+        .. " | deferredTicks=0"
+        .. " | source=post-yield-signal-same-tick"
+        .. " | ships=" .. tostring(attentionCount)
+        .. " | mode=" .. tostring(attentionCount <= 9 and "single-page" or "multi-page")
+        .. " | storyline=" .. tostring(attentionStoryline)
+        .. " | success=" .. tostring(ok)
+        .. " | error=" .. tostring(err or "")
+    )
+
+    if not ok then
+        ShipFinderAttentionParchmentTest.opening = false
+        ShipFinderAttentionParchmentTest.active = false
+        return false
+    end
+    return true
+end
+
+function CombinedRoot:_sf1425TickAttentionMenuBridge()
+    local bridge = self.AttentionMenuParchmentBridge
+    local signal = self:_sf1425AttentionSignal()
+
+    if bridge.observedSignal == nil then
+        bridge.observedSignal = signal
+    end
+
+    local oldSignal = tonumber(bridge.observedSignal) or 0
+    local delta = signal - oldSignal
+
+    if delta < 1000 then
+        if signal ~= oldSignal then
+            bridge.observedSignal = signal
+        end
+        return false
+    end
+
+    -- v1.4.41 reserves S3L increments >=10000 for the robust Fleet Summary
+    -- handoff. The current production Attention entry no longer uses S3L;
+    -- it uses the proven S3F +6000 path from v1.4.37.
+    if delta >= 10000 then
+        bridge.observedSignal = signal
+        system.log(
+            "[Ship Finder Attention Immediate Bridge 1.4.41] IGNORE"
+            .. " | source=S3L-reserved-fleet-summary"
+            .. " | previous=" .. tostring(oldSignal)
+            .. " | current=" .. tostring(signal)
+            .. " | delta=" .. tostring(delta)
+        )
+        return false
+    end
+
+    bridge.observedSignal = signal
+
+    system.log(
+        "[Ship Finder Attention Immediate Bridge 1.4.31] SIGNAL"
+        .. " | source=S3L-existing-variable"
+        .. " | previous=" .. tostring(oldSignal)
+        .. " | current=" .. tostring(signal)
+        .. " | delta=" .. tostring(delta)
+        .. " | category=" .. tostring(Variables:GetVariable("S3C") or 0)
+        .. " | action=request-proven-parchment-now"
+    )
+
+    self:_sf1425OpenAttentionParchmentNow()
+    return true
+end
+
+
+
+-- Ship Finder v1.4.34 analytical Fleet parchments.
+-- Menus choose the analytical view; parchments show the fleet together.
+ShipFinderFleetReport = ShipFinderFleetReport or {
+    active = false,
+    opening = false,
+    mode = nil,
+    page = 0,
+    visible = {},
+    pageStorylines = { [1] = 2099601, [2] = 2099602, [3] = 2099603, [4] = 2099604, [5] = 2099605, [6] = 2099606, [7] = 2099607, [8] = 2099608, [9] = 2099609, [10] = 2099610, [11] = 2099611, [12] = 2099612 },
+}
+
+function ShipFinderFleetReport.getPopupContent()
+    local content = nil
+    pcall(function()
+        content = ui
+            and ui.Scenes
+            and ui.Scenes.TextPopup
+            and ui.Scenes.TextPopup.SceneData
+            and ui.Scenes.TextPopup.SceneData.Content
+            or nil
+    end)
+    return content
+end
+
+function ShipFinderFleetReport.records(mode)
+    local records = {}
+    local issues = ShipFinderNativeIssueRouteSnapshot()
+
+    for _, object in pairs(
+        Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}
+    ) do
+        local rawName = object.Nameable and object.Nameable.Name
+        if rawName ~= nil then
+            local name = tostring(rawName)
+            local route = object.TradeRouteVehicle
+            local assigned = route
+                and route.IsAssignedOnTradeRoute == true
+            local routeName = route and route.RouteName or nil
+            local military = object.Unit
+                and object.Unit.IsMilitaryUnit == true
+            local issue = routeName ~= nil
+                and issues[ShipFinderNativeRouteKey(routeName)]
+                or nil
+
+            local include = false
+            local group = ""
+            local groupOrder = 9
+
+            if mode == "all" then
+                include = true
+                if military then
+                    group = "warships"
+                    groupOrder = 3
+                elseif assigned then
+                    group = "assigned"
+                    groupOrder = 1
+                else
+                    group = "independent"
+                    groupOrder = 2
+                end
+            elseif mode == "routes" then
+                include = assigned and routeName ~= nil
+                group = tostring(routeName or "")
+                groupOrder = issue ~= nil and 1 or 2
+            elseif mode == "independent" then
+                include = not military and not assigned
+                group = "independent"
+                groupOrder = 1
+            elseif mode == "warships" then
+                include = military
+                group = "warships"
+                groupOrder = 1
+            end
+
+            if include then
+                local routeText = tostring(routeName or "")
+                local key = ""
+
+                if mode == "routes" then
+                    key = tostring(groupOrder)
+                        .. "|" .. string.lower(routeText)
+                        .. "|" .. string.lower(name)
+                        .. "|" .. tostring(object.ID)
+                else
+                    key = tostring(groupOrder)
+                        .. "|" .. string.lower(name)
+                        .. "|" .. string.lower(routeText)
+                        .. "|" .. tostring(object.ID)
+                end
+
+                records[#records + 1] = {
+                    name = name,
+                    id = tostring(object.ID),
+                    routeName = routeText,
+                    group = group,
+                    key = key,
+                    warning = issue ~= nil,
+                    military = military,
+                    assigned = assigned,
+                }
+            end
+        end
+    end
+
+    table.sort(records, function(a, b)
+        return a.key < b.key
+    end)
+
+    return records
+end
+
+function ShipFinderFleetReport.groupCount(records, group)
+    local count = 0
+    for _, record in ipairs(records or {}) do
+        if record.group == group then
+            count = count + 1
+        end
+    end
+    return count
+end
+
+function ShipFinderFleetReport.title(mode, de)
+    local fr = not de and tostring(ShipFinderUILanguage or "") == "fr"
+    if mode == "all" then
+        return de and "FLOTTE — ALLE SCHIFFE"
+            or (fr and "FLOTTE — TOUS LES NAVIRES"
+                or "FLEET — ALL SHIPS")
+    elseif mode == "routes" then
+        return de and "FLOTTE — ROUTENZUWEISUNG"
+            or (fr and "FLOTTE — AFFECTATION AUX ROUTES COMMERCIALES"
+                or "FLEET — ROUTE ALLOCATION")
+    elseif mode == "independent" then
+        return de and "FLOTTE — UNABHÄNGIGE SCHIFFE"
+            or (fr and "FLOTTE — NAVIRES INDÉPENDANTS"
+                or "FLEET — INDEPENDENT SHIPS")
+    elseif mode == "warships" then
+        return de and "FLOTTE — KRIEGSSCHIFFE"
+            or (fr and "FLOTTE — NAVIRES DE GUERRE"
+                or "FLEET — WARSHIPS")
+    end
+    return de and "FLOTTENÜBERSICHT"
+        or (fr and "VUE D’ENSEMBLE DE LA FLOTTE" or "FLEET OVERVIEW")
+end
+
+function ShipFinderFleetReport.pageText(pageIndex)
+    local mode = ShipFinderFleetReport.mode or "all"
+    local de = tostring(ShipFinderUILanguage or "") == "de"
+    local fr = tostring(ShipFinderUILanguage or "") == "fr"
+    local records = ShipFinderFleetReport.records(mode)
+    local pages = math.max(1, math.ceil(#records / 9))
+    local page = math.max(0, tonumber(pageIndex) or 0)
+
+    if page >= pages then
+        page = pages - 1
+    end
+
+    ShipFinderFleetReport.page = page
+    ShipFinderFleetReport.visible = {}
+
+    local first = page * 9 + 1
+    local last = math.min(first + 8, #records)
+
+    local subtitle = ""
+    if mode == "routes" then
+        local representedRoutes = {}
+        local representedRouteCount = 0
+
+        for _, record in ipairs(records) do
+            local routeName = tostring(record.routeName or "")
+            if routeName ~= "" and representedRoutes[routeName] ~= true then
+                representedRoutes[routeName] = true
+                representedRouteCount = representedRouteCount + 1
+            end
+        end
+
+        subtitle = de
+            and (tostring(#records) .. " zugewiesene Schiffe • "
+                .. tostring(representedRouteCount) .. " Routen")
+            or (fr
+                and (tostring(#records) .. " navires affectés • "
+                    .. tostring(representedRouteCount) .. " routes commerciales")
+                or (tostring(#records) .. " assigned ships • "
+                    .. tostring(representedRouteCount) .. " routes"))
+    else
+        subtitle = tostring(#records)
+            .. (de and " Schiffe • Aktuelle Provinz/Sitzung"
+                or (fr and " navires • Province/session actuelle"
+                    or " ships • Current province/session"))
+    end
+
+    local lines = {
+        ShipFinderFleetReport.title(mode, de),
+        "",
+        subtitle,
+        de and "Strg+Alt+1-9: Zum nummerierten Schiff springen"
+            or (fr and "Ctrl+Alt+1-9 : accéder au navire numéroté"
+                or "Ctrl+Alt+1-9: Jump to numbered ship"),
+        de and "Strg+Alt+0: Zurueck zum Ship Finder-Menue"
+            or (fr and "Ctrl+Alt+0 : retour au menu Ship Finder"
+                or "Ctrl+Alt+0: Back to Ship Finder menu"),
+    }
+
+    if pages > 1 then
+        lines[#lines + 1] =
+            (de and "Seite " or (fr and "Page " or "Page "))
+            .. tostring(page + 1) .. "/" .. tostring(pages)
+    end
+
+    lines[#lines + 1] = ""
+
+    if #records == 0 then
+        if mode == "independent" then
+            lines[#lines + 1] = de
+                and "Keine unabhängigen zivilen Schiffe in dieser Provinz."
+                or (fr and "Aucun navire civil indépendant dans cette province."
+                    or "No independent non-military ships in this province.")
+        elseif mode == "warships" then
+            lines[#lines + 1] = de
+                and "Keine Kriegsschiffe in dieser Provinz."
+                or (fr and "Aucun navire de guerre dans cette province."
+                    or "No warships in this province.")
+        elseif mode == "routes" then
+            lines[#lines + 1] = de
+                and "Keine aktuell zugewiesenen Schiffe auf Handelsrouten."
+                or (fr and "Aucun navire n’est actuellement affecté à une route commerciale."
+                    or "No ships are currently assigned to trade routes.")
+        else
+            lines[#lines + 1] = de
+                and "Keine sichtbaren Schiffe in dieser Provinz."
+                or (fr and "Aucun navire visible dans cette province."
+                    or "No visible ships in this province.")
+        end
+        return table.concat(lines, "\n")
+    end
+
+    local lastGroup = nil
+
+    for index = first, last do
+        local record = records[index]
+        local slot = index - first + 1
+
+        if record.group ~= lastGroup then
+            if lastGroup ~= nil then
+                lines[#lines + 1] = ""
+            end
+
+            local count =
+                ShipFinderFleetReport.groupCount(records, record.group)
+
+            if mode == "all" then
+                if record.group == "assigned" then
+                    lines[#lines + 1] = de
+                        and ("▶ HANDELSROUTEN-SCHIFFE — "
+                            .. tostring(count))
+                        or (fr and ("▶ NAVIRES DES ROUTES COMMERCIALES — "
+                            .. tostring(count))
+                            or ("▶ TRADE ROUTE SHIPS — "
+                                .. tostring(count)))
+                elseif record.group == "independent" then
+                    lines[#lines + 1] = de
+                        and ("UNABHÄNGIGE ZIVILE SCHIFFE — "
+                            .. tostring(count))
+                        or (fr and ("NAVIRES CIVILS INDÉPENDANTS — "
+                            .. tostring(count))
+                            or ("INDEPENDENT NON-MILITARY SHIPS — "
+                                .. tostring(count)))
+                else
+                    lines[#lines + 1] = de
+                        and ("KRIEGSSCHIFFE — " .. tostring(count))
+                        or (fr and ("NAVIRES DE GUERRE — " .. tostring(count))
+                            or ("WARSHIPS — " .. tostring(count)))
+                end
+            elseif mode == "routes" then
+                lines[#lines + 1] =
+                    (record.warning and "⚠ " or "")
+                    .. "▶ " .. record.routeName
+                    .. " — " .. tostring(count)
+                    .. (de
+                        and (count == 1 and " Schiff" or " Schiffe")
+                        or (fr
+                            and (count == 1 and " navire" or " navires")
+                            or (count == 1 and " ship" or " ships")))
+            end
+
+            lastGroup = record.group
+        end
+
+        ShipFinderFleetReport.visible[slot] = {
+            id = record.id,
+            name = record.name,
+            routeName = record.routeName,
+        }
+
+        if mode == "all"
+            and record.group == "assigned"
+            and record.routeName ~= ""
+        then
+            lines[#lines + 1] = tostring(slot)
+                .. ". ★ " .. record.name
+                .. " — ▶ " .. record.routeName
+        else
+            lines[#lines + 1] = tostring(slot)
+                .. ". ★ " .. record.name
+        end
+    end
+
+    return table.concat(lines, "\n")
+end
+
+function ShipFinderFleetReport.isReportOpen()
+    if ShipFinderFleetReport.active ~= true then
+        return false
+    end
+
+    local content = ShipFinderFleetReport.getPopupContent()
+    if content == nil then
+        return false
+    end
+
+    local text = ""
+    pcall(function()
+        text = tostring(content.Text or "")
+    end)
+
+    return text:find("FLEET — ", 1, true) == 1
+        or text:find("FLOTTE — ", 1, true) == 1
+        or text:find("FLEET SUMMARY", 1, true) == 1
+        or text:find("FLOTTENZUSAMMENFASSUNG", 1, true) == 1
+        or text:find("RÉSUMÉ DE LA FLOTTE", 1, true) == 1
+        or text:find("VUE D’ENSEMBLE DE LA FLOTTE", 1, true) == 1
+end
+
+function CombinedRoot:FleetReportShortcut(slot)
+    slot = tonumber(slot) or 0
+    if slot < 1 or slot > 9 then
+        return false
+    end
+
+    if not ShipFinderFleetReport.isReportOpen() then
+        return false
+    end
+
+    local record = ShipFinderFleetReport.visible[slot]
+    if record == nil then
+        system.log(
+            "[Ship Finder Fleet Analysis 1.4.36] SLOT EMPTY"
+            .. " | mode=" .. tostring(ShipFinderFleetReport.mode or "")
+            .. " | page=" .. tostring((ShipFinderFleetReport.page or 0) + 1)
+            .. " | slot=" .. tostring(slot)
+        )
+        return false
+    end
+
+    local fresh = nil
+    for _, object in pairs(
+        Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}
+    ) do
+        if tostring(object.ID) == tostring(record.id) then
+            fresh = object
+            break
+        end
+    end
+
+    if fresh == nil then
+        system.log(
+            "[Ship Finder Fleet Analysis 1.4.36] SHIP UNAVAILABLE"
+            .. " | name=" .. tostring(record.name)
+            .. " | id=" .. tostring(record.id)
+        )
+        return false
+    end
+
+    local nativeID = fresh.ID
+    local closeOk, closeErr = pcall(function()
+        Scripts:PopUI()
+    end)
+    local selectOk, selectErr = pcall(function()
+        Selection:SelectByID(nativeID)
+    end)
+    local jumpOk, jumpErr = pcall(function()
+        Scripts:JumpToObject(nativeID)
+    end)
+
+    ShipFinderFleetReport.active = false
+    ShipFinderFleetReport.opening = false
+    ShipFinderFleetReport.visible = {}
+
+    system.log(
+        "[Ship Finder Fleet Analysis 1.4.36] SHIP JUMP"
+        .. " | mode=" .. tostring(ShipFinderFleetReport.mode or "")
+        .. " | page=" .. tostring((ShipFinderFleetReport.page or 0) + 1)
+        .. " | slot=" .. tostring(slot)
+        .. " | name=" .. tostring(record.name)
+        .. " | objectId=" .. tostring(nativeID)
+        .. " | closeSuccess=" .. tostring(closeOk)
+        .. " | selectSuccess=" .. tostring(selectOk)
+        .. " | jumpSuccess=" .. tostring(jumpOk)
+        .. " | closeError=" .. tostring(closeErr or "")
+        .. " | selectError=" .. tostring(selectErr or "")
+        .. " | jumpError=" .. tostring(jumpErr or "")
+    )
+
+    return jumpOk
+end
+
+-- Ship Finder v1.4.34 Fleet Overview analytical parchment bridge.
+-- S3F increments encode which Fleet report was chosen:
+-- +1000 Summary, +2000 All Ships, +3000 Route Allocation,
+-- +4000 Independent Ships, +5000 Warships, +6000 Attention.
+-- Each signal routes through the proven Safe Close component before Tick sees it.
+CombinedRoot.FleetOverviewParchmentBridge = CombinedRoot.FleetOverviewParchmentBridge or {
+    observedSignal = nil,
+    observedSummarySignal = nil,
+}
+
+function CombinedRoot:_sf1432FleetOverviewSignal()
+    local ok, value = pcall(function()
+        return Variables:GetVariable("S3F")
+    end)
+    if not ok or value == nil then return 0 end
+    return tonumber(value) or 0
+end
+
+function CombinedRoot:_sf1441FleetSummarySignal()
+    local ok, value = pcall(function()
+        return Variables:GetVariable("S3L")
+    end)
+    if not ok or value == nil then return 0 end
+    return tonumber(value) or 0
+end
+
+function CombinedRoot:_sf1432ResetFleetOverviewBridge()
+    local bridge = self.FleetOverviewParchmentBridge
+    bridge.observedSignal = self:_sf1432FleetOverviewSignal()
+    bridge.observedSummarySignal = self:_sf1441FleetSummarySignal()
+
+    if ShipFinderFleetReport ~= nil then
+        ShipFinderFleetReport.active = false
+        ShipFinderFleetReport.opening = false
+        ShipFinderFleetReport.mode = nil
+        ShipFinderFleetReport.page = 0
+        ShipFinderFleetReport.visible = {}
+    end
+
+    system.log(
+        "[Ship Finder Fleet Analysis Bridge 1.4.41] RESET"
+        .. " | signal=" .. tostring(bridge.observedSignal)
+        .. " | summarySignal=" .. tostring(bridge.observedSummarySignal)
+        .. " | safeClose=2099398"
+    )
+end
+
+function CombinedRoot:_sf1432TickFleetOverviewBridge()
+    local bridge = self.FleetOverviewParchmentBridge
+
+    local summarySignal = self:_sf1441FleetSummarySignal()
+    if bridge.observedSummarySignal == nil then
+        bridge.observedSummarySignal = summarySignal
+    end
+
+    local oldSummarySignal =
+        tonumber(bridge.observedSummarySignal) or 0
+    local summaryDelta = summarySignal - oldSummarySignal
+
+    if summaryDelta >= 10000 then
+        bridge.observedSummarySignal = summarySignal
+
+        ShipFinderFleetReport.mode = "summary"
+        ShipFinderFleetReport.page = 0
+        ShipFinderFleetReport.visible = {}
+        ShipFinderFleetReport.active = false
+        ShipFinderFleetReport.opening = true
+
+        system.log(
+            "[Ship Finder Fleet Summary Robust Handoff 1.4.41] SIGNAL"
+            .. " | previous=" .. tostring(oldSummarySignal)
+            .. " | current=" .. tostring(summarySignal)
+            .. " | delta=" .. tostring(summaryDelta)
+            .. " | storyline=2099540"
+            .. " | action=request-now"
+        )
+
+        local ok, err = pcall(function()
+            GovernorDecision:CheatStartGovernorDecisionForCurrentPlayerNet(
+                2099540
+            )
+        end)
+
+        system.log(
+            "[Ship Finder Fleet Summary Robust Handoff 1.4.41] REQUEST"
+            .. " | storyline=2099540"
+            .. " | success=" .. tostring(ok)
+            .. " | error=" .. tostring(err or "")
+        )
+
+        if not ok then
+            ShipFinderFleetReport.opening = false
+            ShipFinderFleetReport.active = false
+        end
+
+        return true
+    elseif summarySignal ~= oldSummarySignal then
+        -- Track ordinary small S3L changes from legacy ship-navigation menus.
+        bridge.observedSummarySignal = summarySignal
+    end
+
+    local signal = self:_sf1432FleetOverviewSignal()
+
+    if bridge.observedSignal == nil then
+        bridge.observedSignal = signal
+    end
+
+    local oldSignal = tonumber(bridge.observedSignal) or 0
+    local delta = signal - oldSignal
+
+    if delta < 1000 then
+        if signal ~= oldSignal then
+            bridge.observedSignal = signal
+        end
+        return false
+    end
+
+    bridge.observedSignal = signal
+
+    local reportNumber = math.floor(delta / 1000)
+    local mode = nil
+    if reportNumber == 1 then
+        mode = "summary"
+    elseif reportNumber == 2 then
+        mode = "all"
+    elseif reportNumber == 3 then
+        mode = "routes"
+    elseif reportNumber == 4 then
+        mode = "independent"
+    elseif reportNumber == 5 then
+        mode = "warships"
+    elseif reportNumber == 6 then
+        mode = "attention"
+    end
+
+    if mode == nil then
+        system.log(
+            "[Ship Finder Fleet Analysis Bridge 1.4.37] ABORT"
+            .. " | reason=unknown-mode"
+            .. " | delta=" .. tostring(delta)
+        )
+        return false
+    end
+
+    if mode == "attention" then
+        system.log(
+            "[Ship Finder Attention On-Demand 1.5.0] SIGNAL"
+            .. " | source=S3F-proven-post-yield-bridge"
+            .. " | previous=" .. tostring(oldSignal)
+            .. " | current=" .. tostring(signal)
+            .. " | delta=" .. tostring(delta)
+            .. " | action=start-attention-scan"
+        )
+
+        -- This signal is observed only after Safe Close has allowed the
+        -- active NarrativeSequence to leave. Starting the native Trade Route
+        -- scan here therefore preserves the proven freeze-safe architecture.
+        ShipFinderAttentionScanRequested = true
+        islandScanRequested = false
+        ShipFinderAttentionWarningDetailCache = {}
+        ShipFinderAttentionRealRouteCache = nil
+        ShipFinderNativeIssueRouteCache =
+            ShipFinderNativeIssueRouteSnapshot()
+
+        if ShipFinderAttentionWarningStatesProbe ~= nil then
+            ShipFinderAttentionWarningStatesProbe.active = false
+            ShipFinderAttentionWarningStatesProbe.queue = {}
+            ShipFinderAttentionWarningStatesProbe.index = 0
+            ShipFinderAttentionWarningStatesProbe.phase = "idle"
+            ShipFinderAttentionWarningStatesProbe.focusedName = nil
+        end
+
+        directOpenPending = false
+        directOpenAttempt = 0
+
+        ntBegin()
+        return true
+    end
+
+    local storyline = 2099540
+    local count = 0
+    local pages = 1
+
+    if mode == "summary" then
+        ShipFinderFleetReport.mode = "summary"
+        ShipFinderFleetReport.page = 0
+        ShipFinderFleetReport.visible = {}
+        ShipFinderFleetReport.active = false
+        ShipFinderFleetReport.opening = true
+    else
+        ShipFinderFleetReport.mode = mode
+        ShipFinderFleetReport.page = 0
+        ShipFinderFleetReport.visible = {}
+        ShipFinderFleetReport.active = false
+        ShipFinderFleetReport.opening = true
+
+        count = #ShipFinderFleetReport.records(mode)
+        pages = math.max(1, math.ceil(count / 9))
+
+        if pages <= 12 then
+            storyline =
+                ShipFinderFleetReport.pageStorylines[pages]
+        else
+            storyline = ISLAND_REPORT_STORYLINE
+        end
+    end
+
+    system.log(
+        "[Ship Finder Fleet Analysis Bridge 1.4.37] SIGNAL"
+        .. " | previous=" .. tostring(oldSignal)
+        .. " | current=" .. tostring(signal)
+        .. " | delta=" .. tostring(delta)
+        .. " | mode=" .. tostring(mode)
+        .. " | ships=" .. tostring(count)
+        .. " | pages=" .. tostring(pages)
+        .. " | storyline=" .. tostring(storyline)
+        .. " | action=request-now"
+    )
+
+    local ok, err = pcall(function()
+        GovernorDecision:CheatStartGovernorDecisionForCurrentPlayerNet(
+            storyline
+        )
+    end)
+
+    system.log(
+        "[Ship Finder Fleet Analysis 1.4.36] STORYLINE REQUEST"
+        .. " | mode=" .. tostring(mode)
+        .. " | storyline=" .. tostring(storyline)
+        .. " | success=" .. tostring(ok)
+        .. " | error=" .. tostring(err or "")
+    )
+
+    if not ok and ShipFinderFleetReport ~= nil then
+        ShipFinderFleetReport.active = false
+        ShipFinderFleetReport.opening = false
+    end
+
+    return true
+end
+
 function CombinedRoot:Tick()
     if nativeTradeRouteToggleActive then
         ntTick()
         return
     end
 
+    if ShipFinderFleetReport ~= nil
+        and ShipFinderFleetReport.returnMainPending == true
+    then
+        ShipFinderFleetReport.returnMainPending = false
+
+        system.log(
+            "[Ship Finder Fleet Analysis 1.4.36] RETURN MAIN"
+            .. " | action=proven-native-menu-opener"
+            .. " | rescan=false"
+        )
+
+        ntOpenShipFinderMenu()
+        return
+    end
+
+    if self:_sf1425TickAttentionMenuBridge() then
+        return
+    end
+
+    if self:_sf1432TickFleetOverviewBridge() then
+        return
+    end
+
+    if ShipFinderAttentionParchmentTest ~= nil
+        and ShipFinderAttentionParchmentTest.pendingOpen == true
+    then
+        ShipFinderAttentionParchmentTest.pendingOpen = false
+        ShipFinderAttentionParchmentTest.opening = true
+
+        local attentionCount = #ShipFinderAttentionParchmentTest.records()
+        local attentionStoryline =
+            attentionCount <= 9 and 2099210 or ISLAND_REPORT_STORYLINE
+
+        local ok, err = pcall(function()
+            GovernorDecision:CheatStartGovernorDecisionForCurrentPlayerNet(
+                attentionStoryline
+            )
+        end)
+        system.log(
+            "[Ship Finder Attention Report 1.4.31] STORYLINE REQUEST"
+            .. " | deferredTicks=1"
+            .. " | ships=" .. tostring(attentionCount)
+            .. " | mode=" .. tostring(attentionCount <= 9 and "single-page" or "multi-page")
+            .. " | storyline=" .. tostring(attentionStoryline)
+            .. " | success=" .. tostring(ok)
+            .. " | error=" .. tostring(err or "")
+        )
+        if not ok then
+            ShipFinderAttentionParchmentTest.opening = false
+            ShipFinderAttentionParchmentTest.active = false
+        end
+        return
+    end
+
+    if ShipFinderIslandUI and ShipFinderIslandUI.pendingIslandOpen then
+        ShipFinderIslandUI.pendingIslandOpen = false
+        local ok, err = pcall(function()
+            GovernorDecision:CheatStartGovernorDecisionForCurrentPlayerNet(
+                ISLAND_REPORT_STORYLINE
+            )
+        end)
+        system.log(
+            "[Ship Finder Island Navigation 1.1.1] ISLAND REPORT OPEN"
+            .. " | island=" .. tostring(ShipFinderIslandUI.selectedIsland or "")
+            .. " | deferredTicks=1"
+            .. " | success=" .. tostring(ok)
+            .. " | error=" .. tostring(err or "")
+        )
+        return
+    end
+
     if tickShipsByIslandUI() then
         return
+    end
+
+    if ShipFinderAttentionParchmentTest ~= nil
+        and ShipFinderAttentionParchmentTest.active == true
+        and ShipFinderAttentionParchmentTest.opening ~= true
+        and ShipFinderAttentionParchmentTest.getPopupContent() == nil
+    then
+        ShipFinderAttentionParchmentTest.active = false
+        ShipFinderAttentionParchmentTest.visible = {}
+        system.log(
+            "[Ship Finder Attention Report 1.4.31] CLOSED"
+            .. " | action=state-cleared"
+        )
     end
 
     if self:_sf1197TickIslandJumpWatch() then
@@ -7501,6 +9096,20 @@ end
 function CombinedRoot:IslandShortcut(slot)
     slot = tonumber(slot) or 0
 
+    if ShipFinderFleetReport ~= nil
+        and ShipFinderFleetReport.isReportOpen ~= nil
+        and ShipFinderFleetReport.isReportOpen()
+    then
+        return self:FleetReportShortcut(slot)
+    end
+
+    if ShipFinderAttentionParchmentTest ~= nil
+        and ShipFinderAttentionParchmentTest.isReportOpen ~= nil
+        and ShipFinderAttentionParchmentTest.isReportOpen()
+    then
+        return self:AttentionParchmentTestShortcut(slot)
+    end
+
     if slot < 1 or slot > 9 then
         return false
     end
@@ -7517,10 +9126,70 @@ function CombinedRoot:IslandShortcut(slot)
         return false
     end
 
-    local _, ships = ShipFinderIslandUI.pageText(
-        ShipFinderIslandUI.page or 0
-    )
-    local ship = ships and ships[slot] or nil
+    if not ShipFinderIslandUI.resumeMode
+        and ShipFinderIslandUI.mode == "islands"
+        and ShipFinderIslandUI.islandForShortcutSlot
+    then
+        local islandName = ShipFinderIslandUI.islandForShortcutSlot(slot)
+        if islandName == nil then
+            system.log(
+                "[Ship Finder Island Navigation 1.1.1] ISLAND SLOT EMPTY"
+                .. " | islandPage="
+                .. tostring((ShipFinderIslandUI.islandPage or 0) + 1)
+                .. " | slot=" .. tostring(slot)
+            )
+            return false
+        end
+
+        ShipFinderIslandUI.mode = "ships"
+        ShipFinderIslandUI.selectedIsland = islandName
+        ShipFinderIslandUI.shipPage = 0
+        islandReportMarkerHandled = false
+        islandScanMarkerHandled = false
+
+        local closeOk, closeErr = pcall(function() Scripts:PopUI() end)
+        ShipFinderIslandUI.pendingIslandOpen = closeOk
+
+        system.log(
+            "[Ship Finder Island Navigation 1.1.1] ISLAND SELECT"
+            .. " | island=" .. tostring(islandName)
+            .. " | islandPage="
+            .. tostring((ShipFinderIslandUI.islandPage or 0) + 1)
+            .. " | slot=" .. tostring(slot)
+            .. " | closeSuccess=" .. tostring(closeOk)
+            .. " | reportOpen=deferred-next-tick"
+            .. " | closeError=" .. tostring(closeErr or "")
+        )
+        return closeOk
+    end
+
+    local ship = nil
+    local resumeIsland = nil
+    if ShipFinderIslandUI.resumeMode
+        and ShipFinderIslandUI.resumeIslandPageText
+    then
+        local _, ships = ShipFinderIslandUI.resumeIslandPageText(
+            ShipFinderIslandUI.page or 0
+        )
+        ship = ships and ships[slot] or nil
+        resumeIsland = ShipFinderIslandUI.selectedIsland
+    elseif ShipFinderIslandUI.mode == "ships"
+        and ShipFinderIslandUI.shipPageText
+    then
+        local _, ships = ShipFinderIslandUI.shipPageText()
+        ship = ships and ships[slot] or nil
+        resumeIsland = ShipFinderIslandUI.selectedIsland
+    elseif ShipFinderIslandUI.pageEntry then
+        ship, resumeIsland = ShipFinderIslandUI.pageEntry(
+            ShipFinderIslandUI.page or 0,
+            slot
+        )
+    else
+        local _, ships = ShipFinderIslandUI.pageText(
+            ShipFinderIslandUI.page or 0
+        )
+        ship = ships and ships[slot] or nil
+    end
 
     if not ship then
         system.log(
@@ -7616,6 +9285,10 @@ function CombinedRoot:IslandShortcut(slot)
     local ok = closeOk and selectOk and jumpOk
     ShipFinderIslandUI.jumpInProgress = false
 
+    if ok and resumeIsland ~= nil and ShipFinderIslandUI.armResume then
+        ShipFinderIslandUI.armResume(resumeIsland)
+    end
+
     if not ok then
         local failure = not closeOk and "popup-close-failed"
             or (not selectOk and "select-failed")
@@ -7646,6 +9319,95 @@ function CombinedRoot:IslandShortcut(slot)
     )
 
     return ok
+end
+
+function CombinedRoot:IslandAllIslands()
+    if ShipFinderFleetReport ~= nil
+        and ShipFinderFleetReport.isReportOpen ~= nil
+        and ShipFinderFleetReport.isReportOpen()
+    then
+        local mode = tostring(ShipFinderFleetReport.mode or "")
+        local closeOk, closeErr = pcall(function()
+            Scripts:PopUI()
+        end)
+
+        ShipFinderFleetReport.active = false
+        ShipFinderFleetReport.opening = false
+        ShipFinderFleetReport.page = 0
+        ShipFinderFleetReport.visible = {}
+        ShipFinderFleetReport.returnMainPending = closeOk
+
+        system.log(
+            "[Ship Finder Fleet Analysis 1.4.36] CTRL ALT 0"
+            .. " | mode=" .. mode
+            .. " | action=return-main-menu-deferred"
+            .. " | closeSuccess=" .. tostring(closeOk)
+            .. " | error=" .. tostring(closeErr or "")
+        )
+
+        return closeOk
+    end
+
+    if ShipFinderAttentionParchmentTest ~= nil
+        and ShipFinderAttentionParchmentTest.isReportOpen ~= nil
+        and ShipFinderAttentionParchmentTest.isReportOpen()
+    then
+        local closeOk, closeErr = pcall(function()
+            Scripts:PopUI()
+        end)
+
+        ShipFinderAttentionParchmentTest.active = false
+        ShipFinderAttentionParchmentTest.opening = false
+        ShipFinderAttentionParchmentTest.pendingOpen = false
+        ShipFinderAttentionParchmentTest.page = 0
+        ShipFinderAttentionParchmentTest.visible = {}
+
+        if ShipFinderFleetReport ~= nil then
+            ShipFinderFleetReport.returnMainPending = closeOk
+        end
+
+        system.log(
+            "[Ship Finder Fleet Analysis 1.4.36] CTRL ALT 0"
+            .. " | mode=attention"
+            .. " | action=return-main-menu-deferred"
+            .. " | closeSuccess=" .. tostring(closeOk)
+            .. " | error=" .. tostring(closeErr or "")
+        )
+
+        return closeOk
+    end
+
+    if not ShipFinderIslandUI
+        or not ShipFinderIslandUI.isReportOpen
+        or not ShipFinderIslandUI.isReportOpen()
+        or (not ShipFinderIslandUI.resumeMode
+            and ShipFinderIslandUI.mode ~= "ships")
+    then
+        return false
+    end
+
+    ShipFinderIslandUI.resumeMode = false
+    ShipFinderIslandUI.mode = "islands"
+    ShipFinderIslandUI.page = 0
+    ShipFinderIslandUI.islandPage = 0
+    ShipFinderIslandUI.shipPage = 0
+    ShipFinderIslandUI.jumpInProgress = false
+    islandReportMarkerHandled = false
+    islandScanMarkerHandled = false
+
+    -- Reopen the existing report at native page 1. This resets the parchment's
+    -- arrow state while preserving the proven topology cache and avoiding a scan.
+    local closeOk, closeErr = pcall(function() Scripts:PopUI() end)
+    ShipFinderIslandUI.pendingIslandOpen = closeOk
+    system.log(
+        "[Ship Finder Fast Resume 1.4.10] ALL ISLANDS"
+        .. " | cachePreserved=true"
+        .. " | topologyRescan=false"
+        .. " | reportOpen=deferred-next-tick"
+        .. " | success=" .. tostring(closeOk)
+        .. " | error=" .. tostring(closeErr or "")
+    )
+    return closeOk
 end
 
 function CombinedRoot:IslandNextPage()
@@ -7941,6 +9703,18 @@ function ShipFinderIslandCache.commit(index, routeCount, routeIslandMap)
 
     local nowRaw = ShipFinderIslandCache._sf1194PlayTimeRaw and ShipFinderIslandCache._sf1194PlayTimeRaw() or nil
     local startRaw = ShipFinderIslandCache.scanStartedPlayTime
+    local nowWall = nil
+    local nowCpu = nil
+    pcall(function()
+        if os and type(os.time) == "function" then nowWall = os.time() end
+    end)
+    pcall(function()
+        if os and type(os.clock) == "function" then nowCpu = os.clock() end
+    end)
+    local wallDuration = ShipFinderIslandCache.scanStartedWallTime and nowWall
+        and (nowWall - ShipFinderIslandCache.scanStartedWallTime) or nil
+    local cpuDuration = ShipFinderIslandCache.scanStartedCpuClock and nowCpu
+        and (nowCpu - ShipFinderIslandCache.scanStartedCpuClock) or nil
     local nowSeconds = ShipFinderIslandCache._sf1194SecondsFromPlayTime and ShipFinderIslandCache._sf1194SecondsFromPlayTime(nowRaw) or nil
     local startSeconds = ShipFinderIslandCache._sf1194SecondsFromPlayTime and ShipFinderIslandCache._sf1194SecondsFromPlayTime(startRaw) or nil
     ShipFinderIslandCache.lastScanPlayTimeRaw = nowRaw
@@ -7968,9 +9742,17 @@ function ShipFinderIslandCache.commit(index, routeCount, routeIslandMap)
         .. " | islands=" .. tostring(islandCount)
         .. " | routesScanned=" .. tostring(routeCount)
         .. " | topologyRoutes=" .. tostring(topologyRoutes)
+        .. " | scanReason=" .. tostring(ShipFinderIslandCache.scanStartReason)
+        .. " | durationGameSec="
+        .. tostring(ShipFinderIslandCache.lastScanDurationSeconds)
+        .. " | durationWallSec=" .. tostring(wallDuration)
+        .. " | durationCpuSec=" .. tostring(cpuDuration)
         .. " | topologySignatureChars="
         .. tostring(#(ShipFinderIslandCache.topologySignature or ""))
     )
+
+    ShipFinderIslandCache.scanStartedWallTime = nil
+    ShipFinderIslandCache.scanStartedCpuClock = nil
 end
 
 function ShipFinderIslandCache._sf1194PlayTimeRaw()
@@ -8032,9 +9814,12 @@ end
 function ShipFinderIslandCache.scanInfoText()
     local islands, mappedRoutes, activeRoutes, ships = ShipFinderIslandCache._sf1194Stats()
     local de = tostring(ShipFinderUILanguage or "") == "de"
+    local fr = tostring(ShipFinderUILanguage or "") == "fr"
     local cacheState = de
         and (ShipFinderIslandCache.valid and "Im Cache" or "Noch nicht im Cache")
-        or (ShipFinderIslandCache.valid and "Cached" or "Not cached yet")
+        or (fr
+            and (ShipFinderIslandCache.valid and "En cache" or "Pas encore en cache")
+            or (ShipFinderIslandCache.valid and "Cached" or "Not cached yet"))
     local lastPlay = ShipFinderIslandCache.lastScanPlayTimeSeconds
     local scanDuration = ShipFinderIslandCache.lastScanDurationSeconds
     local nowRaw = ShipFinderIslandCache._sf1194PlayTimeRaw()
@@ -8052,16 +9837,26 @@ function ShipFinderIslandCache.scanInfoText()
             :gsub("(%d+)h", "%1 Std.")
             :gsub("(%d+)m", "%1 Min.")
             :gsub("(%d+)s", "%1 Sek.")
+    elseif fr and ageCompact then
+        ageCompact = ageCompact
+            :gsub("(%d+)d", "%1 j")
+            :gsub("(%d+)h", "%1 h")
+            :gsub("(%d+)m", "%1 min")
+            :gsub("(%d+)s", "%1 s")
     end
     local lastText = nil
     if de then
         lastText = ageCompact and ("vor " .. ageCompact) or "Noch kein vollständiger Scan gespeichert"
+    elseif fr then
+        lastText = ageCompact and ("il y a " .. ageCompact) or "Aucune analyse complète enregistrée"
     else
         lastText = ageCompact and (ageCompact .. " ago") or "No full scan recorded"
     end
     local durationText = scanDuration
-        and (string.format("%.1f", scanDuration) .. (de and " Sek." or " sec"))
-        or (de and "Nicht verfügbar" or "Not available")
+        and (string.format("%.1f", scanDuration)
+            .. (de and " Sek." or (fr and " s" or " sec")))
+        or (de and "Nicht verfügbar"
+            or (fr and "Indisponible" or "Not available"))
 
     if de then
         return "SCHIFFE NACH INSEL — SCAN-INFORMATIONEN\n\n"
@@ -8076,6 +9871,19 @@ function ShipFinderIslandCache.scanInfoText()
             .. "Schiffzuweisungen: Automatisch aktualisiert\n\n"
             .. "Inselverbindungen neu scannen, nachdem Routenstopps geändert wurden\n"
             .. "oder wenn Ergebnisse nicht korrekt erscheinen."
+    elseif fr then
+        return "NAVIRES PAR ÎLE — INFORMATIONS SUR L’ANALYSE\n\n"
+            .. "Province : " .. ShipFinderIslandCache._sf1194ProvinceName() .. "\n\n"
+            .. "Dernière analyse complète : " .. lastText .. "\n"
+            .. "Durée de l’analyse : " .. durationText .. "\n\n"
+            .. "Îles trouvées : " .. tostring(islands) .. "\n"
+            .. "Routes répertoriées : " .. tostring(mappedRoutes) .. "\n"
+            .. "Routes actives : " .. tostring(activeRoutes) .. "\n"
+            .. "Navires trouvés : " .. tostring(ships) .. "\n\n"
+            .. "Liaisons entre îles : " .. cacheState .. "\n"
+            .. "Affectations des navires : actualisées automatiquement\n\n"
+            .. "Utilisez « Réanalyser les liaisons entre îles » après avoir modifié les escales d’une route\n"
+            .. "ou si les résultats semblent incorrects."
     end
 
     return "SHIPS BY ISLAND — SCAN INFORMATION\n\n"
@@ -8172,6 +9980,15 @@ ShipFinderIslandUI = ShipFinderIslandUI or {
     page = 0,
     jumpInProgress = false,
 }
+
+ShipFinderIslandUI.resumeAvailable =
+    ShipFinderIslandUI.resumeAvailable == true
+ShipFinderIslandUI.resumeMode = false
+ShipFinderIslandUI.selectedIsland =
+    ShipFinderIslandUI.selectedIsland or nil
+ShipFinderIslandUI.resumeSessionGUID =
+    ShipFinderIslandUI.resumeSessionGUID or nil
+ShipFinderIslandUI.pendingIslandOpen = false
 
 function ShipFinderIslandUI.sortedIslandNames()
     local names = {}
@@ -8288,6 +10105,189 @@ function ShipFinderIslandUI.buildPages()
     return pages
 end
 
+-- Resolve the island heading that owns an exact visible shortcut row. A ship can
+-- serve several islands, so searching the cache by ship identity alone is not
+-- sufficient to preserve the user's current island context.
+function ShipFinderIslandUI.pageEntry(pageIndex, slot)
+    local pages = ShipFinderIslandUI.buildPages()
+    local page = pages[(math.max(0, tonumber(pageIndex) or 0)) + 1]
+    if page == nil then return nil, nil end
+
+    local currentSlot = 0
+    for _, section in ipairs(page.sections or {}) do
+        for _, ship in ipairs(section.ships or {}) do
+            currentSlot = currentSlot + 1
+            if currentSlot == slot then
+                return ship, tostring(section.island or "")
+            end
+        end
+    end
+    return nil, nil
+end
+
+function ShipFinderIslandUI.shipRowText(number, ship, de)
+    local text = tostring(number) .. ". ★ " .. tostring(ship and ship.name or "")
+    local routeName = tostring(ship and ship.routeName or "")
+    if routeName ~= "" then
+        text = text .. " — ▶ " .. routeName
+    end
+    if ship and ship.paused == true then
+        local fr = not de and tostring(ShipFinderUILanguage or "") == "fr"
+        text = text .. (de and " [PAUSIERT]"
+            or (fr and " [EN PAUSE]" or " [PAUSED]"))
+    end
+    return text
+end
+
+function ShipFinderIslandUI.armResume(islandName)
+    local name = tostring(islandName or "")
+    if name == "" then return false end
+
+    ShipFinderIslandUI.selectedIsland = name
+    ShipFinderIslandUI.resumeSessionGUID =
+        ShipFinderIslandCache.currentSessionGUID()
+    ShipFinderIslandUI.resumeAvailable = true
+
+    system.log(
+        "[Ship Finder Fast Resume 1.1.1] ARM"
+        .. " | island=" .. name
+        .. " | session=" .. tostring(ShipFinderIslandUI.resumeSessionGUID)
+        .. " | nextCtrlAltF=resume-island"
+    )
+    return true
+end
+
+function ShipFinderIslandUI.resumeIslandPageText(pageIndex)
+    local name = tostring(ShipFinderIslandUI.selectedIsland or "")
+    local ships = ShipFinderIslandUI.sortedShipsForIsland(name)
+    local de = tostring(ShipFinderUILanguage or "") == "de"
+    local fr = tostring(ShipFinderUILanguage or "") == "fr"
+    local pageCount = math.max(1, math.ceil(#ships / 9))
+    local page = math.max(0, tonumber(pageIndex) or 0)
+    if page >= pageCount then page = pageCount - 1 end
+    local first = page * 9 + 1
+    local last = math.min(first + 8, #ships)
+    local visibleShips = {}
+    local lines = {
+        (de and "SCHIFFE FÜR "
+            or (fr and "NAVIRES DESSERVANT " or "SHIPS SERVING ")) .. string.upper(name),
+        "",
+        de and "Schnellrückkehr zur zuletzt verwendeten Insel."
+            or (fr and "Retour rapide à la dernière île utilisée."
+                or "Fast resume to your last used island."),
+        de and "Ctrl+Alt+1-9 springt direkt zum nummerierten Schiff."
+            or (fr and "Ctrl+Alt+1-9 : accéder directement au navire numéroté."
+                or "Ctrl+Alt+1-9 jumps directly to the numbered ship."),
+        de and "Ctrl+Alt+0 — ◀ Alle Inseln"
+            or (fr and "Ctrl+Alt+0 — ◀ Toutes les îles"
+                or "Ctrl+Alt+0 — ◀ All Islands"),
+        "",
+        (de and "Schiffe " or (fr and "Navires " or "Ships "))
+            .. tostring(first) .. "-" .. tostring(last)
+            .. (de and " von " or (fr and " sur " or " of ")) .. tostring(#ships)
+            .. (de and "   Seite " or (fr and "   Page " or "   Page ")) .. tostring(page + 1)
+            .. "/" .. tostring(pageCount),
+        "",
+    }
+
+    for index = first, last do
+        local ship = ships[index]
+        if ship then
+            visibleShips[#visibleShips + 1] = ship
+            lines[#lines + 1] = ShipFinderIslandUI.shipRowText(
+                #visibleShips,
+                ship,
+                de
+            )
+        end
+    end
+
+    if #ships == 0 then
+        lines[#lines + 1] = de
+            and "Keine aktuell zugewiesenen Schiffe gefunden."
+            or (fr and "Aucun navire actuellement affecté."
+                or "No currently assigned ships found.")
+    end
+
+    return table.concat(lines, "\n"), visibleShips, page
+end
+
+function ShipFinderIslandUI.tryFastResume()
+    if not ShipFinderIslandUI.resumeAvailable then return false end
+
+    -- A resume token is deliberately one-shot. Jumping another ship arms it
+    -- again; closing the resumed report without a jump makes the following
+    -- Ctrl+Alt+F return to the normal Ship Finder menu.
+    ShipFinderIslandUI.resumeAvailable = false
+
+    local currentSession = ShipFinderIslandCache.currentSessionGUID()
+    if tostring(currentSession) ~= tostring(ShipFinderIslandUI.resumeSessionGUID) then
+        system.log(
+            "[Ship Finder Fast Resume 1.1.1] FALLBACK"
+            .. " | reason=session-changed"
+            .. " | cachedSession=" .. tostring(ShipFinderIslandUI.resumeSessionGUID)
+            .. " | currentSession=" .. tostring(currentSession)
+        )
+        ShipFinderIslandUI.resumeMode = false
+        return false
+    end
+
+    local matches, reason = ShipFinderIslandCache.matchesCurrentFleet()
+    if not matches then
+        system.log(
+            "[Ship Finder Fast Resume 1.1.1] FALLBACK"
+            .. " | reason=" .. tostring(reason)
+            .. " | action=normal-menu"
+        )
+        ShipFinderIslandUI.resumeMode = false
+        return false
+    end
+
+    local index, routeCount = ShipFinderIslandCache.restore()
+    islandFullIndex = index or islandFullIndex
+    islandFullIndexRouteCount = routeCount or islandFullIndexRouteCount
+
+    local islandName = tostring(ShipFinderIslandUI.selectedIsland or "")
+    if islandName == ""
+        or ShipFinderIslandCache.index == nil
+        or ShipFinderIslandCache.index[islandName] == nil
+    then
+        system.log(
+            "[Ship Finder Fast Resume 1.1.1] FALLBACK"
+            .. " | reason=last-island-unavailable"
+            .. " | island=" .. islandName
+            .. " | action=normal-menu"
+        )
+        ShipFinderIslandUI.resumeMode = false
+        return false
+    end
+
+    ShipFinderIslandUI.resumeMode = true
+    ShipFinderIslandUI.page = 0
+    ShipFinderIslandUI.jumpInProgress = false
+    islandReportMarkerHandled = false
+    islandScanMarkerHandled = false
+
+    local ok, err = pcall(function()
+        GovernorDecision:CheatStartGovernorDecisionForCurrentPlayerNet(
+            ISLAND_REPORT_STORYLINE
+        )
+    end)
+
+    system.log(
+        "[Ship Finder Fast Resume 1.1.1] OPEN"
+        .. " | island=" .. islandName
+        .. " | cache=match"
+        .. " | liveAssignments=refreshed"
+        .. " | success=" .. tostring(ok)
+        .. " | error=" .. tostring(err or "")
+    )
+    if not ok then
+        ShipFinderIslandUI.resumeMode = false
+    end
+    return ok
+end
+
 function ShipFinderIslandUI.markerForPage(page)
     return "SF_SHIPS_BY_ISLAND_REPORT_P" .. tostring((tonumber(page) or 0) + 1)
 end
@@ -8313,10 +10313,13 @@ function ShipFinderIslandUI.pageText(pageIndex)
     local pages = ShipFinderIslandUI.buildPages()
     local pageCount = #pages
     local de = tostring(ShipFinderUILanguage or "") == "de"
+    local fr = tostring(ShipFinderUILanguage or "") == "fr"
 
     if pageCount == 0 then
         if de then
             return "SCHIFFE NACH INSEL\n\nKeine Schiffe sind aktiven Handelsrouten zugewiesen.", {}
+        elseif fr then
+            return "NAVIRES PAR ÎLE\n\nAucun navire n’est affecté à une route commerciale active.", {}
         end
         return "SHIPS BY ISLAND\n\nNo ships assigned to active trade routes.", {}
     end
@@ -8326,10 +10329,12 @@ function ShipFinderIslandUI.pageText(pageIndex)
 
     local page = pages[p + 1]
     local lines = {
-        de and "SCHIFFE NACH INSEL" or "SHIPS BY ISLAND",
+        de and "SCHIFFE NACH INSEL"
+            or (fr and "NAVIRES PAR ÎLE" or "SHIPS BY ISLAND"),
         "",
         de and "Ctrl+Alt+1-9 springt direkt zum nummerierten Schiff."
-            or "Ctrl+Alt+1-9 jumps directly to the numbered ship.",
+            or (fr and "Ctrl+Alt+1-9 : accéder directement au navire numéroté."
+                or "Ctrl+Alt+1-9 jumps directly to the numbered ship."),
         "",
     }
 
@@ -8337,20 +10342,23 @@ function ShipFinderIslandUI.pageText(pageIndex)
     for _, section in ipairs(page.sections or {}) do
         local headline = "=== " .. tostring(section.island)
         if section.continued then
-            headline = headline .. (de and " (Fortsetzung)" or " (continued)")
+            headline = headline .. (de and " (Fortsetzung)"
+                or (fr and " (suite)" or " (continued)"))
         end
         headline = headline .. " ==="
         lines[#lines + 1] = headline
 
         for _, ship in ipairs(section.ships or {}) do
             slot = slot + 1
-            lines[#lines + 1] = tostring(slot) .. ". >>> " .. tostring(ship.name)
+            lines[#lines + 1] = ShipFinderIslandUI.shipRowText(slot, ship, de)
         end
         lines[#lines + 1] = ""
     end
 
     if de then
         lines[#lines + 1] = "Seite " .. tostring(p + 1) .. " von " .. tostring(pageCount)
+    elseif fr then
+        lines[#lines + 1] = "Page " .. tostring(p + 1) .. " sur " .. tostring(pageCount)
     else
         lines[#lines + 1] = "Page " .. tostring(p + 1) .. " of " .. tostring(pageCount)
     end
@@ -8402,6 +10410,7 @@ end
 function ShipFinderIslandUI.reset()
     ShipFinderIslandUI.page = 0
     ShipFinderIslandUI.jumpInProgress = false
+    ShipFinderIslandUI.pendingIslandOpen = false
 end
 
 
@@ -8486,17 +10495,24 @@ function ShipFinderIslandUI.islandPageText()
     local last = math.min(first + 8, #names)
     local pages = math.max(1, math.ceil(#names / 9))
     local de = tostring(ShipFinderUILanguage or "") == "de"
+    local fr = tostring(ShipFinderUILanguage or "") == "fr"
 
     local lines = {
-        de and "SCHIFFE NACH INSEL" or "SHIPS BY ISLAND",
+        de and "SCHIFFE NACH INSEL"
+            or (fr and "NAVIRES PAR ÎLE" or "SHIPS BY ISLAND"),
         "",
-        de and "Wähle eine Insel mit Ctrl+Alt+1-9." or "Choose an island with Ctrl+Alt+1-9.",
+        de and "Wähle eine Insel mit Ctrl+Alt+1-9."
+            or (fr and "Choisissez une île avec Ctrl+Alt+1-9."
+                or "Choose an island with Ctrl+Alt+1-9."),
         de and "Nutze die Pfeile auf dem Pergament, um die Seiten zu wechseln."
-            or "Use the parchment arrows to change pages.",
+            or (fr and "Utilisez les flèches du parchemin pour changer de page."
+                or "Use the parchment arrows to change pages."),
         "",
-        (de and "Inseln " or "Islands ") .. tostring(first) .. "-" .. tostring(last)
-            .. (de and " von " or " of ") .. tostring(#names)
-            .. (de and "   Seite " or "   Page ") .. tostring(page + 1) .. "/" .. tostring(pages),
+        (de and "Inseln " or (fr and "Îles " or "Islands "))
+            .. tostring(first) .. "-" .. tostring(last)
+            .. (de and " von " or (fr and " sur " or " of ")) .. tostring(#names)
+            .. (de and "   Seite " or (fr and "   Page " or "   Page "))
+            .. tostring(page + 1) .. "/" .. tostring(pages),
         ""
     }
 
@@ -8507,7 +10523,8 @@ function ShipFinderIslandUI.islandPageText()
             local rec = ShipFinderIslandCache.index[name]
             local ships = rec and rec.ships or {}
             local unit = de and (#ships == 1 and " Schiff" or " Schiffe")
-                or (" ship" .. (#ships == 1 and "" or "s"))
+                or (fr and (#ships == 1 and " navire" or " navires")
+                    or (" ship" .. (#ships == 1 and "" or "s")))
             lines[#lines + 1] = tostring(slot) .. ". " .. tostring(name)
                 .. " — " .. tostring(#ships) .. unit
         end
@@ -8515,11 +10532,20 @@ function ShipFinderIslandUI.islandPageText()
     return table.concat(lines, "\n")
 end
 
+
+function ShipFinderIslandUI.islandForShortcutSlot(slot)
+    local page = math.max(0, tonumber(ShipFinderIslandUI.islandPage) or 0)
+    local index = page * 9 + (tonumber(slot) or 0)
+    local names = ShipFinderIslandUI.sortedIslandNames()
+    return names[index]
+end
+
 function ShipFinderIslandUI.shipPageText()
     local name = ShipFinderIslandUI.selectedIsland
     local rec = name and ShipFinderIslandCache.index and ShipFinderIslandCache.index[name] or nil
     local ships = rec and rec.ships or {}
     local de = tostring(ShipFinderUILanguage or "") == "de"
+    local fr = tostring(ShipFinderUILanguage or "") == "fr"
 
     table.sort(ships, function(a, b)
         return string.lower(tostring(a.name)) < string.lower(tostring(b.name))
@@ -8531,25 +10557,38 @@ function ShipFinderIslandUI.shipPageText()
     local pages = math.max(1, math.ceil(#ships / 9))
 
     local lines = {
-        (de and "SCHIFFE FÜR " or "SHIPS SERVING ") .. string.upper(tostring(name or "")),
+        (de and "SCHIFFE FÜR "
+            or (fr and "NAVIRES DESSERVANT " or "SHIPS SERVING "))
+            .. string.upper(tostring(name or "")),
         "",
         de and "Wähle ein Schiff mit Ctrl+Alt+1-9, um direkt dorthin zu springen."
-            or "Choose a ship with Ctrl+Alt+1-9 to jump directly to it.",
+            or (fr and "Choisissez un navire avec Ctrl+Alt+1-9 pour y accéder directement."
+                or "Choose a ship with Ctrl+Alt+1-9 to jump directly to it."),
         de and "Nutze die Pfeile auf dem Pergament, um die Seiten zu wechseln."
-            or "Use the parchment arrows to change pages.",
+            or (fr and "Utilisez les flèches du parchemin pour changer de page."
+                or "Use the parchment arrows to change pages."),
+        de and "Ctrl+Alt+0 — ◀ Alle Inseln"
+            or (fr and "Ctrl+Alt+0 — ◀ Toutes les îles"
+                or "Ctrl+Alt+0 — ◀ All Islands"),
         "",
-        (de and "Schiffe " or "Ships ") .. tostring(first) .. "-" .. tostring(last)
-            .. (de and " von " or " of ") .. tostring(#ships)
-            .. (de and "   Seite " or "   Page ") .. tostring(page + 1) .. "/" .. tostring(pages),
+        (de and "Schiffe " or (fr and "Navires " or "Ships "))
+            .. tostring(first) .. "-" .. tostring(last)
+            .. (de and " von " or (fr and " sur " or " of ")) .. tostring(#ships)
+            .. (de and "   Seite " or (fr and "   Page " or "   Page "))
+            .. tostring(page + 1) .. "/" .. tostring(pages),
         ""
     }
 
+    local visibleShips = {}
     for slot = 1, 9 do
         local index = page * 9 + slot
         local ship = ships[index]
-        if ship then lines[#lines + 1] = tostring(slot) .. ". >>> " .. tostring(ship.name) end
+        if ship then
+            visibleShips[#visibleShips + 1] = ship
+            lines[#lines + 1] = tostring(slot) .. ". >>> " .. tostring(ship.name)
+        end
     end
-    return table.concat(lines, "\n")
+    return table.concat(lines, "\n"), visibleShips, page
 end
 
 function ShipFinderIslandUI.writeCurrentPage()
@@ -8584,21 +10623,1272 @@ end
 
 function ShipFinderIslandUI.reset()
     ShipFinderIslandUI.mode = "islands"
+    ShipFinderIslandUI.resumeMode = false
     ShipFinderIslandUI.islandPage = 0
     ShipFinderIslandUI.shipPage = 0
     ShipFinderIslandUI.selectedIsland = nil
     ShipFinderIslandUI.jumpInProgress = false
 end
 
-system.log("[Ship Finder Combined Root 1.1.0] Lua loaded and Ctrl+Alt+F ready | generic categories | proven auto-open | route-group probe retained")
+system.log("[Ship Finder 1.5.0] Load complete | EN/DE/FR | fast Ctrl+Alt+F menu | on-demand Attention scan | Ships by Island | Fleet Overview | direct jumps")
+end
+
+-- Keep these helpers global. This combined chunk is already at Anno's
+-- top-level Lua local-variable limit; adding more top-level locals prevents
+-- the complete menu module from loading.
+function ShipFinderNativeRouteKey(value)
+    if value == nil then return nil end
+    return string.lower(
+        (tostring(value):gsub("^%s+", ""):gsub("%s+$", ""))
+    )
+end
+
+-- Ship Finder v1.4.40 Attention real-route probe.
+-- Diagnostic only.
+--
+-- v1.4.39 proved that objects exposed through TradeRoutesWithIssues are good
+-- property snapshots but are not accepted as callable CSessionTradeRoute
+-- userdata by the method bindings.
+--
+-- This build resolves each issue route name back to a real route object via
+-- CTradeRouteManager:GetRoute(id), then invokes warning getters only on that
+-- resolved CSessionTradeRoute.
+ShipFinderAttentionRealRouteCache =
+    ShipFinderAttentionRealRouteCache or nil
+
+function ShipFinderAttentionBuildRealRouteCache()
+    local cache = {
+        byName = {},
+        scanned = 0,
+        valid = 0,
+        maxID = 512,
+    }
+
+    local manager = nil
+    local okManager, managerValue = pcall(function()
+        return TradeRoute.get()
+    end)
+
+    if okManager then
+        manager = managerValue
+    end
+
+    if manager == nil then
+        system.log(
+            "[Ship Finder Attention Real Route Probe 1.4.40] CACHE"
+            .. " | managerAvailable=false"
+        )
+        ShipFinderAttentionRealRouteCache = cache
+        return cache
+    end
+
+    for routeID = 0, cache.maxID do
+        cache.scanned = cache.scanned + 1
+
+        local okRoute, route = pcall(function()
+            return manager:GetRoute(routeID)
+        end)
+
+        if okRoute and route ~= nil then
+            local okValid, isValid = pcall(function()
+                if type(route.isValid) == "function" then
+                    return route:isValid()
+                end
+                return true
+            end)
+
+            if not okValid then
+                isValid = true
+            end
+
+            if isValid == true then
+                local okName, name = pcall(function()
+                    return route.Name
+                end)
+
+                if okName and name ~= nil and tostring(name) ~= "" then
+                    cache.valid = cache.valid + 1
+                    local nameText = tostring(name)
+                    if cache.byName[nameText] == nil then
+                        cache.byName[nameText] = {
+                            id = routeID,
+                            route = route,
+                        }
+                    end
+                end
+            end
+        end
+    end
+
+    system.log(
+        "[Ship Finder Attention Real Route Probe 1.4.40] CACHE"
+        .. " | managerAvailable=true"
+        .. " | scannedIDs=" .. tostring(cache.scanned)
+        .. " | validNamedRoutes=" .. tostring(cache.valid)
+        .. " | maxID=" .. tostring(cache.maxID)
+    )
+
+    ShipFinderAttentionRealRouteCache = cache
+    return cache
+end
+
+function ShipFinderAttentionResolveRealRoute(routeName)
+    local cache = ShipFinderAttentionRealRouteCache
+    if cache == nil then
+        cache = ShipFinderAttentionBuildRealRouteCache()
+    end
+
+    local key = tostring(routeName or "")
+    local found = cache.byName and cache.byName[key] or nil
+
+    if found ~= nil then
+        return found.route, found.id
+    end
+
+    return nil, nil
+end
+
+function ShipFinderNativeAttentionCategoryProbe(issueRoute, routeName, errorCount)
+    if issueRoute == nil then return end
+
+    local realRoute, routeID =
+        ShipFinderAttentionResolveRealRoute(routeName)
+
+    local issueType = tostring(type(issueRoute))
+    local realType = tostring(type(realRoute))
+
+    local issueString = ""
+    pcall(function()
+        issueString = tostring(issueRoute)
+    end)
+
+    local realString = ""
+    pcall(function()
+        realString = tostring(realRoute)
+    end)
+
+    system.log(
+        "[Ship Finder Attention Real Route Probe 1.4.40] RESOLVE"
+        .. " | name=" .. tostring(routeName or "")
+        .. " | routeID=" .. tostring(routeID)
+        .. " | issueType=" .. issueType
+        .. " | issueObject=" .. issueString
+        .. " | realType=" .. realType
+        .. " | realObject=" .. realString
+        .. " | resolved=" .. tostring(realRoute ~= nil)
+    )
+
+    -- Preserve the four proven direct properties from the issue snapshot.
+    local direct = {
+        {"NoShipsActive", "NO_SHIPS"},
+        {"AllShipsPausedActive", "ALL_SHIPS_PAUSED"},
+        {"NoGoodsActive", "NO_GOODS"},
+        {"NotEnoughStationsActive", "NOT_ENOUGH_STATIONS"},
+    }
+
+    -- Warning getters which appear argument-free from the binding names.
+    -- These are now called only on a manager-resolved CSessionTradeRoute.
+    local methods = {
+        {"ConfiguredGoodNotTradedActive", "CONFIGURED_GOOD_NOT_TRADED"},
+        {"GoodsDontMatchActive", "GOODS_DONT_MATCH"},
+        {"MismatchingGoodActive", "MISMATCHING_GOOD"},
+        {"LongWaitingTimeActive", "LONG_WAITING_TIME"},
+        {"StorageEmptyActive", "STORAGE_EMPTY"},
+        {"StorageFullActive", "STORAGE_FULL"},
+        {"LoadedGoodNeverUnloadedActive", "LOADED_GOOD_NEVER_UNLOADED"},
+        {"UnloadedGoodNeverLoadedActive", "UNLOADED_GOOD_NEVER_LOADED"},
+        {"NoTradeRightsActive", "NO_TRADE_RIGHTS"},
+        {"NoValidPierActive", "NO_VALID_PIER"},
+        {"IslandUnderSiegeActive", "ISLAND_UNDER_SIEGE"},
+        {"NotEnoughSlotsErrorActive", "NOT_ENOUGH_SLOTS"},
+        {"NotEnoughSlotsForShipsErrorActive", "NOT_ENOUGH_SLOTS_FOR_SHIPS"},
+    }
+
+    local active = {}
+    local states = {}
+    local callErrors = {}
+
+    for _, entry in ipairs(direct) do
+        local member = entry[1]
+        local label = entry[2]
+        local ok, value = pcall(function()
+            return issueRoute[member]
+        end)
+
+        if ok then
+            states[#states + 1] =
+                member .. "=" .. tostring(value)
+            if value == true then
+                active[#active + 1] = label
+            end
+        else
+            states[#states + 1] =
+                member .. "=ERROR"
+        end
+    end
+
+    if realRoute ~= nil then
+        for _, entry in ipairs(methods) do
+            local member = entry[1]
+            local label = entry[2]
+
+            local okMember, fn = pcall(function()
+                return realRoute[member]
+            end)
+
+            if not okMember or type(fn) ~= "function" then
+                states[#states + 1] =
+                    member .. "=UNAVAILABLE"
+            else
+                local okCall, value = pcall(function()
+                    return fn(realRoute)
+                end)
+
+                if not okCall then
+                    states[#states + 1] =
+                        member .. "=CALL_ERROR"
+                    callErrors[#callErrors + 1] =
+                        member .. "{" .. tostring(value or "") .. "}"
+                else
+                    states[#states + 1] =
+                        member .. "=" .. tostring(value)
+                    if value == true then
+                        active[#active + 1] = label
+                    end
+                end
+            end
+        end
+    else
+        states[#states + 1] = "REAL_ROUTE=NOT_FOUND"
+    end
+
+    system.log(
+        "[Ship Finder Attention Real Route Probe 1.4.40] ROUTE"
+        .. " | name=" .. tostring(routeName or "")
+        .. " | routeID=" .. tostring(routeID)
+        .. " | activeErrorCount=" .. tostring(errorCount or 0)
+        .. " | activeCategories="
+        .. (#active > 0 and table.concat(active, ",") or "NONE")
+        .. " | callErrors=" .. tostring(#callErrors)
+    )
+
+    system.log(
+        "[Ship Finder Attention Real Route Probe 1.4.40] STATES"
+        .. " | name=" .. tostring(routeName or "")
+        .. " | routeID=" .. tostring(routeID)
+        .. " | " .. table.concat(states, " | ")
+    )
+
+    if #callErrors > 0 then
+        system.log(
+            "[Ship Finder Attention Real Route Probe 1.4.40] CALL ERRORS"
+            .. " | name=" .. tostring(routeName or "")
+            .. " | routeID=" .. tostring(routeID)
+            .. " | " .. table.concat(callErrors, " || ")
+        )
+    end
+
+    -- Detail functions remain type-only. Their argument contracts are unknown.
+    local extraMembers = {
+        "MismatchingGoodActiveForGood",
+        "IsErrorActive",
+        "GetLostShipName",
+        "GetStation",
+    }
+    local extras = {}
+
+    if realRoute ~= nil then
+        for _, member in ipairs(extraMembers) do
+            local ok, value = pcall(function()
+                return realRoute[member]
+            end)
+
+            if ok then
+                extras[#extras + 1] =
+                    member .. ":" .. tostring(type(value))
+            else
+                extras[#extras + 1] =
+                    member .. ":ERROR"
+            end
+        end
+    end
+
+    system.log(
+        "[Ship Finder Attention Real Route Probe 1.4.40] EXTRA"
+        .. " | name=" .. tostring(routeName or "")
+        .. " | routeID=" .. tostring(routeID)
+        .. " | " .. table.concat(extras, " | ")
+    )
+end
+
+function ShipFinderNativeIssueRouteSnapshot()
+    local result = {}
+    local manager = nil
+    local list = nil
+
+    pcall(function()
+        manager = TradeRoute and TradeRoute.get and TradeRoute.get() or nil
+        list = manager and manager.TradeRoutesWithIssues or nil
+    end)
+
+    if type(list) == "table" then
+        for _, route in pairs(list) do
+            local valid = route ~= nil
+            pcall(function()
+                if route.isValid then valid = route:isValid() end
+            end)
+
+            if valid then
+                local name, errorCount, allPaused = nil, 0, false
+                pcall(function() name = route.Name end)
+                pcall(function() errorCount = tonumber(route.ActiveErrorCount) or 0 end)
+                pcall(function() allPaused = route.AllShipsPausedActive == true end)
+
+                if name ~= nil and tostring(name) ~= "" then
+                    -- v1.4.42: low-level route warning method probing is
+                    -- retired from the active path. Anno's own
+                    -- TradeRouteWarningStateData is now the proven surface.
+                    result[ShipFinderNativeRouteKey(name)] = {
+                        name = tostring(name),
+                        activeErrorCount = errorCount,
+                        allShipsPaused = allPaused,
+                    }
+                end
+            end
+        end
+    end
+
+    local count = 0
+    for _ in pairs(result) do count = count + 1 end
+
+    local assignedCount, matchedCount = 0, 0
+    local liveRouteNames = {}
+    for _, object in pairs(
+        Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}
+    ) do
+        local vehicle = object.TradeRouteVehicle
+        if vehicle and vehicle.IsAssignedOnTradeRoute == true
+            and vehicle.RouteName ~= nil
+        then
+            assignedCount = assignedCount + 1
+            local key = ShipFinderNativeRouteKey(vehicle.RouteName)
+            liveRouteNames[key] = true
+            if result[key] ~= nil then matchedCount = matchedCount + 1 end
+        end
+    end
+
+    local unmatchedIssueNames = {}
+    for key, issue in pairs(result) do
+        if not liveRouteNames[key] then
+            unmatchedIssueNames[#unmatchedIssueNames + 1] = issue.name
+        end
+    end
+    table.sort(unmatchedIssueNames)
+    system.log(
+        "[Ship Finder Native Attention 1.5.0] REFRESH"
+        .. " | nativeIssueRoutes=" .. tostring(count)
+        .. " | sourceAvailable=" .. tostring(type(list) == "table")
+        .. " | assignedLiveShips=" .. tostring(assignedCount)
+        .. " | matchedLiveShips=" .. tostring(matchedCount)
+        .. " | issueRoutesWithoutLiveShip="
+        .. table.concat(unmatchedIssueNames, ",")
+    )
+    return result
+end
+
+-- Production Attention parchment state and renderer.
+-- Originally introduced while proving the standalone parchment path; it is now
+-- used by the normal Ships Needing Attention flow after the freeze-safe
+-- post-yield handoff. There is no standalone public shortcut.
+ShipFinderAttentionParchmentTest = ShipFinderAttentionParchmentTest or {
+    active = false,
+    pendingOpen = false,
+    opening = false,
+    page = 0,
+    visible = {},
+}
+
+function ShipFinderAttentionParchmentTest.getPopupContent()
+    local content = nil
+    pcall(function()
+        content = ui
+            and ui.Scenes
+            and ui.Scenes.TextPopup
+            and ui.Scenes.TextPopup.SceneData
+            and ui.Scenes.TextPopup.SceneData.Content
+            or nil
+    end)
+    return content
+end
+
+function ShipFinderAttentionParchmentTest.records()
+    local issues = ShipFinderNativeIssueRouteSnapshot()
+    local records = {}
+
+    for _, object in pairs(
+        Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}
+    ) do
+        local rawName = object.Nameable and object.Nameable.Name
+        local route = object.TradeRouteVehicle
+        local assigned = route and route.IsAssignedOnTradeRoute == true
+        local military = object.Unit and object.Unit.IsMilitaryUnit == true
+        local routeName = route and route.RouteName or nil
+        local issue = routeName ~= nil
+            and issues[ShipFinderNativeRouteKey(routeName)]
+            or nil
+
+        if rawName ~= nil and assigned and not military and issue ~= nil then
+            local name = tostring(rawName)
+            local detail =
+                ShipFinderAttentionWarningDetailCache
+                and ShipFinderAttentionWarningDetailCache[
+                    ShipFinderNativeRouteKey(routeName)
+                ]
+                or nil
+
+            local detailKind =
+                detail and tostring(detail.kind or "")
+                or ""
+
+            local detailTopic = "4"
+            if issue.allShipsPaused == true then
+                detailTopic = "0"
+            elseif detailKind == "wait_for_goods" then
+                detailTopic = "1"
+            elseif detailKind == "wait_to_unload" then
+                detailTopic = "2"
+            elseif detailKind == "station_warning" then
+                detailTopic = "3"
+            end
+
+            records[#records + 1] = {
+                name = name,
+                routeName = tostring(routeName),
+                id = tostring(object.ID),
+                key = detailTopic
+                    .. "|" .. string.lower(name)
+                    .. "|" .. string.lower(tostring(routeName))
+                    .. "|" .. tostring(object.ID),
+                allShipsPaused = issue.allShipsPaused == true,
+                activeErrorCount = tonumber(issue.activeErrorCount) or 0,
+                warningKind = detailKind,
+                warningIsland =
+                    detail and tostring(detail.islandName or "")
+                    or "",
+            }
+        end
+    end
+
+    table.sort(records, function(a, b) return a.key < b.key end)
+    return records
+end
+
+function ShipFinderAttentionParchmentTest.reasonText(record, de)
+    local fr = not de and tostring(ShipFinderUILanguage or "") == "fr"
+    if record ~= nil and record.allShipsPaused == true then
+        return de and "Alle Schiffe pausiert"
+            or (fr and "Tous les navires en pause" or "All ships paused")
+    end
+
+    local kind = record and record.warningKind or ""
+    local island = record and record.warningIsland or ""
+
+    if kind == "wait_for_goods" then
+        local base = de and "Auf Waren warten"
+            or (fr and "Attendre avant de charger" or "Wait for goods")
+        if island ~= nil and tostring(island) ~= "" then
+            return base .. " — " .. tostring(island)
+        end
+        return base
+    end
+
+    if kind == "wait_to_unload" then
+        local base = de and "Auf Entladen warten"
+            or (fr and "Attendre avant de décharger" or "Wait to unload")
+        if island ~= nil and tostring(island) ~= "" then
+            return base .. " — " .. tostring(island)
+        end
+        return base
+    end
+
+    if kind == "station_warning" then
+        local base = de and "Stationswarnung"
+            or (fr and "Avertissement de station" or "Station warning")
+        if island ~= nil and tostring(island) ~= "" then
+            return base .. " — " .. tostring(island)
+        end
+        return base
+    end
+
+    return de and "Handelsrouten-Warnung"
+        or (fr and "Avertissement de route commerciale"
+            or "Trade route warning")
+end
+
+function ShipFinderAttentionParchmentTest.pageText(pageIndex)
+    local records = ShipFinderAttentionParchmentTest.records()
+    local pages = math.max(1, math.ceil(#records / 9))
+    local requestedPage = math.max(0, tonumber(pageIndex) or 0)
+    local page = requestedPage
+    if page >= pages then page = pages - 1 end
+
+    ShipFinderAttentionParchmentTest.page = page
+    ShipFinderAttentionParchmentTest.visible = {}
+
+    local de = tostring(ShipFinderUILanguage or "") == "de"
+    local fr = tostring(ShipFinderUILanguage or "") == "fr"
+    local first = page * 9 + 1
+    local last = math.min(first + 8, #records)
+    local lines = {
+        de and "SCHIFFE MIT HANDLUNGSBEDARF"
+            or (fr and "NAVIRES NÉCESSITANT VOTRE ATTENTION"
+                or "SHIPS NEEDING ATTENTION"),
+        "",
+        tostring(#records)
+            .. (de and " Schiffe • Aktuelle Provinz"
+                or (fr and " navires • Province actuelle"
+                    or " ships • Current province")),
+        de and "Strg+Alt+1-9: Zum nummerierten Schiff springen"
+            or (fr and "Ctrl+Alt+1-9 : accéder au navire numéroté"
+                or "Ctrl+Alt+1-9: Jump to numbered ship"),
+        de and "Strg+Alt+0: Zurueck zum Ship Finder-Menue"
+            or (fr and "Ctrl+Alt+0 : retour au menu Ship Finder"
+                or "Ctrl+Alt+0: Back to Ship Finder menu"),
+    }
+
+    if pages > 1 then
+        lines[#lines + 1] = (de and "Seite "
+            or (fr and "Page " or "Page "))
+            .. tostring(page + 1) .. "/" .. tostring(pages)
+    end
+
+    lines[#lines + 1] = ""
+
+    if #records == 0 then
+        lines[#lines + 1] = de
+            and "Keine aktuell sichtbaren zugewiesenen zivilen Schiffe befinden sich auf Routen mit nativen Warnungen."
+            or (fr
+                and "Aucun navire civil affecté et actuellement visible ne se trouve sur une route signalée par le jeu."
+                or "No currently visible assigned non-military ships are on routes with native warnings.")
+    else
+        local lastWarningKey = nil
+
+        for index = first, last do
+            local record = records[index]
+            local slot = index - first + 1
+            local warningKey = "route"
+            if record.allShipsPaused == true then
+                warningKey = "paused"
+            elseif record.warningKind == "wait_for_goods" then
+                warningKey = "wait_for_goods"
+            elseif record.warningKind == "wait_to_unload" then
+                warningKey = "wait_to_unload"
+            elseif record.warningKind == "station_warning" then
+                warningKey = "station"
+            end
+
+            if warningKey ~= lastWarningKey then
+                if lastWarningKey ~= nil then
+                    lines[#lines + 1] = ""
+                end
+
+                if warningKey == "paused" then
+                    lines[#lines + 1] = de
+                        and "⚠ ALLE SCHIFFE PAUSIERT"
+                        or (fr and "⚠ TOUS LES NAVIRES EN PAUSE"
+                            or "⚠ ALL SHIPS PAUSED")
+                elseif warningKey == "wait_for_goods" then
+                    lines[#lines + 1] = de
+                        and "⚠ AUF WAREN WARTEN"
+                        or (fr and "⚠ ATTENDRE AVANT DE CHARGER"
+                            or "⚠ WAIT FOR GOODS")
+                elseif warningKey == "wait_to_unload" then
+                    lines[#lines + 1] = de
+                        and "⚠ AUF ENTLADEN WARTEN"
+                        or (fr and "⚠ ATTENDRE AVANT DE DÉCHARGER"
+                            or "⚠ WAIT TO UNLOAD")
+                elseif warningKey == "station" then
+                    lines[#lines + 1] = de
+                        and "⚠ STATIONSWARNUNG"
+                        or (fr and "⚠ AVERTISSEMENT DE STATION"
+                            or "⚠ STATION WARNING")
+                else
+                    lines[#lines + 1] = de
+                        and "⚠ HANDELSROUTEN-WARNUNG"
+                        or (fr and "⚠ AVERTISSEMENT DE ROUTE COMMERCIALE"
+                            or "⚠ TRADE ROUTE WARNING")
+                end
+
+                lastWarningKey = warningKey
+            end
+
+            ShipFinderAttentionParchmentTest.visible[slot] = {
+                id = record.id,
+                name = record.name,
+                routeName = record.routeName,
+            }
+
+            local locationSuffix = ""
+            if record.warningIsland ~= nil
+                and tostring(record.warningIsland) ~= ""
+                and warningKey ~= "paused"
+                and warningKey ~= "route"
+            then
+                locationSuffix =
+                    " — " .. tostring(record.warningIsland)
+            end
+
+            lines[#lines + 1] = tostring(slot) .. ". ★ "
+                .. record.name .. " — ▶ " .. record.routeName
+                .. locationSuffix
+        end
+    end
+
+    return table.concat(lines, "\n")
+end
+
+function ShipFinderAttentionParchmentTest.isReportOpen()
+    if ShipFinderAttentionParchmentTest.active ~= true then return false end
+    local content = ShipFinderAttentionParchmentTest.getPopupContent()
+    if content == nil then return false end
+
+    local text = nil
+    pcall(function() text = content.Text end)
+    text = tostring(text or "")
+    return string.match(text, "^SHIPS NEEDING ATTENTION") ~= nil
+        or string.match(text, "^SCHIFFE MIT HANDLUNGSBEDARF") ~= nil
+        or string.match(text, "^NAVIRES NÉCESSITANT VOTRE ATTENTION") ~= nil
+end
+
+function CombinedRoot:AttentionParchmentTestShortcut(slot)
+    slot = tonumber(slot) or 0
+    if slot < 1 or slot > 9
+        or not ShipFinderAttentionParchmentTest.isReportOpen()
+    then
+        return false
+    end
+
+    local target = ShipFinderAttentionParchmentTest.visible[slot]
+    if target == nil then
+        system.log(
+            "[Ship Finder Attention Report 1.4.31] EMPTY SLOT"
+            .. " | page=" .. tostring(ShipFinderAttentionParchmentTest.page + 1)
+            .. " | slot=" .. tostring(slot)
+        )
+        return false
+    end
+
+    local fresh = nil
+    for _, object in pairs(
+        Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}
+    ) do
+        if tostring(object.ID) == tostring(target.id) then
+            fresh = object
+            break
+        end
+    end
+
+    if fresh == nil then
+        system.log(
+            "[Ship Finder Attention Report 1.4.31] SHIP UNAVAILABLE"
+            .. " | name=" .. tostring(target.name)
+            .. " | objectId=" .. tostring(target.id)
+        )
+        return false
+    end
+
+    local nativeID = fresh.ID
+    local closeOk, closeErr = pcall(function() Scripts:PopUI() end)
+    local selectOk, selectErr = pcall(function()
+        Selection:SelectByID(nativeID)
+    end)
+    local jumpOk, jumpErr = pcall(function()
+        Scripts:JumpToObject(nativeID)
+    end)
+
+    ShipFinderAttentionParchmentTest.active = false
+    ShipFinderAttentionParchmentTest.pendingOpen = false
+    ShipFinderAttentionParchmentTest.opening = false
+
+    system.log(
+        "[Ship Finder Attention Report 1.4.31] SHIP JUMP"
+        .. " | page=" .. tostring(ShipFinderAttentionParchmentTest.page + 1)
+        .. " | slot=" .. tostring(slot)
+        .. " | name=" .. tostring(target.name)
+        .. " | objectId=" .. tostring(nativeID)
+        .. " | closeSuccess=" .. tostring(closeOk)
+        .. " | selectSuccess=" .. tostring(selectOk)
+        .. " | jumpSuccess=" .. tostring(jumpOk)
+        .. " | closeError=" .. tostring(closeErr or "")
+        .. " | selectError=" .. tostring(selectErr or "")
+        .. " | jumpError=" .. tostring(jumpErr or "")
+    )
+    return selectOk and jumpOk
+end
+
+function ShipFinderCurrentNativeIssueRoutes()
+    if type(ShipFinderNativeIssueRouteCache) ~= "table" then
+        ShipFinderNativeIssueRouteCache = ShipFinderNativeIssueRouteSnapshot()
+    end
+    return ShipFinderNativeIssueRouteCache
+end
+
+function CombinedRoot:IsAttentionShip(object)
+    if object == nil then return false end
+    local route = object.TradeRouteVehicle
+    local assigned = route and route.IsAssignedOnTradeRoute == true
+    local military = object.Unit and object.Unit.IsMilitaryUnit == true
+    local routeName = route and route.RouteName or nil
+    return assigned
+        and not military
+        and routeName ~= nil
+        and ShipFinderCurrentNativeIssueRoutes()[
+            ShipFinderNativeRouteKey(routeName)
+        ] ~= nil
+end
+
+function CombinedRoot:GetPublicCategoryShips(category, selectedRouteName)
+    local records = {}
+    for _, object in pairs(
+        Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}
+    ) do
+        local rawName = object.Nameable and object.Nameable.Name
+        if rawName ~= nil then
+            local name = tostring(rawName)
+            local route = object.TradeRouteVehicle
+            local assigned = route and route.IsAssignedOnTradeRoute == true
+            local paused = route and route.IsPaused == true
+            local military = object.Unit and object.Unit.IsMilitaryUnit == true
+            local routeName = route and route.RouteName or nil
+            local include = false
+
+            if category == 1 then
+                include = assigned and not paused
+            elseif category == 2 then
+                include = self:IsAttentionShip(object)
+            elseif category == 4 then
+                include = military
+            elseif category == 5 then
+                include = not military and not assigned
+            elseif category == 6 then
+                include = assigned
+                    and not paused
+                    and routeName ~= nil
+                    and selectedRouteName ~= nil
+                    and tostring(routeName) == tostring(selectedRouteName)
+            end
+
+            if include then
+                records[#records + 1] = {
+                    name = name,
+                    key = string.lower(name) .. "|" .. tostring(object.ID),
+                    object = object,
+                    routeName = routeName and tostring(routeName) or nil,
+                }
+            end
+        end
+    end
+
+    table.sort(records, function(a, b) return a.key < b.key end)
+    return records
+end
+
+function CombinedRoot:PublicCategoryRow(slot)
+    local category = Variables:GetVariable("S3C") or 0
+    local page = Variables:GetVariable("S3Q") or 0
+    local records = self:GetPublicCategoryShips(
+        category,
+        ShipFinderSelectedRouteName
+    )
+    local record = records[page * 3 + slot]
+    if record == nil then return "" end
+    if category == 2 and record.routeName ~= nil then
+        return "★ " .. record.name .. " — ▶ " .. record.routeName
+    end
+    return "★ " .. record.name
+end
+
+function CombinedRoot:PublicCategoryMore(de)
+    local category = Variables:GetVariable("S3C") or 0
+    local page = Variables:GetVariable("S3Q") or 0
+    local records = self:GetPublicCategoryShips(
+        category,
+        ShipFinderSelectedRouteName
+    )
+    if #records > (page + 1) * 3 then
+        local fr = not de and tostring(ShipFinderUILanguage or "") == "fr"
+        return de and "Mehr Schiffe ▶"
+            or (fr and "Plus de navires ▶" or "More ships ▶")
+    end
+    return ""
+end
+
+local function currentFleetSnapshot()
+    local snapshot = {
+        total = 0,
+        civilian = 0,
+        assigned = 0,
+        assignedCivilian = 0,
+        independent = 0,
+        warships = 0,
+        paused = 0,
+        routeCount = 0,
+        activeRouteCount = 0,
+        nativeWarningRouteCount = 0,
+        representedWarningRouteCount = 0,
+        warningRoutesWithoutLiveShip = 0,
+        singleShipRoutes = 0,
+        multiShipRoutes = 0,
+        maxShipsOnRoute = 0,
+    }
+
+    local nativeIssueRoutes = ShipFinderCurrentNativeIssueRoutes()
+    local routes = {}
+    local activeRoutes = {}
+    local representedWarningRoutes = {}
+    local routeShipCounts = {}
+
+    for _ in pairs(nativeIssueRoutes or {}) do
+        snapshot.nativeWarningRouteCount = snapshot.nativeWarningRouteCount + 1
+    end
+
+    for _, object in pairs(
+        Scripts:GetObjectGroupByProperty(Properties.ShipModuleOwner) or {}
+    ) do
+        local name = object.Nameable and object.Nameable.Name
+        if name ~= nil then
+            snapshot.total = snapshot.total + 1
+
+            local tradeRoute = object.TradeRouteVehicle
+            local assigned = tradeRoute
+                and tradeRoute.IsAssignedOnTradeRoute == true
+            local paused = tradeRoute and tradeRoute.IsPaused == true
+            local routeName = tradeRoute and tradeRoute.RouteName or nil
+            local military = object.Unit
+                and object.Unit.IsMilitaryUnit == true
+
+            if military then
+                snapshot.warships = snapshot.warships + 1
+            else
+                snapshot.civilian = snapshot.civilian + 1
+            end
+
+            if assigned then
+                snapshot.assigned = snapshot.assigned + 1
+
+                if not military then
+                    snapshot.assignedCivilian =
+                        snapshot.assignedCivilian + 1
+                end
+
+                if routeName ~= nil then
+                    local routeText = tostring(routeName)
+                    routes[routeText] = true
+                    routeShipCounts[routeText] =
+                        (routeShipCounts[routeText] or 0) + 1
+
+                    if not paused then
+                        activeRoutes[routeText] = true
+                    end
+
+                    local issueKey = ShipFinderNativeRouteKey(routeText)
+                    if nativeIssueRoutes[issueKey] ~= nil then
+                        representedWarningRoutes[issueKey] = true
+                    end
+                end
+            end
+
+            if not military and not assigned then
+                snapshot.independent = snapshot.independent + 1
+            end
+
+            if not military
+                and assigned
+                and routeName ~= nil
+                and nativeIssueRoutes[
+                    ShipFinderNativeRouteKey(routeName)
+                ] ~= nil
+            then
+                snapshot.paused = snapshot.paused + 1
+            end
+        end
+    end
+
+    for _ in pairs(routes) do
+        snapshot.routeCount = snapshot.routeCount + 1
+    end
+
+    for _ in pairs(activeRoutes) do
+        snapshot.activeRouteCount = snapshot.activeRouteCount + 1
+    end
+
+    for _ in pairs(representedWarningRoutes) do
+        snapshot.representedWarningRouteCount =
+            snapshot.representedWarningRouteCount + 1
+    end
+
+    snapshot.warningRoutesWithoutLiveShip = math.max(
+        0,
+        snapshot.nativeWarningRouteCount
+            - snapshot.representedWarningRouteCount
+    )
+
+    for _, count in pairs(routeShipCounts) do
+        if count == 1 then
+            snapshot.singleShipRoutes = snapshot.singleShipRoutes + 1
+        elseif count > 1 then
+            snapshot.multiShipRoutes = snapshot.multiShipRoutes + 1
+        end
+
+        if count > snapshot.maxShipsOnRoute then
+            snapshot.maxShipsOnRoute = count
+        end
+    end
+
+    return snapshot
+end
+
+
+function CombinedRoot:FleetOverviewParchmentText(de)
+    local ok, result = pcall(function()
+        local s = currentFleetSnapshot()
+        local assignedPct = 0
+        local independentPct = 0
+
+        if s.civilian > 0 then
+            assignedPct = math.floor(
+                (s.assignedCivilian * 100 / s.civilian) + 0.5
+            )
+            independentPct = math.floor(
+                (s.independent * 100 / s.civilian) + 0.5
+            )
+        end
+
+        local fr = not de and tostring(ShipFinderUILanguage or "") == "fr"
+
+        if de then
+            return "FLOTTENZUSAMMENFASSUNG\n\n"
+                .. "Aktuelle Provinz/Sitzung • "
+                .. tostring(s.total) .. " Schiffe\n"
+                .. "Strg+Alt+0: Zurueck zum Ship Finder-Menue\n\n"
+
+                .. "FLOTTENSTRUKTUR\n"
+                .. "Zivile Schiffe: " .. tostring(s.civilian) .. "\n"
+                .. "  Zugewiesen: " .. tostring(s.assignedCivilian)
+                .. " (" .. tostring(assignedPct) .. "%)\n"
+                .. "  Unabhängig: " .. tostring(s.independent)
+                .. " (" .. tostring(independentPct) .. "%)\n"
+                .. "Kriegsschiffe: " .. tostring(s.warships) .. "\n\n"
+
+                .. "ROUTENZUWEISUNG\n"
+                .. "Vertretene Routen: " .. tostring(s.routeCount) .. "\n"
+                .. "Routen mit 1 Schiff: "
+                .. tostring(s.singleShipRoutes) .. "\n"
+                .. "Routen mit mehreren Schiffen: "
+                .. tostring(s.multiShipRoutes) .. "\n"
+                .. "Größte Routenzuweisung: "
+                .. tostring(s.maxShipsOnRoute) .. " Schiffe\n\n"
+
+                .. "⚠ HANDLUNGSBEDARF\n"
+                .. "Schiffe auf Warnrouten: " .. tostring(s.paused) .. "\n"
+                .. "Warnrouten mit sichtbaren Schiffen: "
+                .. tostring(s.representedWarningRouteCount) .. "\n"
+                .. "Warnrouten ohne sichtbares Schiff: "
+                .. tostring(s.warningRoutesWithoutLiveShip) .. "\n\n"
+
+                .. "Nur aktuelle Provinz/Sitzung - nicht reichsweit."
+        end
+
+        if fr then
+            return "RÉSUMÉ DE LA FLOTTE\n\n"
+                .. "Province/session actuelle • "
+                .. tostring(s.total) .. " navires\n"
+                .. "Ctrl+Alt+0 : retour au menu Ship Finder\n\n"
+
+                .. "COMPOSITION DE LA FLOTTE\n"
+                .. "Navires civils : " .. tostring(s.civilian) .. "\n"
+                .. "  Affectés : " .. tostring(s.assignedCivilian)
+                .. " (" .. tostring(assignedPct) .. "%)\n"
+                .. "  Indépendants : " .. tostring(s.independent)
+                .. " (" .. tostring(independentPct) .. "%)\n"
+                .. "Navires de guerre : " .. tostring(s.warships) .. "\n\n"
+
+                .. "AFFECTATION AUX ROUTES COMMERCIALES\n"
+                .. "Routes représentées : " .. tostring(s.routeCount) .. "\n"
+                .. "Routes avec 1 navire : "
+                .. tostring(s.singleShipRoutes) .. "\n"
+                .. "Routes avec plusieurs navires : "
+                .. tostring(s.multiShipRoutes) .. "\n"
+                .. "Affectation maximale à une route : "
+                .. tostring(s.maxShipsOnRoute) .. " navires\n\n"
+
+                .. "⚠ NÉCESSITANT VOTRE ATTENTION\n"
+                .. "Navires sur des routes signalées : " .. tostring(s.paused) .. "\n"
+                .. "Routes signalées avec des navires visibles : "
+                .. tostring(s.representedWarningRouteCount) .. "\n"
+                .. "Routes signalées sans navire visible : "
+                .. tostring(s.warningRoutesWithoutLiveShip) .. "\n\n"
+
+                .. "Province/session actuelle uniquement — pas à l’échelle de l’Empire."
+        end
+
+        return "FLEET SUMMARY\n\n"
+            .. "Current province/session • "
+            .. tostring(s.total) .. " live ships\n"
+            .. "Ctrl+Alt+0: Back to Ship Finder menu\n\n"
+
+            .. "FLEET COMPOSITION\n"
+            .. "Civilian ships: " .. tostring(s.civilian) .. "\n"
+            .. "  Assigned: " .. tostring(s.assignedCivilian)
+            .. " (" .. tostring(assignedPct) .. "%)\n"
+            .. "  Independent: " .. tostring(s.independent)
+            .. " (" .. tostring(independentPct) .. "%)\n"
+            .. "Warships: " .. tostring(s.warships) .. "\n\n"
+
+            .. "ROUTE ALLOCATION\n"
+            .. "Routes represented: " .. tostring(s.routeCount) .. "\n"
+            .. "Routes with 1 ship: "
+            .. tostring(s.singleShipRoutes) .. "\n"
+            .. "Routes with multiple ships: "
+            .. tostring(s.multiShipRoutes) .. "\n"
+            .. "Largest route allocation: "
+            .. tostring(s.maxShipsOnRoute) .. " ships\n\n"
+
+            .. "⚠ NEEDING ATTENTION\n"
+            .. "Ships on warning routes: " .. tostring(s.paused) .. "\n"
+            .. "Warning routes with visible ships: "
+            .. tostring(s.representedWarningRouteCount) .. "\n"
+            .. "Warning routes without a visible ship: "
+            .. tostring(s.warningRoutesWithoutLiveShip) .. "\n\n"
+
+            .. "Current province/session only - not empire-wide."
+    end)
+
+    if ok then return result end
+
+    system.log(
+        "[Ship Finder Fleet Analysis 1.4.36] SUMMARY ERROR | "
+        .. tostring(result)
+    )
+    local fr = not de and tostring(ShipFinderUILanguage or "") == "fr"
+    return de
+        and "Flottenzusammenfassung konnte nicht geladen werden."
+        or (fr and "Le résumé de la flotte n’a pas pu être chargé."
+            or "Fleet Summary could not be loaded.")
+end
+
+function CombinedRoot:FleetSummaryText(de)
+    local ok, result = pcall(function()
+        local s = currentFleetSnapshot()
+        local fr = not de and tostring(ShipFinderUILanguage or "") == "fr"
+        if de then
+            return "Nur aktuelle Provinz/Sitzung - nicht reichsweit.\n\n"
+                .. "Aktuell verfügbare Schiffe: " .. tostring(s.total) .. "\n"
+                .. "Zugewiesene Schiffe: " .. tostring(s.assigned) .. "\n"
+                .. "Unabhängige zivile Schiffe: " .. tostring(s.independent) .. "\n"
+                .. "Kriegsschiffe: " .. tostring(s.warships) .. "\n"
+                .. "Zivile Schiffe auf Routen mit nativen Warnungen: " .. tostring(s.paused) .. "\n"
+                .. "Vertretene Routen: " .. tostring(s.routeCount) .. "\n"
+                .. "Aktive Routen in Flotte nach Route: "
+                .. tostring(s.activeRouteCount)
+                .. "\n\nKennzahlen können sich überschneiden."
+        end
+        if fr then
+            return "Province/session actuelle uniquement — pas à l’échelle de l’Empire.\n\n"
+                .. "Navires disponibles : " .. tostring(s.total) .. "\n"
+                .. "Navires affectés : " .. tostring(s.assigned) .. "\n"
+                .. "Navires civils indépendants : " .. tostring(s.independent) .. "\n"
+                .. "Navires de guerre : " .. tostring(s.warships) .. "\n"
+                .. "Navires civils sur des routes signalées par le jeu : " .. tostring(s.paused) .. "\n"
+                .. "Routes représentées : " .. tostring(s.routeCount) .. "\n"
+                .. "Routes actives dans Flotte par route : "
+                .. tostring(s.activeRouteCount)
+                .. "\n\nLes statistiques peuvent se chevaucher."
+        end
+        return "Current province/session only - not empire-wide.\n\n"
+            .. "Live ships: " .. tostring(s.total) .. "\n"
+            .. "Assigned ships: " .. tostring(s.assigned) .. "\n"
+            .. "Independent non-military ships: " .. tostring(s.independent) .. "\n"
+            .. "Warships: " .. tostring(s.warships) .. "\n"
+            .. "Non-military ships on native-warning routes: " .. tostring(s.paused) .. "\n"
+            .. "Routes represented: " .. tostring(s.routeCount) .. "\n"
+            .. "Active routes in Fleet by Route: "
+            .. tostring(s.activeRouteCount)
+            .. "\n\nMetrics can overlap."
+    end)
+
+    if ok then return result end
+    system.log("[Ship Finder Fleet Summary 1.4.5] ERROR | " .. tostring(result))
+    local fr = not de and tostring(ShipFinderUILanguage or "") == "fr"
+    return de
+        and "Flottenübersicht konnte nicht geladen werden."
+        or (fr and "Le résumé de la flotte n’a pas pu être chargé."
+            or "Fleet summary could not be loaded.")
+end
+
+function CombinedRoot:FleetSummaryRow(row, de)
+    local fr = not de and tostring(ShipFinderUILanguage or "") == "fr"
+    local ok, result = pcall(function()
+        local s = currentFleetSnapshot()
+        if row == 1 then
+            return de
+                and ("Schiffe: " .. tostring(s.total)
+                    .. "   |   Zugewiesen: " .. tostring(s.assigned))
+                or (fr
+                    and ("Navires : " .. tostring(s.total)
+                        .. "   |   Affectés : " .. tostring(s.assigned))
+                    or ("Live ships: " .. tostring(s.total)
+                        .. "   |   Assigned: " .. tostring(s.assigned)))
+        elseif row == 2 then
+            return de
+                and ("Unabhängig: " .. tostring(s.independent)
+                    .. "   |   Kriegsschiffe: " .. tostring(s.warships))
+                or (fr
+                    and ("Indépendants : " .. tostring(s.independent)
+                        .. "   |   Navires de guerre : " .. tostring(s.warships))
+                    or ("Independent: " .. tostring(s.independent)
+                        .. "   |   Warships: " .. tostring(s.warships)))
+        elseif row == 3 then
+            return de
+                and ("Zivile Schiffe auf Routen mit nativen Warnungen: " .. tostring(s.paused))
+                or (fr
+                    and ("Navires civils sur des routes signalées par le jeu : " .. tostring(s.paused))
+                    or ("Non-military ships on native-warning routes: " .. tostring(s.paused)))
+        end
+        return de
+            and ("Vertretene Routen: " .. tostring(s.routeCount)
+                .. "   |   Aktiv: " .. tostring(s.activeRouteCount))
+            or (fr
+                and ("Routes représentées : " .. tostring(s.routeCount)
+                    .. "   |   Actives : " .. tostring(s.activeRouteCount))
+                or ("Routes represented: " .. tostring(s.routeCount)
+                    .. "   |   Active: " .. tostring(s.activeRouteCount)))
+    end)
+
+    if ok then return result end
+    system.log("[Ship Finder Fleet Summary Row 1.4.6] ERROR | " .. tostring(result))
+    return de and "Flottenkennzahl nicht verfügbar."
+        or (fr and "Statistique de flotte indisponible."
+            or "Fleet metric unavailable.")
+end
+
+function CombinedRoot:CategoryFirstPageText(de)
+    local fr = not de and tostring(ShipFinderUILanguage or "") == "fr"
+    local ok, result = pcall(function()
+        local category = Variables:GetVariable("S3C") or 0
+        local s = currentFleetSnapshot()
+        if category == 2 and s.paused == 0 then
+            return de
+                and "Keine Schiffe benötigen aktuell Aufmerksamkeit"
+                or (fr and "Aucun navire ne nécessite actuellement votre attention"
+                    or "No ships currently need attention")
+        elseif category == 4 and s.warships == 0 then
+            return de
+                and "Keine Kriegsschiffe in dieser Provinz/Sitzung"
+                or (fr and "Aucun navire de guerre dans cette province/session"
+                    or "No warships in this province/session")
+        elseif category == 5 and s.independent == 0 then
+            return de
+                and "Keine unabhängigen zivilen Schiffe in dieser Provinz/Sitzung"
+                or (fr and "Aucun navire civil indépendant dans cette province/session"
+                    or "No independent non-military ships in this province/session")
+        end
+        return de and "▲ Erste Schiffe"
+            or (fr and "▲ Premiers navires" or "▲ First ships")
+    end)
+
+    if ok then return result end
+    system.log("[Ship Finder Category First Page 1.4.6] ERROR | " .. tostring(result))
+    return de and "▲ Erste Schiffe"
+        or (fr and "▲ Premiers navires" or "▲ First ships")
+end
+
+function CombinedRoot:ShipCategoryDescription(de)
+    local fr = not de and tostring(ShipFinderUILanguage or "") == "fr"
+    local ok, result = pcall(function()
+        local category = Variables:GetVariable("S3C") or 0
+        local s = currentFleetSnapshot()
+        if category == 2 then
+            if s.paused == 0 then
+                return de
+                    and "Kein zugewiesenes ziviles Schiff befindet sich aktuell auf einer Route mit einer nativen Warnung. Unabhängige Schiffe gelten nicht automatisch als Problem."
+                    or (fr
+                        and "Aucun navire civil affecté ne se trouve actuellement sur une route signalée par le jeu. Les navires indépendants ne sont pas automatiquement considérés comme un problème."
+                        or "No assigned non-military ship is currently on a route with a native warning. Independent ships are not automatically treated as a fault.")
+            end
+            return de
+                and (tostring(s.paused) .. " zugewiesene zivile Schiffe befinden sich auf Routen mit nativen Warnungen.")
+                or (fr
+                    and (tostring(s.paused) .. " navires civils affectés se trouvent sur des routes signalées par le jeu.")
+                    or (tostring(s.paused) .. " assigned non-military ship(s) are on routes with native warnings."))
+        elseif category == 4 then
+            return de
+                and (tostring(s.warships) .. " Kriegsschiffe in der aktuellen Provinz/Sitzung.")
+                or (fr
+                    and (tostring(s.warships) .. " navires de guerre dans la province/session actuelle.")
+                    or (tostring(s.warships) .. " warship(s) in the current province/session."))
+        elseif category == 5 then
+            return de
+                and (tostring(s.independent) .. " unabhängige zivile Schiffe in der aktuellen Provinz/Sitzung.")
+                or (fr
+                    and (tostring(s.independent) .. " navires civils indépendants dans la province/session actuelle.")
+                    or (tostring(s.independent) .. " independent non-military ship(s) in the current province/session."))
+        end
+        return de
+            and "Wähle ein Schiff aus der aktuellen Provinz."
+            or (fr and "Choisissez un navire dans la province actuelle."
+                or "Choose a ship from the current province.")
+    end)
+
+    if ok then return result end
+    system.log("[Ship Finder Category Description 1.4.5] ERROR | " .. tostring(result))
+    return de and "Schiffsbericht nicht verfügbar."
+        or (fr and "Rapport de navire indisponible."
+            or "Ship report unavailable.")
 end
 
 function CombinedRoot:Open()
-    system.log("[Ship Finder Combined Root 1.1.0] Open entered")
+    system.log("[Ship Finder 1.5.0] Open")
+    self:_sf1425ResetAttentionMenuBridge()
+    self:_sf1432ResetFleetOverviewBridge()
+    ShipFinderAttentionRealRouteCache = nil
+
+    ShipFinderAttentionWarningDetailCache = {}
+
+    if ShipFinderAttentionWarningStatesProbe ~= nil then
+        ShipFinderAttentionWarningStatesProbe.active = false
+        ShipFinderAttentionWarningStatesProbe.queue = {}
+        ShipFinderAttentionWarningStatesProbe.index = 0
+        ShipFinderAttentionWarningStatesProbe.phase = "idle"
+        ShipFinderAttentionWarningStatesProbe.focusedName = nil
+    end
+    -- Clear any stale Attention parchment state before opening the main menu.
+    if ShipFinderAttentionParchmentTest ~= nil then
+        ShipFinderAttentionParchmentTest.active = false
+        ShipFinderAttentionParchmentTest.pendingOpen = false
+        ShipFinderAttentionParchmentTest.opening = false
+        ShipFinderAttentionParchmentTest.visible = {}
+    end
     directOpenPending = false
     directOpenAttempt = 0
+    ShipFinderAttentionScanRequested = false
+    ShipFinderNativeIssueRouteCache = ShipFinderNativeIssueRouteSnapshot()
+    ShipFinderPersonalLabelCache = {}
 
-    ntBegin()
+    if ShipFinderIslandUI
+        and ShipFinderIslandUI.tryFastResume
+        and ShipFinderIslandUI.tryFastResume()
+    then
+        return true
+    end
+
+    system.log(
+        "[Ship Finder 1.5.0] FAST MENU"
+        .. " | tradeRouteUIScan=false"
+        .. " | attentionScan=on-demand"
+    )
+
+    ntOpenShipFinderMenu()
 
     return true
 end
