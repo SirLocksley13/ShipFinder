@@ -1,5 +1,22 @@
 # Ship Finder Changelog
 
+## v1.5.1 — Controls Baseline
+
+### Changed
+- The Ship Finder opener is now a native configurable Anno control.
+- Default remains **Ctrl+Alt+F**.
+- Permanent shortcut identifier: `SirLocksleyShipFinderOpen`.
+- Permanent command: `ShipFinderCombinedRoot.Open(ShipFinderCombinedRoot)`.
+- The old proof-era non-configurable Ctrl+Alt+F binding was removed.
+
+### Deliberately unchanged
+- No Ship Finder Lua logic changed.
+- No Governor-menu behavior changed.
+- No emergency-exit behavior added yet.
+- No save/load lifecycle behavior changed.
+- Ctrl+Alt+1-9 direct ship jumps and Ctrl+Alt+0 return/back remain unchanged.
+- Scanning, parchments, menus, localization and read-only gameplay behavior remain the v1.5.0 baseline.
+
 ## v1.5.0
 
 ### New

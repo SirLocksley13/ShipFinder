@@ -1,11 +1,11 @@
-# Ship Finder v1.5.0
+# Ship Finder v1.5.1 — Controls Baseline
 
 **Ship Finder** helps you find ships quickly and jump directly to them in
 Anno 117: Pax Romana.
 
 ## Open Ship Finder
 
-**Ctrl+Alt+F**
+**Ctrl+Alt+F** (default; configurable in **Settings → Controls**)
 
 The main menu opens immediately. Trade-route scanning is performed only by
 features that actually need it.
@@ -47,7 +47,7 @@ selected island. A ship may correctly appear under more than one island.
 
 ## Shortcuts
 
-- **Ctrl+Alt+F** — open Ship Finder
+- **Ctrl+Alt+F** — open Ship Finder (default; configurable in **Settings → Controls**)
 - **Ctrl+Alt+1-9** — jump to the numbered ship shown on supported parchments
 - **Ctrl+Alt+0** — return/back depending on the current Ship Finder context
 
