@@ -11848,7 +11848,7 @@ function CombinedRoot:ShipCategoryDescription(de)
 end
 
 function CombinedRoot:Open()
-    system.log("[Ship Finder 1.5.1 Controls Baseline] Open")
+    system.log("[Ship Finder 1.5.0] Open")
     self:_sf1425ResetAttentionMenuBridge()
     self:_sf1432ResetFleetOverviewBridge()
     ShipFinderAttentionRealRouteCache = nil
@@ -11883,7 +11883,7 @@ function CombinedRoot:Open()
     end
 
     system.log(
-        "[Ship Finder 1.5.1 Controls Baseline] FAST MENU"
+        "[Ship Finder 1.5.0] FAST MENU"
         .. " | tradeRouteUIScan=false"
         .. " | attentionScan=on-demand"
     )
