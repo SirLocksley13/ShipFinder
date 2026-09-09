@@ -1,0 +1,56 @@
+name: Materialize Ship Finder v1.6.0
+
+on:
+  push:
+    branches:
+      - release-v1.6.0-sync
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout staging branch
+        uses: actions/checkout@v4
+        with:
+          ref: release-v1.6.0-sync
+          fetch-depth: 0
+
+      - name: Materialize validated v1.6.0 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected_count=11
+          actual_count=$(find .release-sync-v1.6.0 -maxdepth 1 -type f -name 'part-*.txt' | wc -l)
+          if [ "$actual_count" -ne "$expected_count" ]; then
+            echo "Staging incomplete: $actual_count/$expected_count chunks; waiting for remaining chunks."
+            exit 0
+          fi
+
+          cat $(find .release-sync-v1.6.0 -maxdepth 1 -type f -name 'part-*.txt' | sort) | base64 -d > /tmp/ShipFinder_v1.6.0.zip
+          echo "36f14d9bd1e6d778782c4d7a96e91a2575722334f6567a4dba8337a0d2efa986  /tmp/ShipFinder_v1.6.0.zip" | sha256sum -c -
+
+          rm -rf /tmp/shipfinder-release
+          mkdir -p /tmp/shipfinder-release
+          unzip -q /tmp/ShipFinder_v1.6.0.zip -d /tmp/shipfinder-release
+          test -f /tmp/shipfinder-release/ShipFinder/modinfo.json
+          test -f /tmp/shipfinder-release/ShipFinder/shipfinder/combined-root.lua
+
+          rm -rf data shipfinder README.md CHANGELOG.md modinfo.json LICENSE
+          cp -a /tmp/shipfinder-release/ShipFinder/. .
+          rm -rf .release-sync-v1.6.0
+          rm -f .github/workflows/materialize-v1.6.0.yml
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+
+          git config user.name "SirLocksley"
+          git config user.email "enrico.handrick@gmx.de"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No source changes to commit."
+            exit 0
+          fi
+          git commit -m "Ship Finder v1.6.0"
+          git push origin HEAD:release-v1.6.0-sync
